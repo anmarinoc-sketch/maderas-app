@@ -173,9 +173,8 @@ fun PantallaExplicacion(onEmpezar: () -> Unit) {
             )
             Spacer(Modifier.height(10.dp))
             Text(
-                "Conoce sobre todo las 34 maderas comerciales del Valle de Aburrá, según la " +
-                    "guía de la Universidad Nacional sede Medellín. Fuera de esa lista, " +
-                    "responde con conocimiento general y acierta menos.",
+                "Está afinada para las maderas comerciales que se mueven en la zona. Con " +
+                    "especies de fuera acierta menos.",
                 color = TextoSuave,
             )
 

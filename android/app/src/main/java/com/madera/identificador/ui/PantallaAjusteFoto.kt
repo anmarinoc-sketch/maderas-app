@@ -18,12 +18,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -81,13 +83,25 @@ fun PantallaAjusteFoto(
     Surface(color = Fondo, modifier = Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
 
-            Column(Modifier.padding(16.dp)) {
-                Text("Ajusta la foto", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                Text(
-                    "Pellizca para acercar, arrastra para mover y deja el corte llenando el recuadro.",
-                    color = TextoTenue,
-                    style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
-                )
+            // La X descarta la foto y vuelve al visor: si no gusto como salio, lo natural
+            // es cerrarla de inmediato, sin buscar el boton de repetir entre las herramientas.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 8.dp, top = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text("Ajusta la foto", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        "Pellizca para acercar, arrastra para mover y deja el corte llenando el recuadro.",
+                        color = TextoTenue,
+                        style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                    )
+                }
+                IconButton(onClick = onRepetir) {
+                    Icon(Icons.Default.Close, contentDescription = "Descartar la foto", tint = Color.White)
+                }
             }
 
             Box(
