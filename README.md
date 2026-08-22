@@ -55,7 +55,7 @@ Hay dos caminos preparados:
 - **Cloud Run** — con el [`backend/Dockerfile`](backend/Dockerfile). Escala a cero, arranque
   en frío de pocos segundos y capa gratuita amplia. Al configurar el despliegue continuo hay
   que indicar `backend` como directorio de contexto.
-- **Render** — con [`backend/render.yaml`](backend/render.yaml). No pide tarjeta, pero el plan
+- **Render** — con [`render.yaml`](render.yaml). No pide tarjeta, pero el plan
   gratuito duerme el servicio tras 15 minutos de inactividad.
 
 En cuanto el backend sea público, define `APP_API_KEY` en el servidor: sin él, cualquiera
