@@ -74,7 +74,10 @@ import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaIdentificar(vm: IdentificarViewModel = viewModel()) {
+fun PantallaIdentificar(
+    onVerExplicacion: () -> Unit = {},
+    vm: IdentificarViewModel = viewModel(),
+) {
     val estado by vm.estado.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val snackbar = remember { SnackbarHostState() }
@@ -89,6 +92,7 @@ fun PantallaIdentificar(vm: IdentificarViewModel = viewModel()) {
             onFoto = vm::seleccionarImagen,
             onError = { aviso = it },
             onAjustes = { mostrarAjustes = true },
+            onVerExplicacion = onVerExplicacion,
             mensaje = aviso ?: error?.mensaje,
         )
         if (mostrarAjustes) {
@@ -103,6 +107,19 @@ fun PantallaIdentificar(vm: IdentificarViewModel = viewModel()) {
                     mostrarAjustes = false
                 },
                 onCerrar = { mostrarAjustes = false },
+            )
+        }
+        return
+    }
+
+    // Entre la foto y el analisis va el editor: girar, acercar y recortar. Encuadrar
+    // aqui gana resolucion util, porque el servidor reduce la imagen a 1600 px de lado.
+    if (!estado.ajustada) {
+        estado.imagen?.let { imagen ->
+            PantallaAjusteFoto(
+                original = imagen.vistaPrevia,
+                onConfirmar = vm::confirmarAjuste,
+                onRepetir = vm::limpiar,
             )
         }
         return
@@ -147,13 +164,21 @@ fun PantallaIdentificar(vm: IdentificarViewModel = viewModel()) {
                 onQuitar = vm::limpiar,
             )
 
-            OutlinedButton(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = vm::limpiar,
-            ) {
-                Icon(Icons.Default.PhotoCamera, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text("Repetir foto")
+            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                OutlinedButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = vm::volverAAjustar,
+                ) {
+                    Text("Reencuadrar")
+                }
+                OutlinedButton(
+                    modifier = Modifier.weight(1f),
+                    onClick = vm::limpiar,
+                ) {
+                    Icon(Icons.Default.PhotoCamera, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Repetir foto")
+                }
             }
 
             val cargando = estado.analisis is EstadoAnalisis.Cargando

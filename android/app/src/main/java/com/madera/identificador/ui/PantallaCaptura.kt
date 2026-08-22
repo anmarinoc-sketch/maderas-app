@@ -82,6 +82,7 @@ fun PantallaCaptura(
     onFoto: (Uri) -> Unit,
     onError: (String) -> Unit,
     onAjustes: () -> Unit,
+    onVerExplicacion: () -> Unit = {},
     mensaje: String? = null,
 ) {
     val context = LocalContext.current
@@ -245,7 +246,13 @@ fun PantallaCaptura(
     }
 
     if (mostrarAyuda) {
-        DialogoAyuda(onCerrar = { mostrarAyuda = false })
+        DialogoAyuda(
+            onCerrar = { mostrarAyuda = false },
+            onVerExplicacion = {
+                mostrarAyuda = false
+                onVerExplicacion()
+            },
+        )
     }
 }
 
@@ -525,7 +532,7 @@ private fun SinPermiso(rechazado: Boolean, onPedir: () -> Unit) {
 }
 
 @Composable
-private fun DialogoAyuda(onCerrar: () -> Unit) {
+private fun DialogoAyuda(onCerrar: () -> Unit, onVerExplicacion: () -> Unit) {
     AlertDialog(
         onDismissRequest = onCerrar,
         title = { Text("Cómo tomar la foto") },
@@ -547,6 +554,9 @@ private fun DialogoAyuda(onCerrar: () -> Unit) {
             }
         },
         confirmButton = { TextButton(onClick = onCerrar) { Text("Entendido") } },
+        dismissButton = {
+            TextButton(onClick = onVerExplicacion) { Text("Cómo funciona") }
+        },
     )
 }
 

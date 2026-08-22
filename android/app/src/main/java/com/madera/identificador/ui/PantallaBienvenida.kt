@@ -58,7 +58,7 @@ fun PantallaBienvenida(onTerminar: () -> Unit) {
 
     LaunchedEffect(Unit) {
         visible = true
-        delay(1900)
+        delay(3600)
         onTerminar()
     }
 

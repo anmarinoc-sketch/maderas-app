@@ -66,6 +66,17 @@ object Imagenes {
         ImagenPreparada(jpeg = salida.toByteArray(), vistaPrevia = escalada)
     }
 
+    /**
+     * Vuelve a empaquetar un bitmap ya editado (girado, recortado o ampliado por el
+     * usuario) en el mismo formato que se envia al servidor.
+     */
+    suspend fun desdeBitmap(bitmap: Bitmap): ImagenPreparada = withContext(Dispatchers.IO) {
+        val escalada = escalar(bitmap)
+        val salida = ByteArrayOutputStream()
+        escalada.compress(Bitmap.CompressFormat.JPEG, CALIDAD_JPEG, salida)
+        ImagenPreparada(jpeg = salida.toByteArray(), vistaPrevia = escalada)
+    }
+
     /** Archivo temporal en cache/capturas para que la camara del sistema escriba la foto. */
     fun archivoTemporalDeCaptura(context: Context): File {
         val carpeta = File(context.cacheDir, "capturas").apply { mkdirs() }

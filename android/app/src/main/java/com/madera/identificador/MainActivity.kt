@@ -12,12 +12,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import com.madera.identificador.ui.PantallaBienvenida
 import com.madera.identificador.ui.PantallaExplicacion
 import com.madera.identificador.ui.PantallaIdentificar
 import com.madera.identificador.ui.theme.TemaIdentificaMadera
-import com.madera.identificador.util.Ajustes
 
 /** Etapas por las que pasa la app al abrirse. */
 private enum class Fase { BIENVENIDA, EXPLICACION, TRABAJO }
@@ -40,26 +38,17 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 private fun Arranque() {
-    val context = LocalContext.current
-    val ajustes = remember { Ajustes(context) }
     var fase by remember { mutableStateOf(Fase.BIENVENIDA) }
 
     when (fase) {
-        Fase.BIENVENIDA -> PantallaBienvenida(
-            onTerminar = {
-                // La explicacion solo interrumpe la primera vez; despues se va directo
-                // al visor, que es donde se trabaja.
-                fase = if (ajustes.explicacionVista) Fase.TRABAJO else Fase.EXPLICACION
-            }
-        )
+        // La explicacion aparece en cada arranque: recuerda los limites de la
+        // herramienta antes de cada jornada, y se pasa con un boton.
+        Fase.BIENVENIDA -> PantallaBienvenida(onTerminar = { fase = Fase.EXPLICACION })
 
-        Fase.EXPLICACION -> PantallaExplicacion(
-            onEmpezar = {
-                ajustes.explicacionVista = true
-                fase = Fase.TRABAJO
-            }
-        )
+        Fase.EXPLICACION -> PantallaExplicacion(onEmpezar = { fase = Fase.TRABAJO })
 
-        Fase.TRABAJO -> PantallaIdentificar()
+        Fase.TRABAJO -> PantallaIdentificar(
+            onVerExplicacion = { fase = Fase.EXPLICACION }
+        )
     }
 }

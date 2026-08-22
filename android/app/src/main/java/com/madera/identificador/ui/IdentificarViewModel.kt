@@ -35,6 +35,9 @@ sealed interface EstadoAnalisis {
 
 data class EstadoUi(
     val imagen: ImagenPreparada? = null,
+    /** La foto recien tomada pasa primero por el editor: girar, ampliar y recortar. */
+    val ajustada: Boolean = false,
+    val original: ImagenPreparada? = null,
     val analisis: EstadoAnalisis = EstadoAnalisis.Inicial,
     val urlServidor: String = "",
     val claveApp: String = "",
@@ -57,7 +60,14 @@ class IdentificarViewModel(application: Application) : AndroidViewModel(applicat
         viewModelScope.launch {
             runCatching { Imagenes.preparar(getApplication(), uri) }
                 .onSuccess { imagen ->
-                    _estado.update { it.copy(imagen = imagen, analisis = EstadoAnalisis.Inicial) }
+                    _estado.update {
+                        it.copy(
+                            imagen = imagen,
+                            original = imagen,
+                            ajustada = false,
+                            analisis = EstadoAnalisis.Inicial,
+                        )
+                    }
                 }
                 .onFailure { e ->
                     _estado.update {
@@ -106,8 +116,36 @@ class IdentificarViewModel(application: Application) : AndroidViewModel(applicat
         }
     }
 
+    /** Confirma el recorte y giro hechos por el usuario. */
+    fun confirmarAjuste(bitmap: android.graphics.Bitmap) {
+        viewModelScope.launch {
+            runCatching { Imagenes.desdeBitmap(bitmap) }
+                .onSuccess { imagen ->
+                    _estado.update { it.copy(imagen = imagen, ajustada = true) }
+                }
+                .onFailure { e ->
+                    _estado.update {
+                        it.copy(
+                            analisis = EstadoAnalisis.Error(
+                                codigo = 'RECORTE_FALLIDO',
+                                mensaje = e.message ?: 'No se pudo aplicar el recorte.',
+                                detalle = null,
+                            )
+                        )
+                    }
+                }
+        }
+    }
+
+    /** Vuelve al editor partiendo siempre de la foto original, no de un recorte previo. */
+    fun volverAAjustar() {
+        _estado.update { it.copy(imagen = it.original ?: it.imagen, ajustada = false) }
+    }
+
     fun limpiar() {
-        _estado.update { it.copy(imagen = null, analisis = EstadoAnalisis.Inicial) }
+        _estado.update {
+            it.copy(imagen = null, original = null, ajustada = false, analisis = EstadoAnalisis.Inicial)
+        }
     }
 
     fun guardarAjustes(url: String, clave: String) {
