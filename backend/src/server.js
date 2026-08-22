@@ -22,6 +22,32 @@ servidor.headersTimeout = servidor.keepAliveTimeout + 5_000;
 // Subir una foto desde el movil con mala cobertura puede ser lento.
 servidor.requestTimeout = 300_000;
 
+/**
+ * Auto-ping para no dormirse.
+ *
+ * El plan gratuito de Render apaga el servicio tras 15 minutos sin trafico de entrada,
+ * y despertarlo añade casi un minuto a la siguiente foto. En vez de un cron externo
+ * —que llenaba el historial de GitHub con 144 ejecuciones al dia— el propio servicio
+ * se llama a si mismo por su URL publica: la peticion sale a internet y vuelve por el
+ * router de Render, que es lo que cuenta como actividad.
+ *
+ * RENDER_EXTERNAL_URL la define Render; fuera de Render no existe y esto no se activa.
+ */
+const urlPublica = process.env.RENDER_EXTERNAL_URL?.trim();
+if (urlPublica) {
+  const cada = 10 * 60 * 1000;
+  const latido = setInterval(() => {
+    fetch(`${urlPublica.replace(/\/$/, '')}/health`)
+      .then((r) => {
+        if (!r.ok) console.warn(`[latido] respuesta ${r.status}`);
+      })
+      .catch((e) => console.warn(`[latido] fallo: ${e.message}`));
+  }, cada);
+  // unref para que este temporizador no impida que el proceso termine al cerrarse.
+  latido.unref();
+  console.log(`  auto-ping cada 10 min contra ${urlPublica}`);
+}
+
 for (const senal of ['SIGINT', 'SIGTERM']) {
   process.on(senal, () => {
     console.log(`\n[${senal}] cerrando servidor...`);
