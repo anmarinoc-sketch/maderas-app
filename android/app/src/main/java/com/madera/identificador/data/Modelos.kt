@@ -36,6 +36,8 @@ data class ResultadoMadera(
     @SerializedName("nombre_cientifico") val nombreCientifico: String? = null,
     val familia: String? = null,
     val confianza: Double? = null,
+    /** guia_valle_aburra · conocimiento_general · no_identificada */
+    @SerializedName("origen_identificacion") val origenIdentificacion: String? = null,
     val alternativas: List<Alternativa>? = null,
     @SerializedName("usos_habituales") val usos: List<String>? = null,
     val limitaciones: List<String>? = null,

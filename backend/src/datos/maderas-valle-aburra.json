@@ -1,0 +1,661 @@
+[
+  {
+    "nombres": [
+      "ABARCO",
+      "CHIBUGA"
+    ],
+    "botanico": "Cariniana pyriformis Miers",
+    "familia": "LECYTHIDACEAE",
+    "otros_nombres": [
+      "Abarco",
+      "albarco",
+      "caobano",
+      "chibuya",
+      "caoba falsa",
+      "cobano",
+      "coco abarco",
+      "coco huasco",
+      "jequitiva",
+      "nomana",
+      "nomena",
+      "papelillo",
+      "poná",
+      "tabarí"
+    ],
+    "comercial": "Abarco",
+    "organolepticos": "Albura de color marrón claro rosáceo con transición gradual a duramen de color marrón rosáceo oscuro; olor y sabor no distintivos; brillo moderado a acentuado; grano recto a entrecruzado; textura media; superficie suave al tacto; veteado acentuado definido por líneas vasculares, satinado, jaspeado, arcos superpuestos y en ocasiones bandas de coloración característica más oscuras.",
+    "macroscopicos": "Parénquima visible con aumento de 5x, en bandas reticulado y a veces escaleriforme muy fino; porosidad difusa; poros en el plano transversal (X) apenas visibles a simple vista, moderadamente pequeños (de 50 a 100μm de diámetro), pocos (de 12 a 30 en 10mm2 ), predominantemente solitarios y algunos múltiples de 2, sin ninguna orientación, con contenidos brillantes y tilosis; líneas vasculares en el plano tangencial (T) visibles a simple vista, con tilosis, contenidos brillantes, y no estratificadas; canales secretores axiales traumáticos dispuestos en cadenas tangenciales largas y cortas; radios en el plano transversal (X) visibles con aumento de 5x, finos (menos de 50μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm), y no estratificados en el plano tangencial (T); anillos de crecimiento visibles a simple vista y definidos por mayor espesor de la pared de las fibras y disminución de su diámetro radial.",
+    "amenaza": "Categoría nacional, En peligro crítico (CR A2cd + 4cd)"
+  },
+  {
+    "nombres": [
+      "ACEITE"
+    ],
+    "botanico": "Calophyllum mariae Tr. et. Pl",
+    "familia": "CLUSIACEAE",
+    "otros_nombres": [
+      "Aceite",
+      "aceite maría",
+      "aceite marío",
+      "aceite cachicamo",
+      "marío"
+    ],
+    "comercial": "Santa María",
+    "organolepticos": "Albura de color rosado claro con transición gradual al duramen de color marrón rosáceo (2.5YR 4/6); olor y sabor no distintivos; brillo moderado a acentuado; grano recto a entrecruzado; textura media; superficie poco suave al tacto; veteado acentuado definido por aspecto fibroso, líneas vasculares y satinado.",
+    "macroscopicos": "Parénquima visible con aumento de 5x, predominantemente paratraqueal vasicéntrico y además, en bandas cortas, delgadas y marginales; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), muchos (de 65 a 125 en 10mm2 ), predominantemente solitarios y algunos múltiples de 2 a 4, con orientación diagonal, con contenidos rojizos abundantes y tilosis; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos rojizos, tilosis, y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) visibles con aumento de 5x, finos (menos de 25μm de ancho), muchos (de 50 a 80 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento visibles con aumento de 5x y definidos por bandas cortas y delgadas de parénquima en bandas marginal."
+  },
+  {
+    "nombres": [
+      "ALGARROBO"
+    ],
+    "botanico": "Hymenaea courbaril L. e Hymenaea oblongifolia Huber",
+    "familia": "CAESALPINIACEAE",
+    "otros_nombres": [
+      "Algarrobo",
+      "jutahí",
+      "guapinal",
+      "nazareno",
+      "quenuque",
+      "guanano",
+      "tonka"
+    ],
+    "comercial": "Jatoba",
+    "organolepticos": "Albura de color café claro (5YR 4/6) con transición abrupta a duramen que varía desde café oscuro hasta café rojizo (7.5YR 6/2); olor agradable; sabor no distintivo; brillo acentuado; grano recto a entrecruzado; textura media; superficie suave al tacto; veteado acentuado definido por aspecto fibroso, líneas vasculares, arcos superpuestos, satinado, jaspeado y bandas de coloración característica, más oscuras.",
+    "macroscopicos": "Parénquima visible a simple vista, predominantemente paratraqueal vasicéntrico, además en bandas marginales regularmente espaciadas y paratraqueal aliforme romboidal confluente en tramos cortos uniendo 2 y 3 poros; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), moderadamente pocos (de 30 a 65 en 10mm2 ), solitarios y múltiples de 2 a 3, sin ninguna orientación, con contenidos oscuros muy característicos; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos oscuros y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), pocos (menos de 25 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento visibles a simple vista y definidos por parénquima en bandas marginal.",
+    "amenaza": "Categoría nacional, casi amenazada"
+  },
+  {
+    "nombres": [
+      "AMARGO"
+    ],
+    "botanico": "Vataireopsis sp",
+    "familia": "FABACEAE",
+    "otros_nombres": [
+      "Amargo",
+      "maqui–maqui",
+      "ají"
+    ],
+    "comercial": "Faveira amargosa",
+    "organolepticos": "Albura de color café claro (2.5YR 4/4) con transición gradual a duramen de color castaño oscuro (2.5YR 3/6), que cuando se oxida adquiere un color marrón rojizo; olor indistinto; sabor característico amargo; brillo moderado; grano recto; textura media; superficie poco suave al tacto; veteado acentuado definido por aspecto fibroso, líneas vasculares, satinado y jaspeado visible con aumento de 5x.",
+    "macroscopicos": "Parénquima visible a simple vista, predominantemente paratraqueal aliforme romboidal confluente en tramos cortos uniendo 2 y 3 poros y además, paratraqueal vasicéntrico; porosidad difusa; poros en el plano transversal (X) fácilmente visibles a una distancia normal de lectura, moderadamente grandes (de 200 a 300μm de diámetro), pocos (de 12 a 30 en 10mm2 ), solitarios y múltiples de 2 a 4, sin ninguna orientación, con abundantes contenidos rojizos brillantes oscuros; líneas vasculares en el plano tangencial (T) visibles a simple vista, con abundantes contenidos rojizos y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento visibles con aumento de 5x y definidos por zonas fibrosas."
+  },
+  {
+    "nombres": [
+      "ANIME"
+    ],
+    "botanico": "Protium aracouchini (Aubl.) Marchand",
+    "familia": "BURSERACEAE",
+    "otros_nombres": [
+      "Anime",
+      "cariaño",
+      "currucay"
+    ],
+    "comercial": "Breu",
+    "organolepticos": "Albura de color blanco a rosado claro con transición gradual a duramen gris rosáceo (7.5YR 7/4); olor y sabor no distintivos; brillo acentuado; grano recto a entrecruzado; textura media; superficie suave al tacto; veteado acentuado definido por líneas vasculares, satinado, jaspeado y arcos superpuestos.",
+    "macroscopicos": "Parénquima indistinto con aumento de 5x; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), muchos (de 65 a 125 en 10mm2 ), solitarios y múltiples de 2, sin ninguna orientación, con contenidos blancos y posible tilosis; líneas vasculares en el plano tangencial (T) visibles a simple vista con contenidos blancos y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), pocos (menos de 25 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento generalmente indistintos con aumento de 5x, cuando están presentes son visibles a simple vista y definidos por mayor espesor de la pared de las fibras y disminución de su diámetro radial."
+  },
+  {
+    "nombres": [
+      "BÁLSAMO"
+    ],
+    "botanico": "Myroxylon balsamum (L.) Harms",
+    "familia": "FABACEAE",
+    "otros_nombres": [
+      "Bálsamo de Tolú",
+      "bálsamo",
+      "tacho",
+      "olor"
+    ],
+    "comercial": "Bálsamo",
+    "organolepticos": "Albura de color amarillo pálido (5Y 8/6) con transición abrupta al duramen de color marrón rojizo oscuro (10R 3/6); olor agradable; sabor característico a legumbre; brillo moderado; grano recto a entrecruzado; textura media; superficie poco suave al tacto; veteado acentuado definido por líneas vasculares, arcos superpuestos y bandas de coloración característica más oscuras.",
+    "macroscopicos": "Parénquima visible a simple vista, paratraqueal vasicéntrico; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), abundantes (de 125 a 250 en 10mm2 ), solitarios y múltiples de dos, sin ninguna orientación, con contenidos blancos y rojizos abundantes; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos rojizos, blancos, y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) visibles con aumento de 5x, finos (menos de 25μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), poco contrastados en el plano radial (R), bajos (menores de 1mm) y estratificados irregularmente en el plano tangencial (T); anillos de crecimiento visibles a simple vista y definidos por mayor espesor de la pared de las fibras y disminución de su diámetro radial.",
+    "amenaza": "Categoría nacional, casi amenazada"
+  },
+  {
+    "nombres": [
+      "BALSO"
+    ],
+    "botanico": "Ochroma pyramidale (Cav. ex Lam.) Urb",
+    "familia": "BOMBACACEAE",
+    "otros_nombres": [
+      "Balso",
+      "lano",
+      "balsa",
+      "balso real",
+      "tumuco",
+      "ceiba de lana",
+      "palo de balsa",
+      "menudito",
+      "balso de lana"
+    ],
+    "comercial": "Balsa",
+    "organolepticos": "Albura poco diferenciada del duramen de color blanco hueso (2.5Y 8/4); olor y sabor no distintivos; brillo moderado a acentuado; grano recto; textura gruesa; superficie suave al tacto; veteado acentuado definido por líneas vasculares muy notorias, satinado, jaspeado y mancha azul.",
+    "macroscopicos": "Parénquima visible con aumento de 5x, paratraqueal de escaso a vasicéntrico; porosidad difusa; poros en el plano transversal (X) fácilmente visibles a una distancia normal de lectura, moderadamente grandes (de 200 a 300μm de diámetro), pocos (de 12 a 30 en 10mm2 ), solitarios y múltiples de 2 a 5, sin ninguna orientación, con tilosis; líneas vasculares en el plano tangencial (T) visibles a simple vista, con tilosis y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) regularmente visibles a simple vista, moderadamente anchos (de 100 a 200μm de ancho), pocos (menos de 25 por 5mm), contrastados en el plano radial (R), altos (mayores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento generalmente indistintos con aumento de 5x, cuando están presentes son visibles a simple vista y definidos por mayor espesor de la pared de las fibras y disminución de su diámetro radial."
+  },
+  {
+    "nombres": [
+      "CAIDITA",
+      "COMINO"
+    ],
+    "botanico": "Aniba spp",
+    "familia": "LAURACEAE",
+    "otros_nombres": [
+      "Comino",
+      "laurel comino"
+    ],
+    "comercial": null,
+    "organolepticos": "Albura poco diferenciada del duramen de color amarillo dorado a marrón dorado (2.5Y 8/6) con tonos verde oliva; olor característico agradable; sabor no distintivo; brillo acentuado; grano recto, entrecruzado y ondulado; textura media; superficie muy suave al tacto; veteado acentuado definido por líneas vasculares, satinado y jaspeado.",
+    "macroscopicos": "Parénquima visible con aumento de 5x, paratraqueal de escaso a vasicéntrico; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), muchos (de 65 a 125 en 10mm2 ), solitarios y múltiples de 2 a 5,sin ninguna orientación, con contenidos brillantes y tilosis; líneas vasculares en el plano tangencial (T) visibles a simple vista con tilosis, contenidos brillantes y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento generalmente indistintos, cuando están presentes, son visibles a simple vista y definidos por mayor espesor de la pared de las fibras y disminución de su diámetro radial.",
+    "amenaza": "Categoría nacional, En peligro crítico (CR A2cd)"
+  },
+  {
+    "nombres": [
+      "CAIMITO"
+    ],
+    "botanico": "Pouteria spp",
+    "familia": "SAPOTACEAE",
+    "otros_nombres": [
+      "Caimo",
+      "caimito",
+      "caimito colorado"
+    ],
+    "comercial": null,
+    "organolepticos": "Albura poco diferenciada del duramen de color marrón claro (7.5YR 6/4); olor y sabor indistintos; brillo moderado; grano recto; textura media a fina; superficie suave al tacto; veteado acentuado definido por líneas vasculares, bandas de coloración característica café oscuro y arcos superpuestos.",
+    "macroscopicos": "Parénquima visible a simple vista, en bandas delgadas; porosidad difusa; poros en el plano transversal (X) apenas visibles a simple vista, moderadamente pequeños (de 50 a 100μm de diámetro), pocos (de 12 a 30 en 10mm2 ), solitarios y múltiples de 2 a 4, sin ninguna orientación, con abundante tilosis y gomas negras; líneas vasculares en el plano tangencial (T) visibles a simple vista, con abundante tilosis, gomas negras, y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) visibles con aumento de 5x, finos (menos de 50μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), poco contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento visibles a simple vista y definidos por mayor espaciamiento entre las bandas de parénquima."
+  },
+  {
+    "nombres": [
+      "CARACOLÍ"
+    ],
+    "botanico": "Anacardium excelsum (Bertero & Balb. ex Kunth) Skeels",
+    "familia": "ANACARDIACEAE",
+    "otros_nombres": [
+      "Caracolí",
+      "aspavé",
+      "espavé",
+      "ispavé",
+      "marañón de monte",
+      "ispavel",
+      "merey"
+    ],
+    "comercial": "Caracolí, espavel",
+    "organolepticos": "Albura de color café claro (5YR 6/4) con transición gradual a duramen de color amarillo rojizo (7.5YR 5/6); olor y sabor no distintivos; brillo acentuado; grano recto; textura media a gruesa; superficie suave al tacto; veteado acentuado definido por líneas vasculares muy notorias, satinado, jaspeado y bandas de coloración característica.",
+    "macroscopicos": "Parénquima visible a simple vista, predominantemente paratraqueal vasicéntrico y además, aliforme romboidal; porosidad difusa; poros en el plano transversal (X) fácilmente visibles a una distancia normal de lectura, moderadamente grandes (de 200 a 300μm de diámetro), pocos (de 12 a 30 en 10mm2 ), predominantemente solitarios y algunos múltiples de 2 a 3,sin ninguna orientación, con contenidos negros y tilosis; líneas vasculares en el plano tangencial (T) visibles a simple vista con tilosis, contenidos negros y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento generalmente indistintos con aumento de 5x, cuando están presentes son visibles a simple vista y definidos por mayor espesor de la pared de las fibras y disminución de su diámetro radial.",
+    "amenaza": "Categoría nacional, casi amenazada"
+  },
+  {
+    "nombres": [
+      "CARRÁ"
+    ],
+    "botanico": "Huberodendron patinoi Cuatrec",
+    "familia": "BOMBACACEAE",
+    "otros_nombres": [
+      "Carrá",
+      "naguare",
+      "volador",
+      "coco volador"
+    ],
+    "comercial": null,
+    "organolepticos": "Albura de color crema amarillenta (2.5Y 7/4) con transición gradual a duramen de color marrón rojizo claro (2.5YR 5/4); olor y sabor no distintivos; brillo moderado; grano recto a entrecruzado; textura media; superficie suave al tacto; veteado acentuado definido por líneas vasculares más oscuras, satinado, jaspeado y mancha azul.",
+    "macroscopicos": "Parénquima visible con aumento de 5x, apotraqueal difuso en agregados y en ocasiones en bandas marginal muy fino; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), pocos (de 12 a 30 en 10mm2 ), solitarios y múltiples de 2 a 3, sin ninguna orientación, con contenidos blancos, oscuros y tilosis; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos blancos y oscuros y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), pocos (menos de 25 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento indistintos con aumento de 5x, aunque se puede observar parénquima en bandas marginal en algunas muestras, que los delimita muy suavemente, o también la presencia de mayor ancho de los radios.",
+    "amenaza": "Categoría global, vulnerable (VU C1) ver. 2.3 1994 (Mitré 1998b). Categoría nacional, vulnerable (VU A2cd)"
+  },
+  {
+    "nombres": [
+      "CATIVO"
+    ],
+    "botanico": "Prioria copaifera Griseb",
+    "familia": "CAESALPINIACEAE",
+    "otros_nombres": [
+      "Cativo",
+      "trementino",
+      "amansa mujer",
+      "copachu",
+      "canime",
+      "muramo",
+      "taito"
+    ],
+    "comercial": "Cativo",
+    "organolepticos": "Albura de color anaranjado claro (7.5YR 7/6) con transición gradual a duramen de color marrón rosáceo (5YR 4/6); olor y sabor no distintivos; brillo moderado; grano recto; textura media; superficie poco suave al tacto; veteado acentuado definido por líneas vasculares, satinado, jaspeado, canales axiales y mancha azul.",
+    "macroscopicos": "Parénquima visible a simple vista, predominantemente paratraqueal vasicéntrico, además en bandas marginal y puede presentar paratraqueal aliforme romboidal confluente en tramos cortos uniendo 2 y 3 poros; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), moderadamente pocos (de 30 a 65 en 10mm2 ), solitarios y múltiples de 2 a 3, sin ninguna orientación, con contenidos blancos; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos blancos y no estratificadas; canales secretores axiales normales, difusos caracterizados por una abundante segregación de contenidos en todos los cortes, los cuales por su abundancia producen una mancha característica en la madera; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), contrastados en el plano radial (R), altos (mayores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento visibles a simple vista y definidos por parénquima en bandas marginal.",
+    "amenaza": "Categoría nacional, En peligro (EN A2acd)"
+  },
+  {
+    "nombres": [
+      "CEDRO"
+    ],
+    "botanico": "Cedrela odorata L",
+    "familia": "MELIACEAE",
+    "otros_nombres": [
+      "Cedro",
+      "cedro blanco",
+      "cedro oloroso",
+      "cedro clavel",
+      "cedro real",
+      "cedro caquetá",
+      "cedro cebollo",
+      "cedro crespo",
+      "cedro amargo",
+      "cedro caoba"
+    ],
+    "comercial": "Spanish cedar, cedro",
+    "organolepticos": "Albura de color rosado claro (5YR 8/2) con transición gradual a duramen de color rosado hasta marrón rojizo oscuro (5YR 5/6); olor característico agradable; sabor amargo; brillo acentuado; grano recto a entrecruzado; textura media; superficie muy suave al tacto; veteado acentuado definido por aspecto fibroso, líneas vasculares, satinado, jaspeado y arcos superpuestos.",
+    "macroscopicos": "Parénquima visible a simple vista, predominantemente paratraqueal vasicéntrico y además, en bandas marginal; porosidad semicircular; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), solitarios y múltiples de 2 a 3, sin ninguna orientación, con contenidos negros abundantes; líneas vasculares en el plano tangencial (T) visibles a simple vista, con abundantes contenidos negros y segregación de los mismos y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), contrastados en el plano radial (R), bajos y no estratificados en el plano tangencial (T); anillos de crecimiento visibles a simple vista y definidos por parénquima en bandas marginal y porosidad semicircular.",
+    "amenaza": "Categoría global, vulnerable (VU A1cd + 2cd) ver. 2.3 1994 (Americas Regional Workshop 1998b), Categoría nacional, En peligro (EN A2acd)"
+  },
+  {
+    "nombres": [
+      "CEDRO GÜINO",
+      "CEDRO MACHO",
+      "GÜINA"
+    ],
+    "botanico": "Carapa guianensis Aubl",
+    "familia": "MELIACEAE",
+    "otros_nombres": [
+      "Masabalo",
+      "mazabalo",
+      "cedro güino",
+      "güino",
+      "tangare",
+      "andiroba",
+      "wino"
+    ],
+    "comercial": "Andiroba, carapa",
+    "organolepticos": "Albura de color crema grisáceo (7.5YR 8/2) con transición abrupta a duramen de color marrón rojizo claro a oscuro (5YR 5/4); olor característico agradable; sabor no distintivo; brillo moderado a acentuado; grano entrecruzado a ondulado; textura media; superficie poco suave al tacto; veteado acentuado definido por líneas vasculares, satinado, jaspeado y arcos superpuestos.",
+    "macroscopicos": "Parénquima visible a simple vista, predominantemente paratraqueal vasicéntrico y además, en bandas marginal; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), muchos (de 65 a 125 en 10mm2 ), solitarios y múltiples de 2 a 3, sin ninguna orientación, con contenidos negros brillantes abundantes; líneas vasculares en el plano tangencial (T) visibles a simple vista, con abundantes contenidos negros brillantes y no estratificadas; canales secretores axiales traumáticos dispuestos en cadenas tangenciales largas y cortas; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento visibles a simple vista y definidos por parénquima en bandas marginal."
+  },
+  {
+    "nombres": [
+      "CHANUL"
+    ],
+    "botanico": "Humiriastrum procerum (Little) Cuatrec. y H. colombianum (Cuatrec.) Cuatrec",
+    "familia": "HUMIRIACEAE",
+    "otros_nombres": [
+      "Chanul",
+      "aceituno rojo",
+      "oloroso",
+      "chanú",
+      "chanó",
+      "nevavac",
+      "batea"
+    ],
+    "comercial": "Chanul",
+    "organolepticos": "Albura de color rosado oscuro con transición gradual a duramen de color rosado más oscuro (10R 5/4) con visos blancos característicos; olor y sabor no distintivos; brillo moderado; grano recto a entrecruzado; textura fina; superficie poco suave al tacto; veteado no acentuado definido por aspecto fibroso y líneas vasculares.",
+    "macroscopicos": "Parénquima visible con aumento de 5x, paratraqueal vasicéntrico; porosidad difusa; poros en el plano transversal (X) apenas visibles a simple vista, moderadamente pequeños (de 50 a 100μm de diámetro), abundantes (de 125 a 250 en 10mm2 ), predominantemente solitarios y algunos múltiples de 2, sin ninguna orientación, con abundantes contenidos blancos; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos blancos abundantes y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) visibles con aumento de 5x, finos a medianos (menos de 50 a 100μm de ancho), muchos (de 50 a 80 por 5mm), poco contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento generalmente indistintos con aumento de 5x, cuando están presentes, son visibles a simple vista y definidos por mayor espesor de la pared de las fibras y disminución de su diámetro radial.",
+    "amenaza": "Categoría nacional, En peligro crítico (CR A2acd)"
+  },
+  {
+    "nombres": [
+      "CHINGALÉ"
+    ],
+    "botanico": "Jacaranda copaia (Aubl.) D. Don",
+    "familia": "BIGNONIACEAE",
+    "otros_nombres": [
+      "Chingalé",
+      "cedro blanco",
+      "gualanday",
+      "pavito",
+      "escobillo",
+      "maduraplátano",
+      "guabillo"
+    ],
+    "comercial": "Copaia, para–para",
+    "organolepticos": "Albura poco diferenciada del duramen de color blanco cremoso (2.5Y 8/4); olor y sabor no distintivos; brillo moderado; grano recto; textura media; superficie suave al tacto; veteado acentuado definido por líneas vasculares más oscuras, satinado, jaspeado y mancha azul.",
+    "macroscopicos": "Parénquima visible a simple vista, paratraqueal aliforme lineal confluente en tramos cortos uniendo 2 y 3 poros y ocasionalmente en tramos largos uniendo más de 3 poros; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), pocos (de 12 a 30 en 10mm2 ), predominantemente solitarios y algunos múltiples de 2, sin ninguna orientación, con contenidos blancos; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos blancos y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), moderadamente pocos (de 25 a 50 en 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento generalmente indistintos con aumento de 5x, cuando están presentes son visibles a simple vista y definidos por mayor espesor de la pared de las fibras y disminución de su diámetro radial."
+  },
+  {
+    "nombres": [
+      "CHOIBÁ"
+    ],
+    "botanico": "Dipteryx sp",
+    "familia": "FABACEAE",
+    "otros_nombres": [
+      "Almendro",
+      "choiba",
+      "sarrapia",
+      "charapilla",
+      "paloepiedra",
+      "caramantú",
+      "congrio",
+      "guacamayo",
+      "sarrapio"
+    ],
+    "comercial": "Cumaru, tonka",
+    "organolepticos": "Albura de color blanco con transición abrupta a duramen de color café claro amarilloso pasando a colores marrón claro y marrón rojizo (5YR 5/4); olor y sabor desagradables; brillo moderado; grano recto a entrecruzado; textura media; superficie poco suave al tacto; veteado acentuado definido por aspecto fibroso, líneas vasculares, jaspeado, bandas de coloración característica de color café oscuro y arcos superpuestos.",
+    "macroscopicos": "Parénquima visible a simple vista, predominantemente paratraqueal vasicéntrico, además paratraqueal aliforme romboidal confluente en tramos cortos uniendo 2 y 3 poros y paratraqueal aliforme lineal confluente en tramos largos; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), muchos (de 65 a 125 en 10mm2 ), poros solitarios y múltiples de 2 a 4, sin ninguna orientación, con contenidos blancos; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos blancos y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) visibles con aumento de 5x, finos (menos de 50μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), poco contrastados en el plano radial (R), bajos (menores de 1mm) y estratificados regularmente en el plano tangencial (T); anillos de crecimiento visibles a simple vista y definidos por zonas fibrosas.",
+    "amenaza": "Categoría nacional, Vulnerable (VU A2ac)"
+  },
+  {
+    "nombres": [
+      "CIPRÉS"
+    ],
+    "botanico": "Cupressus lusitánica Mill",
+    "familia": "CUPRESSACEAE",
+    "otros_nombres": [
+      "Ciprés",
+      "pino ciprés"
+    ],
+    "comercial": "Ciprés",
+    "organolepticos": "Albura poco diferenciada del duramen de color crema a café (2.5Y 7/6); olor característico agradable; sabor no distintivo; brillo moderado; grano recto; textura fina; suave; superficie suave al tacto; veteado acentuado definido por arcos superpuestos y presencia de nudos.",
+    "macroscopicos": "Radios en el plano transversal (X) visibles con aumento de 5x; transición entre el leño inicial y tardío suave; canales secretores axiales ausentes; anillos de crecimiento pocos distintos."
+  },
+  {
+    "nombres": [
+      "COCO CRISTAL",
+      "COCO MONO"
+    ],
+    "botanico": "Lecythis mesophylla S.A. Mori",
+    "familia": "LECYTHIDACEAE",
+    "otros_nombres": [
+      "Coco cristal",
+      "castaña",
+      "coco mono"
+    ],
+    "comercial": "Sapucaia",
+    "organolepticos": "Albura de color café amarilloso (2.5Y 8/4) con transición abrupta a duramen de color café oscuro (7.5YR 5/4); olor y sabor indistintos; brillo moderado a acentuado; grano recto a entrecruzado; textura media; superficie suave al tacto; veteado acentuado definido por líneas vasculares y arcos superpuestos.",
+    "macroscopicos": "Parénquima visible a simple vista, en bandas delgadas; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), pocos (de 12 a 30 en 10mm2 ), predominantemente solitarios y algunos múltiples de 2 a 3, sin ninguna orientación, con tilosis; líneas vasculares en el plano tangencial (T) visibles a simple vista, con tilosis y no estratificadas; canales secretores axiales traumáticos dispuestos en bandas tangenciales largas; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), poco contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento visibles a simple vista y definidos por mayor espaciamiento de las bandas de parénquima."
+  },
+  {
+    "nombres": [
+      "DORMILÓN"
+    ],
+    "botanico": "Vochysia ferruginea Mart",
+    "familia": "VOCHYSIACEAE",
+    "otros_nombres": [
+      "Dormilón",
+      "palo santo",
+      "orcano",
+      "soroga",
+      "gomo",
+      "goma",
+      "almidón",
+      "bizcochito",
+      "cacho de venado",
+      "cajú",
+      "suruma"
+    ],
+    "comercial": "Quaruba, dormilón",
+    "organolepticos": "Albura de color blanco rosáceo (5YR 7/4) con transición gradual a duramen de color rosado (2.5YR 6/6) con líneas oscuras; olor y sabor no distintivos; brillo acentuado; grano recto; textura media; superficie suave al tacto; veteado acentuado definido por líneas vasculares, satinado, jaspeado, bandas de coloración característica y canales axiales.",
+    "macroscopicos": "Parénquima visible a simple vista, paratraqueal aliforme lineal confluente en tramos cortos uniendo 2 y 3 poros y ocasionalmente en tramos largos uniendo más de 3 poros; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), pocos (de 12 a 30 en 10mm2 ), solitarios y múltiples de 2, sin ninguna orientación, sin contenidos; líneas vasculares en el plano tangencial (T) visibles a simple vista y no estratificadas; canales secretores axiales normales dispuestos en cadenas tangenciales largas; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento indistintos con aumento de 5x."
+  },
+  {
+    "nombres": [
+      "EUCALIPTO"
+    ],
+    "botanico": "Eucalyptus spp",
+    "familia": "MYRTACEAE",
+    "otros_nombres": [
+      "Eucalipto",
+      "ocalito",
+      "eucalipto común",
+      "eucalipto plateado"
+    ],
+    "comercial": "Eucalipto",
+    "organolepticos": "Albura de color marrón pálido o rosado claro con transición gradual a duramen marrón grisáceo (5YR 7/4 7) o rosado (10R 6/6), que cuando se oxida adquiere diferentes tonos de marrón rosáceo; olor y sabor no distintivos; brillo moderado; grano recto a entrecruzado; textura media; superficie poco suave al tacto; veteado acentuado definido por líneas vasculares y bolsas de resina que pueden llegar a ser muy abundantes.",
+    "macroscopicos": "Parénquima visible a simple vista, paratraqueal vasicéntrico confluente en tramos cortos uniendo 2 a 5 poros; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), muchos (de 65 a 125 en 10mm2 ), predominantemente solitarios y algunos múltiples de 2, con orientación diagonal, con abundante tilosis y contenidos blancos; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos blancos, tilosis, y no estratificadas; bolsas de resina presentes; radios en el plano transversal (X) visibles con aumento de 5x, finos (menos de 50μm de ancho), muchos (de 50 a 80 por 5mm), poco contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento generalmente indistintos con aumento de 5x, cuando están presentes son visibles a simple vista y definidos por mayor espesor de la pared de las fibras y disminución de su diámetro radial."
+  },
+  {
+    "nombres": [
+      "GUAYACÁN LILA",
+      "ROBLE",
+      "OCOBO",
+      "FLORMORADO"
+    ],
+    "botanico": "Tabebuia rosea (Bertol.) A. DC",
+    "familia": "BIGNONIACEAE",
+    "otros_nombres": [
+      "Coralibe",
+      "guayacán",
+      "otobo",
+      "ocobo",
+      "guayacán rosado",
+      "apamate",
+      "caoba del Brasil",
+      "cañaguate",
+      "chicalá",
+      "roble sabanero",
+      "roble de río",
+      "roble morado",
+      "roble"
+    ],
+    "comercial": "Apamate",
+    "organolepticos": "Albura poco diferenciada del duramen de color café claro a café almendrado (7.5YR 5/4); olor y sabor no distintivos; brillo moderado; grano recto a entrecruzado; textura media; superficie muy suave al tacto; veteado acentuado definido por arcos superpuestos, líneas vasculares con una apariencia muy característica y jaspeado.",
+    "macroscopicos": "Parénquima visible con aumento de 5x, paratraqueal vasicéntrico confluente en tramos largos; porosidad difusa; poros en el plano transversal (X) apenas visibles a simple vista, moderadamente pequeños (de 50 a 100μm de diámetro), predominantemente solitarios con algunos múltiples de 2 y arracimados, pueden encontrarse en bandas tangenciales muy claras, solo una leve tendencia o ninguna orientación; sin contenidos; líneas vasculares en el plano tangencial (T) visibles a simple vista y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), poco contrastados en el plano radial (R), bajos (menores de 1mm) y estratificados regularmente en el plano tangencial (T); anillos de crecimiento indistintos con aumento de 5x."
+  },
+  {
+    "nombres": [
+      "LECHE PERRA"
+    ],
+    "botanico": "Brosimum guianense (Aubl.) Huber",
+    "familia": "MORACEAE",
+    "otros_nombres": [
+      "Leche perra"
+    ],
+    "comercial": "Amourette, Snakewood",
+    "organolepticos": "Albura poco diferenciada del duramen de color amarillo pálido a marrón muy claro (2.5Y 8/6) con bandas tangenciales rojas no muy abundantes; olor y sabor no distintivos; brillo moderado a acentuado; grano recto; textura fina; superficie muy suave al tacto; veteado acentuado definido por líneas vasculares, bandas de coloración característica y mancha azul.",
+    "macroscopicos": "Parénquima visible con aumento de 5x, paratraqueal aliforme lineal y confluente en tramos cortos uniendo 2 y 3 poros; porosidad difusa; poros en el plano transversal (X) apenas visibles a simple vista, moderadamente pequeños (de 50 a 100μm de diámetro), muchos (de 65 a 125 en 10mm2 ), solitarios y múltiples de 2, sin ninguna orientación, con contenidos blancos y rojizos; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos blancos y rojizos, y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) visibles con aumento de 5x, finos (menos de 50μm de ancho), moderadamente pocos (de 25 a 50 en 5mm), poco contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento visibles a simple vista y definidos por el mayor espesor de la pared de las fibras y disminución de su diámetro radial."
+  },
+  {
+    "nombres": [
+      "LIRIO",
+      "PERILLO"
+    ],
+    "botanico": "Couma macrocarpa Barb. Rodr",
+    "familia": "APOCYNACEAE",
+    "otros_nombres": [
+      "Perillo",
+      "lirio",
+      "perillo negro",
+      "popa",
+      "juan soco",
+      "pundare",
+      "icucau",
+      "leche caspi",
+      "purga"
+    ],
+    "comercial": "Cowtree",
+    "organolepticos": "Albura de color rosado amarillento (5YR 8/2) con transición gradual a duramen de color marrón muy claro (7.5YR 6/4); olor y sabor no distintivos; brillo moderado; grano recto a entrecruzado; textura media; superficie suave al tacto; veteado acentuado definido por líneas vasculares y satinado.",
+    "macroscopicos": "Parénquima visible con aumento de 5x, apotraqueal difuso en agregados; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), de contorno ovalado, moderadamente pocos (de 30 a 65 en 10mm2 ), múltiples de 2 a 4, con orientación radial, sin contenidos; líneas vasculares en el plano tangencial (T) visibles a simple vista, no estratificadas; canales secretores ausentes; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento indistintos con aumento de 5x."
+  },
+  {
+    "nombres": [
+      "NOGAL CAFETERO",
+      "LAUREL",
+      "MOHO",
+      "CANALETE"
+    ],
+    "botanico": "Cordia alliodora (Ruiz &Pav.) Oken",
+    "familia": "BORAGINACEAE",
+    "otros_nombres": [
+      "Nogal",
+      "nogal cafetero",
+      "molinillo",
+      "vara de humo",
+      "móncoro",
+      "moho",
+      "guácimo nogal",
+      "prieto",
+      "solera",
+      "pardillo",
+      "laurel",
+      "nogal blanco",
+      "uvito"
+    ],
+    "comercial": "Pardillo",
+    "organolepticos": "Albura de color crema oscura (2.5Y 8/4) con transición abrupta a duramen de color café verdoso (2.5Y 5/4); olor y sabor no distintivos; brillo acentuado; grano recto; textura media; superficie suave al tacto; veteado acentuado definido por aspecto fibroso, líneas vasculares, satinado, jaspeado, bandas de coloración característica marrón oscuras y arcos superpuestos.",
+    "macroscopicos": "Parénquima visible a simple vista, predominantemente paratraqueal vasicéntrico y además, confluente en tramos largos uniendo más de 3 poros; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), poros solitarios y múltiples de 2 a 3, con algunos agrupados, pueden encontrarse sin ninguna orientación o con tendencia a presentar bandas tangenciales cortas y largas, con contenidos blancos brillantes y tilosis; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos blancos y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), pocos (menos de 25 por 5mm), contrastados en el plano radial (R), altos (mayores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento indistintos con aumento de 5x."
+  },
+  {
+    "nombres": [
+      "PINO PÁTULA"
+    ],
+    "botanico": "Pinus patula Schiede & Schltdl. & Cham",
+    "familia": "PINACEAE",
+    "otros_nombres": [
+      "Pino",
+      "pino candelabro",
+      "pino pátula"
+    ],
+    "comercial": "Pátula",
+    "organolepticos": "Albura poco diferenciada del duramen de color crema a café oscuro (2.5Y 8/6); cuando está verde o es recién aserrada presenta un olor agradable a resina; sabor no distintivo; brillo moderado; grano recto; textura fina a media; moderadamente dura al corte; superficie suave al tacto; veteado acentuado definido por diferencias de color entre los anillos de crecimiento, canales axiales y agentes biológicos manchadores.",
+    "macroscopicos": "Radios en el plano transversal (X) visibles con aumento de 5x; transición gradual entre los leños inicial y final; canales secretores axiales de resinas, visibles a simple vista dispuestos en forma difusa y presentes tanto en el leño inicial como en el tardío; anillos de crecimiento distintos."
+  },
+  {
+    "nombres": [
+      "PUERTO"
+    ],
+    "botanico": "Simarouba amara Aubl",
+    "familia": "SIMAROUBACEAE",
+    "otros_nombres": [
+      "Puerto",
+      "simaruba",
+      "palo blanco",
+      "marupá",
+      "arenillo blanco",
+      "tara"
+    ],
+    "comercial": "Marupá",
+    "organolepticos": "Albura de color blanco con transición gradual a duramen de color amarillo pálido (5Y 8/4); olor y sabor no distintivos; brillo moderado; grano recto a entrecruzado; textura media; superficie suave al tacto; veteado acentuado definido por líneas vasculares, satinado, jaspeado, canales axiales y mancha azul.",
+    "macroscopicos": "Parénquima visible a simple vista, paratraqueal aliforme lineal confluente en tramos largos uniendo más de 3 poros; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), moderadamente pocos (de 30 a 65 en 10mm2 ), solitarios y múltiples de 2 a 3, sin ninguna orientación, con contenidos blancos; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos blancos y no estratificadas; canales secretores axiales normales distribuidos en cadenas tangenciales cortas y largas; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y estratificados regularmente en el plano tangencial (T); anillos de crecimiento indistintos con aumento de 5x."
+  },
+  {
+    "nombres": [
+      "SAJO"
+    ],
+    "botanico": "Campnosperma panamense Standl",
+    "familia": "ANACARDIACEAE",
+    "otros_nombres": [
+      "Sajo",
+      "orey",
+      "vaquerá"
+    ],
+    "comercial": "Orey Word, sajo",
+    "organolepticos": "Albura de color blanco rosáceo (5YR 8/4) con transición gradual a duramen de color marrón rosáceo (5YR 7/4); olor y sabor no distintivos; brillo acentuado; grano de recto a entrecruzado; textura fina; superficie poco suave al tacto; veteado acentuado definido por líneas vasculares, satinado, jaspeado y canales radiales con segregación de contenidos.",
+    "macroscopicos": "Parénquima de indistinto con aumento de 5x a visible con aumento de 5x, paratraqueal escaso; porosidad difusa; poros en el plano transversal (X) apenas visibles a simple vista, moderadamente pequeños (de 50 a 100μm de diámetro), abundantes (de 125 a 250 en 10mm2 ), solitarios, sin ninguna orientación, con contenidos brillantes; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos brillantes y no estratificadas; canales secretores axiales ausentes; radios en el plano transversal (X) apenas visibles a simple vista, predominantemente medianos (de 50 a 100μm de ancho), algunos regularmente visibles a simple vista, moderadamente anchos (de 100 a 200μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm), no estratificados y con abundantes canales radiales en el plano tangencial (T); anillos de crecimiento generalmente indistintos con aumento de 5x, cuando están presentes son visibles con aumento de 5x y definidos por mayor espesor de la pared de las fibras y disminución de su diámetro radial.",
+    "amenaza": "Categoría nacional, casi amenazada"
+  },
+  {
+    "nombres": [
+      "SANDE"
+    ],
+    "botanico": "Brosimum utile (Kunth) Pittier",
+    "familia": "MORACEAE",
+    "otros_nombres": [
+      "Sande",
+      "árbol vaca",
+      "pan de árbol",
+      "lechero",
+      "perillo",
+      "avichurí",
+      "vaco",
+      "palo de vaca",
+      "árbol de leche",
+      "vacuno",
+      "palanco",
+      "aceituno rojo"
+    ],
+    "comercial": "Sande",
+    "organolepticos": "Albura de color blanco rosáceo (7.5YR 8/2) con transición gradual a duramen de color marrón muy claro (7.5YR 7/4); olor y sabor no distintivos; brillo acentuado; grano recto; textura media; superficie suave al tacto; veteado acentuado definido por líneas vasculares, satinado y jaspeado.",
+    "macroscopicos": "Parénquima visible a simple vista, paratraqueal aliforme lineal confluente en tramos cortos uniendo 2 y 3 poros; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), moderadamente pocos (de 30 a 65 en 10mm2 ), solitarios y múltiples de 2 a 3, sin ninguna orientación, sin contenidos; líneas vasculares en el plano tangencial (T) visibles a simple vista y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), moderadamente pocos (de 25 a 50 en 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento generalmente indistintos con aumento de 5x, cuando están presentes, son visibles a simple vista y definidos por mayor espesor de la pared de las fibras y disminución de su diámetro radial."
+  },
+  {
+    "nombres": [
+      "SAPÁN"
+    ],
+    "botanico": "Clathrotropis brachypetala (Tul.) Kleinhoonte",
+    "familia": "FABACEAE",
+    "otros_nombres": [
+      "Sapán",
+      "zapán",
+      "bizcocho",
+      "kabari",
+      "kajarú",
+      "maíz tostado",
+      "manona",
+      "masano",
+      "alma negra",
+      "mionquii"
+    ],
+    "comercial": "Sapán",
+    "organolepticos": "Albura de color crema claro (2.5Y 7/4) con transición abrupta al duramen de color castaño oscuro (7.5YR 4/4), que cuando se oxida adquiere un color marrón oscuro; olor y sabor no distintivos; brillo moderado; grano recto a entrecruzado; textura media; superficie poco suave al tacto; veteado acentuado definido por aspecto fibroso, líneas vasculares, arcos superpuestos y satinado.",
+    "macroscopicos": "Parénquima visible a simple vista, paratraqueal vasicéntrico, aliforme romboidal, aliforme lineal confluente en tramos largos uniendo más de 3 poros y en ocasiones en bandas marginal; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), moderadamente pocos (de 30 a 65 en 10mm2 ), solitarios y múltiples de 2 a 7, sin ninguna orientación, con contenidos blancos abundantes; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos blancos y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento visibles a simple vista y definidos por zonas fibrosas que pueden estar acompañadas por parénquima en bandas marginal.",
+    "amenaza": "Categoría nacional, En Peligro (EN A2cd)"
+  },
+  {
+    "nombres": [
+      "SOTO"
+    ],
+    "botanico": "Virola spp",
+    "familia": "MYRISTICACEAE",
+    "otros_nombres": [
+      "Sota",
+      "tirasucio",
+      "sangre de toro",
+      "sangre de gallo",
+      "nuánamo",
+      "chalviande",
+      "sebo",
+      "otobo",
+      "virola",
+      "perinolo",
+      "gabón"
+    ],
+    "comercial": "Virola, bicuiba",
+    "organolepticos": "Madera que se presenta desde un color blanco amarillento a marrón rojizo (7.5YR 7/6), que cuando se oxida adquiere un color marrón negruzco (5YR 3/4); olor y sabor no distintivos; brillo moderado; grano recto; textura media; superficie poco suave al tacto; veteado acentuado definido por líneas vasculares, satinado y jaspeado.",
+    "macroscopicos": "Parénquima visible con aumento de 5x, paratraqueal escaso; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), muchos (de 65 a 125 en 10mm2 ), múltiples de 2 a 3, generalmente con contorno ovalado, con tendencia a orientación radial, sin contenidos; líneas vasculares en el plano tangencial (T) visibles a simple vista, y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) visibles con aumento de 5x, finos (menos de 25μm de ancho), moderadamente pocos (de 25 a 50 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento generalmente indistintos con aumento de 5x, cuando están presentes son visibles con aumento de 5x y definidos por mayor espesor de la pared de las fibras y disminución de su diámetro radial."
+  },
+  {
+    "nombres": [
+      "TECA"
+    ],
+    "botanico": "Tectona grandis L. f",
+    "familia": "VERBENACEAE",
+    "otros_nombres": [
+      "Teca"
+    ],
+    "comercial": "Teca",
+    "organolepticos": "Albura de color amarillo claro (5Y 8/2) con transición gradual a duramen de color marrón dorado (7.5YR 6/4) con bandas de color verde oliva y marrón oscuro; olor agradable; sabor no distintivo; brillo moderado a acentuado; grano recto; textura media; superficie suave al tacto; veteado acentuado definido por líneas vasculares, arcos superpuestos, satinado, jaspeado visible con aumento de 5x, bandas de color característico y nudos.",
+    "macroscopicos": "Parénquima visible a simple vista, predominantemente paratraqueal vasicéntrico y además, en bandas marginal; porosidad circular o semicircular; poros en el plano transversal (X) al inicio del anillo de crecimiento fácilmente visibles a una distancia normal de lectura, moderadamente grandes (de 200 a 300μm de diámetro), y al final del anillo apenas visibles a simple vista, moderadamente pequeños (de 50 a 100μm de diámetro), predominantemente solitarios con algunos múltiples de 2, sin ninguna orientación, con contenidos blancos, oscuros y tilosis; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos blancos y oscuros y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), pocos (menos de 25 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento visibles a simple vista y definidos por parénquima en bandas marginal y porosidad circular o semicircular."
+  },
+  {
+    "nombres": [
+      "TOLÚA"
+    ],
+    "botanico": "Pachira quinata (Jacq.) W.S. Alverson",
+    "familia": "BOMBACACEAE",
+    "otros_nombres": [
+      "Tolúa",
+      "ceiba tolúa",
+      "cedro tolúa",
+      "cedro macho",
+      "ceiba del tolú",
+      "ceiba colorada",
+      "cartagenero",
+      "cedro espinoso",
+      "tolú",
+      "ceiba bruja"
+    ],
+    "comercial": "Saqui–saqui",
+    "organolepticos": "Albura de color amarillo pálido (2.5Y 7/4) con transición gradual a duramen de color marrón rojizo oscuro (2.5YR 3/6); olor y sabor no distintivos; brillo moderado; grano recto; textura media; superficie muy suave al tacto; veteado acentuado definido por líneas vasculares, satinado y jaspeado.",
+    "macroscopicos": "Parénquima visible con aumento de 5x, apotraqueal difuso en agregados; porosidad difusa; poros en el plano transversal (X) regularmente visibles a simple vista, medianos (de 100 a 200μm de diámetro), pocos (de 12 a 30 en 10mm2 ), solitarios y múltiples de 3, sin ninguna orientación, con abundante tilosis; líneas vasculares en el plano tangencial (T) visibles a simple vista, con abundante tilosis y no estratificadas; canales secretores axiales traumáticos en cadenas tangenciales largas y cortas; radios en el plano transversal (X) apenas visibles a simple vista, medianos (de 50 a 100μm de ancho), pocos (menos de 25 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y no estratificados en el plano tangencial (T); anillos de crecimiento generalmente indistintos con aumento de 5x, cuando están presentes son visibles a simple vista y definidos por mayor espesor de la pared de las fibras y disminución de su diámetro radial. En algunas muestras se observaron rastros del ataque del insecto Arlequín grabado (Steirastoma histrionicum T.; CERAMBYCIDAE ).",
+    "amenaza": "Categoría global, vulnerable (VU A1cd) ver. 2.3 1994 (Sandiford 1998), Categoría nacional, En peligro (EN A2acd)"
+  },
+  {
+    "nombres": [
+      "TORNILLO",
+      "ACHAPO"
+    ],
+    "botanico": "Cedrelinga cateniformis (Ducke) Ducke",
+    "familia": "MIMOSACEAE",
+    "otros_nombres": [
+      "Achapo",
+      "achapo blanco",
+      "achuapo",
+      "jeñeni",
+      "yakayata"
+    ],
+    "comercial": "Tornillo",
+    "organolepticos": "Albura de color crema (7.5YR 8/2) con transición gradual a duramen de color café claro (7.5YR 5/4); olor y sabor no distintivos; brillo moderado a acentuado; grano recto; textura media a gruesa; superficie suave al tacto; veteado acentuado definido por aspecto fibroso, líneas vasculares, jaspeado y satinado.",
+    "macroscopicos": "Parénquima visible a simple vista, paratraqueal vasicéntrico a aliforme romboidal; porosidad difusa; poros en el plano transversal (X) fácilmente visibles a una distancia normal de lectura, moderadamente grandes (de 200 a 300μm de diámetro), pocos (de 12 a 30 en 10mm2 ), predominantemente solitarios y algunos múltiples de 2 a 6, sin ninguna orientación, con contenidos crema oscuros; líneas vasculares en el plano tangencial (T) visibles a simple vista, con contenidos crema oscuros y no estratificadas; canales secretores ausentes; radios en el plano transversal (X) visibles con aumento de 5x, finos (menos de 50μm de ancho), muchos (de 50 a 80 por 5mm), contrastados en el plano radial (R), bajos (menores de 1mm) y pueden, o no, estar estratificados irregularmente en el plano tangencial (T); anillos de crecimiento visibles a simple vista y definidos por mayor espesor de la pared de las fibras y disminución de su diámetro radial."
+  }
+]

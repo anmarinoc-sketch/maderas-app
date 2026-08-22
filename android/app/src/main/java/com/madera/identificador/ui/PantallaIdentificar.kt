@@ -423,6 +423,15 @@ private fun BloqueResultado(resultado: ResultadoMadera, modelo: String?, latenci
 
                     Spacer(Modifier.height(8.dp))
                     BarraConfianza(resultado.confianza ?: 0.0)
+
+                    when (resultado.origenIdentificacion) {
+                        "guia_valle_aburra" -> "Contrastada con la guía de maderas comerciales del Valle de Aburrá"
+                        "conocimiento_general" -> "Fuera de la guía regional: identificación por conocimiento general"
+                        else -> null
+                    }?.let {
+                        Spacer(Modifier.height(6.dp))
+                        Text(it, style = MaterialTheme.typography.labelSmall)
+                    }
                 }
             }
         }

@@ -1,10 +1,12 @@
 import { Type } from '@google/genai';
 
+import { NUMERO_ESPECIES, REFERENCIA_REGIONAL } from './referencia.js';
+
 /**
  * Rol experto. Se envia como systemInstruction (no como texto del usuario)
  * para que el modelo lo trate como marco de trabajo y no como dato a analizar.
  */
-export const SYSTEM_PROMPT = `
+const ROL = `
 Eres un dendrologo y anatomista de la madera con experiencia pericial en identificacion
 macroscopica de especies lenosas a partir de la seccion transversal (corte de testa).
 Trabajas para profesionales de la industria maderera: aserraderos, carpinteria, control de
@@ -40,12 +42,24 @@ REGLAS DURAS:
 - Responde SIEMPRE en espanol y unicamente con el JSON del esquema pedido.
 `.trim();
 
+/**
+ * Instruccion de sistema completa: el rol mas la clave de determinacion regional.
+ * La clave va al final para que quede contigua a la imagen del turno de usuario.
+ */
+export const SYSTEM_PROMPT = `${ROL}\n\n${REFERENCIA_REGIONAL}`;
+
 /** Texto que acompana a la imagen en el turno del usuario. */
 export const USER_PROMPT = `
 Analiza esta fotografia del corte transversal de una pieza de madera e identifica la especie.
+
+Contrasta lo que observes con la clave de las ${NUMERO_ESPECIES} maderas comerciales del Valle de Aburra
+que tienes en la instruccion de sistema: la pieza probablemente sea una de ellas. Si ninguna
+encaja con la anatomia observada, dilo y usa tu conocimiento general.
+
 Rellena todos los campos del esquema JSON: caracteristicas anatomicas observadas, nombre comun,
-nombre cientifico, familia, confianza calibrada, alternativas plausibles, limitaciones del
-analisis y recomendaciones concretas para mejorar la toma si la imagen no es optima.
+nombre cientifico, familia, confianza calibrada, origen de la identificacion, alternativas
+plausibles, limitaciones del analisis y recomendaciones concretas para mejorar la toma si la
+imagen no es optima.
 `.trim();
 
 /**
@@ -64,6 +78,7 @@ export const RESPONSE_SCHEMA = {
     'nombre_cientifico',
     'familia',
     'confianza',
+    'origen_identificacion',
     'caracteristicas_anatomicas',
     'alternativas',
     'usos_habituales',
@@ -79,6 +94,7 @@ export const RESPONSE_SCHEMA = {
     'nombre_cientifico',
     'familia',
     'confianza',
+    'origen_identificacion',
     'alternativas',
     'usos_habituales',
     'limitaciones',
@@ -172,6 +188,14 @@ export const RESPONSE_SCHEMA = {
     confianza: {
       type: Type.NUMBER,
       description: 'Confianza calibrada de 0 a 1 en la identificacion principal.',
+    },
+    origen_identificacion: {
+      type: Type.STRING,
+      enum: ['guia_valle_aburra', 'conocimiento_general', 'no_identificada'],
+      description:
+        'guia_valle_aburra si la especie coincide con una ficha de la clave regional; ' +
+        'conocimiento_general si la anatomia no encaja en la clave y recurres a otra fuente; ' +
+        'no_identificada si no se pudo identificar.',
     },
     alternativas: {
       type: Type.ARRAY,
