@@ -3,6 +3,6 @@
     <!-- Tema base minimo: el aspecto real lo define Compose en ui/theme/Tema.kt -->
     <style name="Theme.IdentificaMadera" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">@color/ic_launcher_background</item>
-        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowBackground">@color/verde_xiloscan</item>
     </style>
 </resources>

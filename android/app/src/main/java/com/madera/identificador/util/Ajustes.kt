@@ -24,6 +24,11 @@ class Ajustes(context: Context) {
         get() = prefs.getString(CLAVE_APP_KEY, null) ?: BuildConfig.APP_API_KEY
         set(valor) = prefs.edit().putString(CLAVE_APP_KEY, valor.trim()).apply()
 
+    /** La explicacion inicial solo se muestra la primera vez que se abre la app. */
+    var explicacionVista: Boolean
+        get() = prefs.getBoolean(CLAVE_EXPLICACION, false)
+        set(valor) = prefs.edit().putBoolean(CLAVE_EXPLICACION, valor).apply()
+
     fun restaurarValoresDeCompilacion() {
         prefs.edit().remove(CLAVE_URL).remove(CLAVE_APP_KEY).apply()
     }
@@ -31,5 +36,6 @@ class Ajustes(context: Context) {
     private companion object {
         const val CLAVE_URL = "url_servidor"
         const val CLAVE_APP_KEY = "clave_app"
+        const val CLAVE_EXPLICACION = "explicacion_vista"
     }
 }

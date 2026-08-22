@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Marca de XiloScan: disco de madera con sus anillos, marco de escaneo alrededor
+    y lupa con hoja. Vectorial para que sirva igual en el icono, en la bienvenida y
+    en cualquier tamano sin pixelarse.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Marco de escaneo: dos esquinas claras arriba, dos verdes abajo -->
+    <path
+        android:pathData="M22,40 L22,28 A6,6 0 0,1 28,22 L40,22"
+        android:strokeColor="#F0E6D2"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M80,22 L92,22 A6,6 0 0,1 98,28 L98,40"
+        android:strokeColor="#F0E6D2"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M22,80 L22,92 A6,6 0 0,0 28,98 L40,98"
+        android:strokeColor="#7CB342"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M80,98 L92,98 A6,6 0 0,0 98,92 L98,80"
+        android:strokeColor="#7CB342"
+        android:strokeWidth="7"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
+
+    <!-- Disco de madera -->
+    <path
+        android:pathData="M56,56 m-30,0 a30,30 0 1,0 60,0 a30,30 0 1,0 -60,0"
+        android:fillColor="#A9793F" />
+    <path
+        android:pathData="M56,56 m-24,0 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0"
+        android:strokeColor="#8A5F2E"
+        android:strokeWidth="2"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M56,56 m-18,0 a18,18 0 1,0 36,0 a18,18 0 1,0 -36,0"
+        android:strokeColor="#C99A5B"
+        android:strokeWidth="2"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M56,56 m-12,0 a12,12 0 1,0 24,0 a12,12 0 1,0 -24,0"
+        android:strokeColor="#8A5F2E"
+        android:strokeWidth="2"
+        android:fillColor="#00000000" />
+    <path
+        android:pathData="M56,56 m-6,0 a6,6 0 1,0 12,0 a6,6 0 1,0 -12,0"
+        android:strokeColor="#C99A5B"
+        android:strokeWidth="2"
+        android:fillColor="#00000000" />
+
+    <!-- Lupa: aro claro, interior verde y mango -->
+    <path
+        android:pathData="M72,72 L88,88"
+        android:strokeColor="#7CB342"
+        android:strokeWidth="9"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M66,66 m-19,0 a19,19 0 1,0 38,0 a19,19 0 1,0 -38,0"
+        android:fillColor="#F0E6D2" />
+    <path
+        android:pathData="M66,66 m-14,0 a14,14 0 1,0 28,0 a14,14 0 1,0 -28,0"
+        android:fillColor="#5E8C3A" />
+
+    <!-- Hoja dentro de la lupa -->
+    <path
+        android:pathData="M66,56 C74,60 76,70 66,76 C56,70 58,60 66,56 Z"
+        android:fillColor="#A7D267" />
+    <path
+        android:pathData="M66,58 L66,75"
+        android:strokeColor="#5E8C3A"
+        android:strokeWidth="1.6"
+        android:strokeLineCap="round" />
+</vector>
