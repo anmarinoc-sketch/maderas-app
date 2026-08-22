@@ -25,9 +25,32 @@ val appKeyPorDefecto: String =
         ?: System.getenv("APP_API_KEY")
         ?: ""
 
+/**
+ * Clave de firma estable.
+ *
+ * Sin ella, cada compilacion en CI genera su propia clave de depuracion y Android
+ * rechaza instalar la version nueva encima de la anterior, obligando a desinstalar
+ * en cada actualizacion. El archivo no esta en el repositorio: la CI lo restaura
+ * desde el secreto DEBUG_KEYSTORE_B64. Si no existe, Gradle usa su clave de siempre
+ * y todo sigue compilando, solo que sin poder actualizar sobre lo instalado.
+ */
+val claveFirma = file("../keystore/xiloscan.p12")
+
 android {
     namespace = "com.madera.identificador"
     compileSdk = 35
+
+    signingConfigs {
+        if (claveFirma.exists()) {
+            getByName("debug") {
+                storeFile = claveFirma
+                storeType = "PKCS12"
+                storePassword = "xiloscan"
+                keyAlias = "xiloscan"
+                keyPassword = "xiloscan"
+            }
+        }
+    }
 
     defaultConfig {
         applicationId = "com.madera.identificador"

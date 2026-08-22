@@ -28,3 +28,6 @@ key.properties
 # Registro que el servidor escribe en caliente; lo permanente va en
 # backend/src/datos/verificaciones.json
 backend/src/datos/aprendizaje/
+
+# La clave de firma nunca va al repositorio: la CI la restaura desde un secreto
+android/keystore/
