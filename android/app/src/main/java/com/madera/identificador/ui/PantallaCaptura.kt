@@ -14,6 +14,10 @@ import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -99,6 +103,9 @@ fun PantallaCaptura(
     var linterna by remember { mutableStateOf(false) }
     var luminancia by remember { mutableDoubleStateOf(-1.0) }
     var camara by remember { mutableStateOf<Camera?>(null) }
+    var zoom by remember { mutableFloatStateOf(1f) }
+    // Cada movil tiene su tope; si la camara aun no esta lista se asume 1 (sin zoom).
+    val zoomMaximo = camara?.cameraInfo?.zoomState?.value?.maxZoomRatio ?: 1f
 
     val capturador = remember {
         ImageCapture.Builder()
@@ -196,14 +203,45 @@ fun PantallaCaptura(
                         },
                     )
 
-                    MarcoDeEncuadre(Modifier.fillMaxSize())
-
-                    ChipDeLuz(
-                        luminancia = luminancia,
+                    // Capa de gestos sobre la vista previa: pellizcar mueve el zoom REAL
+                    // de la camara, no un recorte digital posterior. Acercarse con la
+                    // optica conserva detalle; recortar despues lo pierde.
+                    Box(
                         modifier = Modifier
-                            .align(Alignment.TopCenter)
-                            .padding(top = 16.dp),
-                    )
+                            .fillMaxSize()
+                            .pointerInput(camara, zoomMaximo) {
+                                detectTransformGestures { _, _, acercamiento, _ ->
+                                    if (acercamiento != 1f) {
+                                        val nuevo = (zoom * acercamiento).coerceIn(1f, zoomMaximo)
+                                        zoom = nuevo
+                                        camara?.cameraControl?.setZoomRatio(nuevo)
+                                    }
+                                }
+                            }
+                    ) {
+                        MarcoDeEncuadre(Modifier.fillMaxSize())
+
+                        ChipDeLuz(
+                            luminancia = luminancia,
+                            modifier = Modifier
+                                .align(Alignment.TopCenter)
+                                .padding(top = 16.dp),
+                        )
+
+                        if (zoomMaximo > 1f) {
+                            ChipZoom(
+                                zoom = zoom,
+                                maximo = zoomMaximo,
+                                onReiniciar = {
+                                    zoom = 1f
+                                    camara?.cameraControl?.setZoomRatio(1f)
+                                },
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .padding(16.dp),
+                            )
+                        }
+                    }
                 } else {
                     SinPermiso(
                         rechazado = permisoRechazado,
@@ -356,6 +394,45 @@ private fun ChipDeLuz(luminancia: Double, modifier: Modifier = Modifier) {
         Icon(Icons.Default.WbSunny, contentDescription = null, tint = color, modifier = Modifier.size(16.dp))
         Spacer(Modifier.width(8.dp))
         Text(texto, color = Color.White, style = androidx.compose.material3.MaterialTheme.typography.labelMedium)
+    }
+}
+
+/** Indicador de zoom; al tocarlo se vuelve a 1x. */
+@Composable
+private fun ChipZoom(
+    zoom: Float,
+    maximo: Float,
+    onReiniciar: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .clip(RoundedCornerShape(50))
+            .background(Color.Black.copy(alpha = 0.55f))
+            .clickable(onClick = onReiniciar)
+            .padding(horizontal = 14.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            "%.1f×".format(zoom),
+            color = if (zoom > 1f) Verde else Color.White,
+            style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
+        )
+        if (zoom > 1f) {
+            Spacer(Modifier.width(6.dp))
+            Text(
+                "toca para 1×",
+                color = TextoTenue,
+                style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
+            )
+        } else {
+            Spacer(Modifier.width(6.dp))
+            Text(
+                "pellizca para acercar (hasta ${"%.0f".format(maximo)}×)",
+                color = TextoTenue,
+                style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
+            )
+        }
     }
 }
 

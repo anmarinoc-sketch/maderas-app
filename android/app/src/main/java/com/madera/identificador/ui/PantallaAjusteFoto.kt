@@ -40,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
@@ -94,7 +95,7 @@ fun PantallaAjusteFoto(
                 Column(Modifier.weight(1f)) {
                     Text("Ajusta la foto", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     Text(
-                        "Pellizca para acercar, arrastra para mover y deja el corte llenando el recuadro.",
+                        "Pellizca para acercar y arrastra para mover. Solo se analiza lo que quede dentro del recuadro.",
                         color = TextoTenue,
                         style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
                     )
@@ -138,6 +139,9 @@ fun PantallaAjusteFoto(
                                 translationY = desplazamiento.y,
                             ),
                     )
+
+                    // Marco de recorte: deja claro que lo de dentro es lo que se analiza.
+                    MarcoDeRecorte(Modifier.fillMaxSize())
                 }
             }
 
@@ -206,6 +210,25 @@ private fun BotonHerramienta(
             Spacer(Modifier.height(4.dp))
             Text(texto, color = TextoTenue, style = androidx.compose.material3.MaterialTheme.typography.labelSmall)
         }
+    }
+}
+
+/** Esquinas del area de recorte, para que se vea que ese cuadro es lo que se conserva. */
+@Composable
+private fun MarcoDeRecorte(modifier: Modifier = Modifier) {
+    androidx.compose.foundation.Canvas(modifier) {
+        val largo = size.minDimension * 0.12f
+        val grosor = 5f
+        val c = Color.White.copy(alpha = 0.9f)
+
+        fun esquina(x: Float, y: Float, dx: Float, dy: Float) {
+            drawLine(c, Offset(x, y), Offset(x + dx, y), grosor, StrokeCap.Round)
+            drawLine(c, Offset(x, y), Offset(x, y + dy), grosor, StrokeCap.Round)
+        }
+        esquina(0f, 0f, largo, largo)
+        esquina(size.width, 0f, -largo, largo)
+        esquina(0f, size.height, largo, -largo)
+        esquina(size.width, size.height, -largo, -largo)
     }
 }
 
