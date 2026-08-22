@@ -54,17 +54,19 @@ jobs:
       # Sin clave estable, cada compilacion firma con una distinta y Android no deja
       # actualizar sobre lo ya instalado. El secreto es opcional: si no esta, se compila
       # igual con la clave que genera Gradle.
-      - name: Restaurar la clave de firma
+      - name: Preparar la clave de firma
         env:
           CLAVE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
         run: |
+          # El secreto, si existe, tiene prioridad sobre la clave del repositorio.
           if [ -n "$CLAVE_B64" ]; then
             mkdir -p keystore
             printf '%s' "$CLAVE_B64" | base64 -d > keystore/xiloscan.p12
-            echo "Clave de firma estable restaurada ($(wc -c < keystore/xiloscan.p12) bytes)."
+            echo "Firmando con la clave del secreto DEBUG_KEYSTORE_B64."
+          elif [ -f keystore/xiloscan.p12 ]; then
+            echo "Firmando con la clave versionada en el repositorio."
           else
-            echo "Sin DEBUG_KEYSTORE_B64: se firmara con la clave que genere Gradle."
-            echo "Habra que desinstalar la version anterior para poder instalar esta."
+            echo "Sin clave estable: Gradle generara una y no se podra actualizar encima."
           fi
 
       - name: Compilar APK
