@@ -1,0 +1,20 @@
+# Despliegue en Render. Las claves NO van aqui: `sync: false` obliga a
+# introducirlas a mano en el panel, y no quedan en el repositorio.
+services:
+  - type: web
+    name: madera-backend
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: npm ci --omit=dev
+    startCommand: node src/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: APP_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.6-flash
+      - key: NODE_ENV
+        value: production
