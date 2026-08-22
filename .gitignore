@@ -24,3 +24,7 @@ npm-debug.log*
 key.properties
 
 .DS_Store
+
+# Registro que el servidor escribe en caliente; lo permanente va en
+# backend/src/datos/verificaciones.json
+backend/src/datos/aprendizaje/

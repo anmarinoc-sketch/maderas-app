@@ -1,1 +1,10 @@
-[]
+[
+  {
+    "fecha": "2026-08-22T17:55:19.813Z",
+    "acierto": false,
+    "dicho": "Tectona grandis",
+    "real": "Cedrela odorata",
+    "confianza": 0.72,
+    "nota": "Confusion observada en pruebas con la lamina de cedro de la guia de la UNAL."
+  }
+]
