@@ -718,8 +718,9 @@ private fun DialogoAjustes(
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Text(
-                    "En el emulador, el equipo local es 10.0.2.2. Desde un móvil real necesitas " +
-                        "la IP de tu PC en la misma wifi, o un túnel público.",
+                    "La app ya viene apuntando al servidor de XiloScan en internet: funciona " +
+                        "con cualquier wifi o con datos móviles, y no depende de ningún equipo " +
+                        "tuyo encendido. Solo cambia esto si sabes que hay otro servidor.",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
