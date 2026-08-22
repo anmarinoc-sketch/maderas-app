@@ -295,7 +295,17 @@ export async function identificarMadera({ buffer, mimeType }) {
           continue;
         }
 
-        throw traducirError(error);
+        // Un problema de credencial afecta igual a todos los modelos: no tiene sentido
+        // recorrer la cadena entera para recibir ocho veces el mismo rechazo.
+        if (status === 401 || status === 403 || /API_KEY_INVALID|API key not valid/i.test(String(error?.message ?? ''))) {
+          throw traducirError(error);
+        }
+
+        // Cualquier otro fallo puede ser cosa de ESTE modelo (retirado, saturado,
+        // parametro no soportado): se aparta un rato y se prueba con el siguiente.
+        console.warn(`[gemini] ${modelo} descartado (${status ?? 'sin codigo'}), se prueba el siguiente`);
+        agotados.set(modelo, Date.now() + 10 * 60_000);
+        break;
       }
     }
   }

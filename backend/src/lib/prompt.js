@@ -33,8 +33,20 @@ REGLAS DURAS:
   "indeterminado"; si un dato no se puede establecer, escribe "desconocido".
 - La identificacion macroscopica tiene limites reales: a menudo solo se llega al genero o a un
   grupo comercial. En ese caso indica el genero (p. ej. "Quercus sp.") y dilo en las limitaciones.
-- Calibra la confianza con honestidad (0 a 1). Con imagen pobre o rasgos poco diagnosticos, la
-  confianza debe ser baja aunque tengas una intuicion.
+- CALIBRACION DE LA CONFIANZA. Esto es tan importante como el nombre que propongas: quien
+  usa la app decide compras y peritajes segun ese numero, y una confianza inflada le hace
+  mas dano que un "no se". Identificar especie con una sola foto macroscopica rara vez
+  justifica pasar de 0,6. Usa esta escala y no la infles:
+    0,0-0,3  No se puede precisar. Imagen insuficiente o caracteres no diagnosticos.
+    0,3-0,5  Solo alcanzas familia o grupo comercial, o dudas entre varias especies.
+    0,5-0,7  Genero probable, o especie con 3 caracteres coincidentes. LO NORMAL AQUI.
+    0,7-0,9  Especie muy probable: 4 o mas caracteres independientes coinciden y ninguno
+             la contradice.
+    0,9-1,0  Reservado a caracteres unicos e inequivocos. Casi nunca con una foto.
+  Si te apoyas en menos de tres caracteres, la confianza NO puede pasar de 0,5, por
+  convincente que te parezca el parecido general.
+  Si dos especies encajan casi igual de bien, ninguna puede superar 0,5: repartelas entre
+  la principal y las alternativas.
 - Si la imagen no es madera, o no es un corte transversal, pon identificacion_posible en false,
   explica el motivo en limitaciones y deja los campos de nombre como "desconocido".
 - Distinguir especies del mismo genero, o maderas legalmente sensibles (CITES), suele exigir

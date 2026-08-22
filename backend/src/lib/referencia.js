@@ -119,28 +119,108 @@ function comoLinea(e) {
 
 export const NUMERO_ESPECIES = especies.length;
 
+/**
+ * Grupos de la clave, en el orden en que se recorren.
+ *
+ * El primer corte NO es la porosidad: 30 de las 32 latifoliadas de esta flora son de
+ * porosidad difusa, asi que ese carácter casi no separa. El que reparte de verdad es
+ * el tipo de parenquima axial.
+ */
+const GRUPOS = [
+  {
+    id: 'CONIFERAS',
+    titulo: 'CONIFERAS — sin poros: tejido uniforme de traqueidas',
+    prueba: (e) => /CUPRESSACEAE|PINACEAE/i.test(e.familia),
+  },
+  {
+    id: 'A',
+    titulo: 'GRUPO A — parenquima ALIFORME o CONFLUENTE (alas o puentes entre poros)',
+    prueba: (e) => /aliforme|confluente/i.test(e.macroscopicos),
+  },
+  {
+    id: 'B',
+    titulo: 'GRUPO B — parenquima VASICENTRICO (solo un anillo ceñido al poro)',
+    prueba: (e) => /vasic[ée]ntrico/i.test(e.macroscopicos),
+  },
+  {
+    id: 'C',
+    titulo: 'GRUPO C — parenquima EN BANDAS (lineas tangenciales continuas)',
+    prueba: (e) => /en bandas/i.test(e.macroscopicos),
+  },
+  {
+    id: 'D',
+    titulo: 'GRUPO D — parenquima APOTRAQUEAL DIFUSO (puntos sueltos, sin relacion con el poro)',
+    prueba: (e) => /apotraqueal|difuso/i.test(e.macroscopicos),
+  },
+  {
+    id: 'E',
+    titulo: 'GRUPO E — parenquima ESCASO, AUSENTE o NO VISIBLE',
+    prueba: () => true,
+  },
+];
+
+/** Reparte cada especie en el primer grupo cuya prueba encaje. */
+function agrupar() {
+  const pendientes = [...especies];
+  return GRUPOS.map((g) => {
+    const miembros = [];
+    for (let i = pendientes.length - 1; i >= 0; i--) {
+      if (g.prueba(pendientes[i])) miembros.unshift(...pendientes.splice(i, 1));
+    }
+    return { ...g, miembros };
+  }).filter((g) => g.miembros.length);
+}
+
+const grupos = agrupar();
+
+const indice = grupos
+  .map((g) => `  ${g.titulo}  ->  ${g.miembros.length} especies`)
+  .join('\n');
+
+const cuerpo = grupos
+  .map(
+    (g) =>
+      `----- ${g.titulo} (${g.miembros.length}) -----\n\n` +
+      g.miembros.map(comoLinea).join('\n\n')
+  )
+  .join('\n\n');
+
 export const REFERENCIA_REGIONAL = `
-=== CLAVE: ${NUMERO_ESPECIES} MADERAS COMERCIALES DEL VALLE DE ABURRA ===
+=== CLAVE DE ${NUMERO_ESPECIES} MADERAS COMERCIALES DEL VALLE DE ABURRA ===
 Fuente: Universidad Nacional de Colombia - Sede Medellin, Laboratorio de Productos
-Forestales "Hector Anaya Lopez" (2011). Solo se listan caracteres visibles en el
-corte transversal.
+Forestales "Hector Anaya Lopez" (2011). Solo caracteres visibles en el corte transversal.
 
-COMO USAR ESTA CLAVE:
-1. PRIMERO describe lo que ves en la foto, sin mirar la lista. Anota porosidad, tamano
-   y agrupacion de poros, tipo de parenquima, finura de radios y anillos.
-2. DESPUES busca que fichas son compatibles con esa descripcion.
-3. Elige una especie solo si coincide en TRES O MAS caracteres independientes. Con dos
-   o menos, responde al nivel de familia o de genero, o admite que no se puede precisar.
-4. Prohibido elegir una ficha por descarte perezoso o porque "suene probable". Si dudas
-   entre varias, ponlas todas en alternativas con confianza repartida.
-5. Si la anatomia no encaja con ninguna, dilo y usa tu conocimiento general: la pieza
-   puede ser importada o no estar en esta lista.
-6. Los rangos numericos (um, poros/10mm2, radios/5mm) se midieron con lupa de 5-10
-   aumentos sobre corte lijado y humedecido. En una foto de movil sin escala no puedes
-   medirlos: usalos como orden de magnitud (grandes/pequenos, muchos/pocos), nunca como
-   dato exacto.
+RECORRE LA CLAVE EN ESTE ORDEN. No leas las fichas en paralelo: descarta grupos enteros.
 
-${especies.map(comoLinea).join('\n\n')}
+PASO 1 — ¿Se ven poros (vasos)?
+  NO, tejido uniforme y radios finisimos ....... vete al grupo CONIFERAS y no mires el resto.
+  SI, hay poros ................................ sigue al paso 2.
+
+PASO 2 — Porosidad.
+  Anotala, pero AQUI CASI NO DISCRIMINA: 30 de las 32 latifoliadas de esta flora son de
+  porosidad difusa. Que sea difusa no descarta practicamente nada.
+
+PASO 3 — Tipo de parenquima axial. ESTE es el carácter que reparte esta flora.
+  Mira si el tejido claro forma alas o puentes entre poros, un anillo ceñido a cada poro,
+  bandas tangenciales, puntos sueltos, o si no se ve. Elige UN grupo:
+
+${indice}
+
+PASO 4 — Ya dentro del grupo, separa por tamano de poros, cuantos hay, si son solitarios
+  o multiples, si tienen tilosis o contenidos, y por la finura y numero de radios.
+
+REGLAS QUE NO PUEDES SALTARTE:
+- Describe primero lo que ves; solo despues mires a que grupo pertenece.
+- Elige una especie unicamente si coincide en TRES O MAS caracteres independientes.
+  Con dos o menos, responde a nivel de familia o de genero, o di que no se puede precisar.
+- Si el parenquima no se distingue en la foto, NO adivines el grupo: dilo en limitaciones
+  y responde con la confianza baja que corresponde.
+- Si dudas entre varias, ponlas todas en alternativas con la confianza repartida.
+- Si nada encaja, dilo y usa tu conocimiento general: la pieza puede ser importada.
+- Los rangos numericos (um, poros/10mm2, radios/5mm) se midieron con lupa de 5-10 aumentos
+  sobre corte lijado. En una foto de movil sin escala son orden de magnitud, no medida.
+
+${cuerpo}
 
 === FIN DE LA CLAVE ===
 `.trim();

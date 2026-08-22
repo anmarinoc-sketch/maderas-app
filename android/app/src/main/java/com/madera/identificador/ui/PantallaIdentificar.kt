@@ -392,13 +392,31 @@ private fun BloqueResultado(resultado: ResultadoMadera, modelo: String?, latenci
                 }
             }
         } else {
+            // Por debajo de 0,6 el resultado se presenta como candidata, no como veredicto:
+            // la identificación macroscópica desde una foto rara vez da para más, y una
+            // respuesta rotunda equivocada es peor que una propuesta con reservas.
+            val fiable = (resultado.confianza ?: 0.0) >= 0.6
+
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                    containerColor = if (fiable) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    },
+                    contentColor = if (fiable) {
+                        MaterialTheme.colorScheme.onPrimaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
                 )
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        if (fiable) "Identificación" else "Candidata más probable · sin confirmar",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                    )
                     Text(
                         resultado.nombreComun ?: "desconocido",
                         style = MaterialTheme.typography.headlineSmall,
@@ -423,6 +441,14 @@ private fun BloqueResultado(resultado: ResultadoMadera, modelo: String?, latenci
 
                     Spacer(Modifier.height(8.dp))
                     BarraConfianza(resultado.confianza ?: 0.0)
+
+                    if (!fiable) {
+                        Spacer(Modifier.height(6.dp))
+                        Text(
+                            "Contrasta con las otras especies compatibles antes de decidir.",
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
 
                     when (resultado.origenIdentificacion) {
                         "guia_valle_aburra" -> "Contrastada con la guía de maderas comerciales del Valle de Aburrá"
