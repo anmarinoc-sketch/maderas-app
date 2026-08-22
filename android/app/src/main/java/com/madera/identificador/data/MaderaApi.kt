@@ -8,6 +8,7 @@ import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Multipart
@@ -22,6 +23,12 @@ interface MaderaApi {
         @Part imagen: MultipartBody.Part,
         @Header("X-App-Key") appKey: String?,
     ): Response<RespuestaIdentificacion>
+
+    @POST("api/verificacion")
+    suspend fun verificar(
+        @Body verificacion: Verificacion,
+        @Header("X-App-Key") appKey: String?,
+    ): Response<RespuestaVerificacion>
 
     @GET("health")
     suspend fun salud(): Response<EstadoServidor>

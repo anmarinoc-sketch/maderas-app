@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 
 import { config } from '../config.js';
 import { AppError } from './errors.js';
-import { RESPONSE_SCHEMA, SYSTEM_PROMPT, USER_PROMPT } from './prompt.js';
+import { RESPONSE_SCHEMA, construirSystemPrompt, USER_PROMPT } from './prompt.js';
 
 // La clave solo vive aqui, en el proceso del servidor. Nunca viaja al cliente.
 const ai = new GoogleGenAI({ apiKey: config.geminiApiKey });
@@ -210,7 +210,7 @@ export async function identificarMadera({ buffer, mimeType }) {
           },
         ],
         config: {
-          systemInstruction: SYSTEM_PROMPT,
+          systemInstruction: construirSystemPrompt(),
           responseMimeType: 'application/json',
           responseSchema: RESPONSE_SCHEMA,
           temperature: 0.2,

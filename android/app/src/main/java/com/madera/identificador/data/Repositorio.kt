@@ -92,6 +92,28 @@ class Repositorio(private val gson: Gson = Gson()) {
         }
     }
 
+    /**
+     * Envia al servidor la confirmacion o la correccion del usuario.
+     *
+     * El servidor acumula estas verificaciones y las inyecta como avisos en las
+     * consultas siguientes: es la via para que los errores no se repitan.
+     */
+    suspend fun verificar(
+        baseUrl: String,
+        appKey: String,
+        verificacion: Verificacion,
+    ): Result<Int> = withContext(Dispatchers.IO) {
+        runCatching {
+            val respuesta = ApiFactory.para(baseUrl).verificar(verificacion, appKey.ifBlank { null })
+            val cuerpo = respuesta.body()
+            if (respuesta.isSuccessful && cuerpo?.ok == true) {
+                cuerpo.registradas ?: 0
+            } else {
+                error(cuerpo?.error?.mensaje ?: "El servidor respondió ${respuesta.code()}")
+            }
+        }
+    }
+
     /** Comprueba /health para diagnosticar la URL desde la pantalla de ajustes. */
     suspend fun comprobarServidor(baseUrl: String): Result<String> = withContext(Dispatchers.IO) {
         runCatching {

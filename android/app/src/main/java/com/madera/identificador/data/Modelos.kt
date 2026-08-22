@@ -79,3 +79,19 @@ data class EstadoServidor(
     val estado: String? = null,
     val modelo: String? = null,
 )
+
+/** Confirmacion o correccion de una identificacion, enviada por el usuario. */
+data class Verificacion(
+    val acierto: Boolean,
+    val dicho: String?,
+    val real: String?,
+    val confianza: Double?,
+    val nota: String? = null,
+)
+
+data class RespuestaVerificacion(
+    val ok: Boolean? = null,
+    val registradas: Int? = null,
+    @SerializedName("acierto_pct") val aciertoPct: Int? = null,
+    val error: ErrorApi? = null,
+)

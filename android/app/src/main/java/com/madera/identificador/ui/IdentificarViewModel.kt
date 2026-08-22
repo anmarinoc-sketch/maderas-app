@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.madera.identificador.data.Repositorio
 import com.madera.identificador.data.ResultadoLlamada
 import com.madera.identificador.data.ResultadoMadera
+import com.madera.identificador.data.Verificacion
 import com.madera.identificador.util.Ajustes
 import com.madera.identificador.util.ImagenPreparada
 import com.madera.identificador.util.Imagenes
@@ -42,6 +43,9 @@ data class EstadoUi(
     val urlServidor: String = "",
     val claveApp: String = "",
     val comprobandoServidor: Boolean = false,
+    val enviandoVerificacion: Boolean = false,
+    val verificacionEnviada: Boolean = false,
+    val mensajeVerificacion: String? = null,
     val mensajeServidor: String? = null,
 )
 
@@ -88,7 +92,13 @@ class IdentificarViewModel(application: Application) : AndroidViewModel(applicat
         if (_estado.value.analisis is EstadoAnalisis.Cargando) return
 
         viewModelScope.launch {
-            _estado.update { it.copy(analisis = EstadoAnalisis.Cargando) }
+            _estado.update {
+                it.copy(
+                    analisis = EstadoAnalisis.Cargando,
+                    verificacionEnviada = false,
+                    mensajeVerificacion = null,
+                )
+            }
 
             val respuesta = repositorio.identificar(
                 baseUrl = ajustes.urlServidor,
@@ -140,6 +150,43 @@ class IdentificarViewModel(application: Application) : AndroidViewModel(applicat
     /** Vuelve al editor partiendo siempre de la foto original, no de un recorte previo. */
     fun volverAAjustar() {
         _estado.update { it.copy(imagen = it.original ?: it.imagen, ajustada = false) }
+    }
+
+    /**
+     * Registra si la identificacion fue correcta. Cuando no lo fue, la especie real es
+     * obligatoria: un fallo sin la respuesta correcta no ensena nada al sistema.
+     */
+    fun verificar(acierto: Boolean, especieReal: String? = null) {
+        val exito = _estado.value.analisis as? EstadoAnalisis.Exito ?: return
+
+        viewModelScope.launch {
+            _estado.update { it.copy(enviandoVerificacion = true) }
+
+            val resultado = repositorio.verificar(
+                baseUrl = ajustes.urlServidor,
+                appKey = ajustes.claveApp,
+                verificacion = Verificacion(
+                    acierto = acierto,
+                    dicho = exito.resultado.nombreCientifico,
+                    real = if (acierto) exito.resultado.nombreCientifico else especieReal,
+                    confianza = exito.resultado.confianza,
+                ),
+            )
+
+            _estado.update {
+                it.copy(
+                    enviandoVerificacion = false,
+                    verificacionEnviada = resultado.isSuccess,
+                    mensajeVerificacion = resultado.fold(
+                        onSuccess = { n ->
+                            if (acierto) "Gracias, queda registrado como acierto."
+                            else "Corrección registrada. Ya son $n verificaciones."
+                        },
+                        onFailure = { e -> "No se pudo registrar: ${e.message ?: "error de red"}" },
+                    ),
+                )
+            }
+        }
     }
 
     fun limpiar() {

@@ -205,11 +205,21 @@ fun PantallaIdentificar(
                     onAjustes = { mostrarAjustes = true },
                 )
 
-                is EstadoAnalisis.Exito -> BloqueResultado(
-                    resultado = analisis.resultado,
-                    modelo = analisis.modelo,
-                    latenciaMs = analisis.latenciaMs,
-                )
+                is EstadoAnalisis.Exito -> {
+                    BloqueResultado(
+                        resultado = analisis.resultado,
+                        modelo = analisis.modelo,
+                        latenciaMs = analisis.latenciaMs,
+                    )
+                    TarjetaVerificacion(
+                        propuesta = analisis.resultado.nombreCientifico ?: "desconocido",
+                        enviando = estado.enviandoVerificacion,
+                        enviada = estado.verificacionEnviada,
+                        mensaje = estado.mensajeVerificacion,
+                        onAcierto = { vm.verificar(acierto = true) },
+                        onCorregir = { especie -> vm.verificar(acierto = false, especieReal = especie) },
+                    )
+                }
             }
 
             Spacer(Modifier.height(24.dp))
@@ -575,6 +585,101 @@ private fun Seccion(titulo: String, contenido: @Composable () -> Unit) {
             )
             Spacer(Modifier.height(8.dp))
             contenido()
+        }
+    }
+}
+
+/**
+ * Verificacion del usuario sobre el resultado.
+ *
+ * No entrena al modelo — Gemini no aprende de una peticion a la siguiente —, pero el
+ * servidor acumula estas confirmaciones y correcciones y las envia como avisos en las
+ * consultas posteriores, para que los errores comprobados no se repitan.
+ */
+@Composable
+private fun TarjetaVerificacion(
+    propuesta: String,
+    enviando: Boolean,
+    enviada: Boolean,
+    mensaje: String?,
+    onAcierto: () -> Unit,
+    onCorregir: (String) -> Unit,
+) {
+    var corrigiendo by remember { mutableStateOf(false) }
+    var especie by remember { mutableStateOf("") }
+
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+        )
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+
+            if (enviada) {
+                Text(
+                    mensaje ?: "Verificación registrada.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold,
+                )
+                Text(
+                    "Se tendrá en cuenta en los próximos análisis.",
+                    style = MaterialTheme.typography.labelSmall,
+                )
+            } else {
+            Text(
+                "¿Acertó?",
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+            )
+            Text(
+                "Confirmar o corregir hace que el análisis no repita el mismo error.",
+                style = MaterialTheme.typography.bodySmall,
+            )
+
+            if (!corrigiendo) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(onClick = onAcierto, enabled = !enviando) {
+                        Text("Sí, es $propuesta")
+                    }
+                    OutlinedButton(onClick = { corrigiendo = true }, enabled = !enviando) {
+                        Text("No, fue otra")
+                    }
+                }
+            } else {
+                OutlinedTextField(
+                    value = especie,
+                    onValueChange = { especie = it },
+                    label = { Text("¿Cuál es la especie correcta?") },
+                    placeholder = { Text("Nombre común o científico") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Button(
+                        onClick = { onCorregir(especie.trim()) },
+                        enabled = !enviando && especie.isNotBlank(),
+                    ) {
+                        Text("Enviar corrección")
+                    }
+                    TextButton(onClick = { corrigiendo = false }, enabled = !enviando) {
+                        Text("Cancelar")
+                    }
+                }
+            }
+
+            if (enviando) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Enviando…", style = MaterialTheme.typography.labelSmall)
+                }
+            }
+
+            mensaje?.let {
+                Text(it, style = MaterialTheme.typography.labelSmall)
+            }
+            }
         }
     }
 }

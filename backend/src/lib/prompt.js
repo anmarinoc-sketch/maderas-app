@@ -1,5 +1,6 @@
 import { Type } from '@google/genai';
 
+import { notasDeCorreccion } from './aprendizaje.js';
 import { NUMERO_ESPECIES, REFERENCIA_REGIONAL } from './referencia.js';
 
 /**
@@ -63,7 +64,10 @@ REGLAS DURAS:
  * Instruccion de sistema completa: el rol mas la clave de determinacion regional.
  * La clave va al final para que quede contigua a la imagen del turno de usuario.
  */
-export const SYSTEM_PROMPT = `${ROL}\n\n${REFERENCIA_REGIONAL}`;
+export function construirSystemPrompt() {
+  // Se arma en cada peticion: las correcciones del usuario cambian entre una y otra.
+  return [ROL, REFERENCIA_REGIONAL, notasDeCorreccion()].filter(Boolean).join('\n\n');
+}
 
 /** Texto que acompana a la imagen en el turno del usuario. */
 export const USER_PROMPT = `
