@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Carpeta temporal donde la camara del sistema deja la foto recien tomada. -->
+    <cache-path name="capturas" path="capturas/" />
+</paths>

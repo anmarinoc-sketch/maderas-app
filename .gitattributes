@@ -1,0 +1,7 @@
+# El repositorio se compila en un runner Linux: normalizamos a LF para que los
+# bloques `run:` del workflow no lleguen con retornos de carro de Windows.
+* text=auto eol=lf
+*.bat text eol=crlf
+*.jar binary
+*.apk binary
+*.png binary
