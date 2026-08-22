@@ -4,6 +4,7 @@ services:
   - type: web
     name: madera-backend
     runtime: node
+    rootDir: backend
     plan: free
     region: oregon
     buildCommand: npm ci --omit=dev
