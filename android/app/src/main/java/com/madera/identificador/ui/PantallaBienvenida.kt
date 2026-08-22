@@ -190,6 +190,15 @@ fun PantallaExplicacion(onEmpezar: () -> Unit) {
             ) {
                 Text("Entendido, empezar", fontWeight = FontWeight.Bold)
             }
+
+            Spacer(Modifier.height(12.dp))
+            Text(
+                "Versión ${com.madera.identificador.BuildConfig.VERSION_NAME}",
+                color = TextoSuave,
+                style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+            )
             Spacer(Modifier.height(16.dp))
         }
     }

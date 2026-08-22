@@ -61,7 +61,9 @@ android {
         minSdk = 26
         targetSdk = 35
         versionCode = 1
-        versionName = "0.1.0"
+        // Incluye el commit con el que se compilo: con varias versiones instaladas o
+        // descargadas, es la unica forma de saber cual se esta usando.
+        versionName = "0.1.0-" + (System.getenv("GITHUB_SHA")?.take(7) ?: "local")
 
         buildConfigField("String", "BASE_URL", "\"$baseUrlPorDefecto\"")
         buildConfigField("String", "APP_API_KEY", "\"$appKeyPorDefecto\"")
