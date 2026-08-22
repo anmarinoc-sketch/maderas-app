@@ -4,6 +4,7 @@ import express from 'express';
 
 import { config } from './config.js';
 import { manejadorErrores, noEncontrado } from './middleware/errorHandler.js';
+import { estadoModelos } from './lib/gemini.js';
 import { router as identificarRouter } from './routes/identificar.js';
 
 export function crearApp() {
@@ -22,7 +23,15 @@ export function crearApp() {
   app.use(express.json({ limit: Math.ceil((config.maxImageBytes * 1.4) / 1024) + 'kb' }));
 
   app.get('/health', (_req, res) => {
-    res.json({ ok: true, estado: 'operativo', modelo: config.geminiModel });
+    const modelos = estadoModelos();
+    const libres = modelos.filter((m) => m.disponible);
+    res.json({
+      ok: true,
+      estado: libres.length ? 'operativo' : 'sin cuota',
+      modelo: libres[0]?.modelo ?? null,
+      modelos_disponibles: libres.length,
+      modelos_totales: modelos.length,
+    });
   });
 
   app.use('/api', identificarRouter);

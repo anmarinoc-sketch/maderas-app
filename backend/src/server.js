@@ -5,7 +5,7 @@ const app = crearApp();
 
 const servidor = app.listen(config.port, config.host, () => {
   console.log(`\n  madera-backend escuchando en http://${config.host}:${config.port}`);
-  console.log(`  modelo: ${config.geminiModel}`);
+  console.log(`  modelos: ${config.geminiModelos.join(', ')}`);
   console.log(`  imagen maxima: ${(config.maxImageBytes / 1024 / 1024).toFixed(1)} MB`);
   console.log(`  X-App-Key: ${config.appApiKey ? 'requerida' : 'desactivada'}`);
   console.log(`  POST http://localhost:${config.port}/api/identificar-madera\n`);

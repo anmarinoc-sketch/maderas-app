@@ -84,7 +84,7 @@ function traducirError(error) {
       return new AppError(
         502,
         'MODELO_NO_DISPONIBLE',
-        `El modelo "${config.geminiModel}" no esta disponible para esta clave.`,
+        "El modelo solicitado no esta disponible para esta clave.",
         mensajeOriginal
       );
     case 429:
@@ -116,24 +116,90 @@ function traducirError(error) {
   }
 }
 
-/** Reintentamos solo lo que puede resolverse solo: saturacion y limites de ritmo. */
-function esReintentable(error) {
+/** Solo se reintenta con el MISMO modelo lo que es saturacion pasajera. */
+function esSaturacion(error) {
   const status = codigoHttp(error);
-  return status === 429 || status === 500 || status === 502 || status === 503;
+  return status === 500 || status === 502 || status === 503;
+}
+
+/**
+ * Modelos con la cuota agotada: nombre -> instante (ms) hasta el que se saltan.
+ * Vive en memoria; al reiniciar el servidor se reintentan todos, que es lo correcto.
+ */
+const agotados = new Map();
+
+/** Medianoche siguiente en horario del Pacifico, que es cuando Google reinicia la cuota diaria. */
+function proximoReinicioDiario() {
+  const ahora = new Date();
+  // El Pacifico va entre 7 y 8 horas por detras de UTC; usamos 8 para no reintentar antes de tiempo.
+  const pacifico = new Date(ahora.getTime() - 8 * 3600_000);
+  const medianoche = Date.UTC(
+    pacifico.getUTCFullYear(),
+    pacifico.getUTCMonth(),
+    pacifico.getUTCDate() + 1
+  );
+  return medianoche + 8 * 3600_000;
+}
+
+/**
+ * Anota que un modelo se quedo sin cuota. Google indica en el error si el limite es
+ * diario o por minuto, y eso cambia cuanto hay que esperar: horas o segundos.
+ */
+function marcarAgotado(modelo, error) {
+  const bruto = String(error?.message ?? error);
+  const esDiario = /PerDay/i.test(bruto);
+  const hasta = esDiario ? proximoReinicioDiario() : Date.now() + 65_000;
+  agotados.set(modelo, hasta);
+  console.warn(
+    `[cuota] ${modelo} agotado (${esDiario ? 'limite diario' : 'limite por minuto'}), ` +
+      `se reintentara ${new Date(hasta).toISOString()}`
+  );
+}
+
+function disponibles() {
+  const ahora = Date.now();
+  return config.geminiModelos.filter((m) => !(agotados.get(m) > ahora));
+}
+
+/** Estado de la cadena de modelos, para /health. */
+export function estadoModelos() {
+  const ahora = Date.now();
+  return config.geminiModelos.map((modelo) => ({
+    modelo,
+    disponible: !(agotados.get(modelo) > ahora),
+    reintentar: agotados.get(modelo) > ahora ? new Date(agotados.get(modelo)).toISOString() : null,
+  }));
 }
 
 /**
  * Envia la imagen a Gemini y devuelve el resultado ya parseado.
+ *
+ * Recorre la cadena de modelos: si uno agota su cuota diaria se pasa al siguiente,
+ * porque el limite del nivel gratuito es por modelo y no por proyecto.
+ *
  * @param {{ buffer: Buffer, mimeType: string }} imagen
  * @returns {Promise<{ resultado: object, modelo: string, uso: object|null }>}
  */
 export async function identificarMadera({ buffer, mimeType }) {
+  const cadena = disponibles();
+  if (cadena.length === 0) {
+    const espera = Math.min(...config.geminiModelos.map((m) => agotados.get(m) ?? 0));
+    throw new AppError(
+      429,
+      'CUOTA_EXCEDIDA',
+      'Se agoto la cuota diaria de todos los modelos disponibles.',
+      `El nivel gratuito de Gemini permite 20 analisis al dia por modelo. ` +
+        `Se reanuda el ${new Date(espera).toLocaleString('es-CO')}.`
+    );
+  }
+
   let ultimoError;
 
-  for (let intento = 0; intento <= config.geminiMaxRetries; intento += 1) {
-    try {
-      const respuesta = await ai.models.generateContent({
-        model: config.geminiModel,
+  for (const modelo of cadena) {
+    for (let intento = 0; intento <= config.geminiMaxRetries; intento += 1) {
+      try {
+        const respuesta = await ai.models.generateContent({
+          model: modelo,
         contents: [
           {
             role: 'user',
@@ -148,6 +214,12 @@ export async function identificarMadera({ buffer, mimeType }) {
           responseMimeType: 'application/json',
           responseSchema: RESPONSE_SCHEMA,
           temperature: 0.2,
+          // Razonamiento explicito antes de responder. Discriminar entre 34 anatomias
+          // parecidas es justo el tipo de tarea donde pensar mas cambia el resultado;
+          // sin esto el modelo tendia a anclarse en una misma especie.
+          ...(config.geminiThinking > 0
+            ? { thinkingConfig: { thinkingBudget: config.geminiThinking } }
+            : {}),
           httpOptions: { timeout: config.geminiTimeoutMs },
         },
       });
@@ -188,26 +260,43 @@ export async function identificarMadera({ buffer, mimeType }) {
         );
       }
 
-      return {
-        resultado,
-        modelo: config.geminiModel,
-        uso: respuesta?.usageMetadata ?? null,
-      };
-    } catch (error) {
-      // Los AppError que lanzamos arriba ya son definitivos: no se reintentan.
-      if (error instanceof AppError) throw error;
+        return {
+          resultado,
+          modelo,
+          uso: respuesta?.usageMetadata ?? null,
+        };
+      } catch (error) {
+        // Los AppError que lanzamos arriba ya son definitivos: no se reintentan.
+        if (error instanceof AppError) throw error;
 
-      ultimoError = error;
-      if (intento < config.geminiMaxRetries && esReintentable(error)) {
-        const espera = 800 * 2 ** intento + Math.floor(Math.random() * 250);
-        console.warn(
-          `[gemini] intento ${intento + 1} fallido (${codigoHttp(error) ?? 'sin codigo'}), ` +
-            `reintentando en ${espera} ms`
-        );
-        await dormir(espera);
-        continue;
+        ultimoError = error;
+        const status = codigoHttp(error);
+
+        // Cuota agotada: insistir con este modelo no sirve de nada, se pasa al siguiente.
+        if (status === 429) {
+          marcarAgotado(modelo, error);
+          break;
+        }
+
+        // Modelo retirado o no habilitado para esta clave: siguiente de la cadena.
+        if (status === 404) {
+          console.warn(`[gemini] ${modelo} no disponible para esta clave, se salta`);
+          agotados.set(modelo, proximoReinicioDiario());
+          break;
+        }
+
+        if (intento < config.geminiMaxRetries && esSaturacion(error)) {
+          const espera = 800 * 2 ** intento + Math.floor(Math.random() * 250);
+          console.warn(
+            `[gemini] ${modelo}: intento ${intento + 1} fallido (${status ?? 'sin codigo'}), ` +
+              `reintentando en ${espera} ms`
+          );
+          await dormir(espera);
+          continue;
+        }
+
+        throw traducirError(error);
       }
-      throw traducirError(error);
     }
   }
 

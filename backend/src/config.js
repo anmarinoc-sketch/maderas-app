@@ -21,16 +21,51 @@ function numero(nombre, porDefecto) {
   return Number.isFinite(valor) && valor > 0 ? valor : porDefecto;
 }
 
+/** Modelos por defecto, de mas a menos capaz. Los "lite" van al final: identifican peor. */
+const MODELOS_POR_DEFECTO = [
+  'gemini-3.6-flash',
+  'gemini-3.7-flash',
+  'gemini-3.5-flash',
+  'gemini-3-flash-preview',
+  'gemini-flash-latest',
+  'gemini-3.5-flash-lite',
+  'gemini-3.1-flash-lite',
+  'gemini-2.5-flash-lite',
+];
+
+/**
+ * GEMINI_MODELOS define la cadena completa. GEMINI_MODEL, si existe, solo encabeza
+ * la lista por defecto (no la sustituye): asi un despliegue antiguo con un unico
+ * modelo configurado gana la rotacion sin tocar su configuracion.
+ */
+function cadenaDeModelos() {
+  const lista = process.env.GEMINI_MODELOS?.trim()
+    ? process.env.GEMINI_MODELOS.split(',')
+    : [process.env.GEMINI_MODEL ?? '', ...MODELOS_POR_DEFECTO];
+
+  return [...new Set(lista.map((m) => m.trim()).filter(Boolean))];
+}
+
 export const config = {
   geminiApiKey: requerido('GEMINI_API_KEY'),
-  geminiModel: process.env.GEMINI_MODEL?.trim() || 'gemini-3.6-flash',
+
+  /**
+   * Cadena de modelos. El nivel gratuito limita a 20 peticiones diarias POR MODELO,
+   * asi que cuando uno agota su cuota se pasa al siguiente y la capacidad diaria del
+   * conjunto se multiplica. Van ordenados de mas a menos capaz: los "lite" son el
+   * ultimo recurso porque identifican peor.
+   */
+  geminiModelos: cadenaDeModelos(),
 
   port: numero('PORT', 3000),
   host: process.env.HOST?.trim() || '0.0.0.0',
 
   maxImageBytes: numero('MAX_IMAGE_MB', 8) * 1024 * 1024,
 
-  geminiTimeoutMs: numero('GEMINI_TIMEOUT_MS', 60_000),
+  geminiTimeoutMs: numero('GEMINI_TIMEOUT_MS', 120_000),
+
+  // Tokens de razonamiento antes de responder. 0 lo desactiva.
+  geminiThinking: Number(process.env.GEMINI_THINKING ?? 4096),
   geminiMaxRetries: numero('GEMINI_MAX_RETRIES', 2),
 
   rateLimitWindowMs: numero('RATE_LIMIT_WINDOW_MS', 60_000),
