@@ -2,55 +2,60 @@ package com.madera.identificador.ui
 
 import android.graphics.Bitmap
 import android.graphics.Matrix
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.asImageBitmap
-import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -59,15 +64,19 @@ private val Panel = Color(0xFF1F1D1B)
 private val Verde = Color(0xFF8FBF6A)
 private val TextoTenue = Color(0xFFB9B2A8)
 
+/** Lado minimo del recorte, en pixeles de pantalla, para que no se cierre sobre si mismo. */
+private const val MINIMO = 80f
+
 /**
- * Ajuste de la foto antes de analizarla: girar, ampliar y recortar.
+ * Ajuste de la foto antes de analizarla: girar y recortar.
  *
- * Recortar y acercarse importa mas de lo que parece: el servidor reduce la imagen a
- * 1600 px de lado, asi que si la madera ocupa un cuarto del encuadre se pierden tres
- * cuartas partes de la resolucion util. Encuadrar aqui equivale a acercar la camara.
+ * El recorte es explicito, con un rectangulo que se arrastra por las esquinas, en vez
+ * del zoom con dos dedos que habia antes: aquello recortaba de verdad, pero nada en la
+ * pantalla lo decia y no habia forma de saber que se estaba conservando.
  *
- * El giro se aplica al bitmap en el momento, de modo que el calculo del recorte solo
- * tiene que lidiar con escala y desplazamiento.
+ * Recortar no es cosmetico. El servidor reduce la imagen a 1600 px de lado, asi que si
+ * la madera ocupa un cuarto del encuadre se tiran tres cuartas partes de la resolucion
+ * util antes de que el analisis la vea.
  */
 @Composable
 fun PantallaAjusteFoto(
@@ -76,16 +85,17 @@ fun PantallaAjusteFoto(
     onRepetir: () -> Unit,
 ) {
     var base by remember(original) { mutableStateOf(original) }
-    var escala by remember(original) { mutableFloatStateOf(1f) }
-    var desplazamiento by remember(original) { mutableStateOf(Offset.Zero) }
-    var giros by remember(original) { mutableIntStateOf(0) }
-    var marco by remember { mutableStateOf(IntSize.Zero) }
+    var caja by remember { mutableStateOf(IntSize.Zero) }
+    val densidad = androidx.compose.ui.platform.LocalDensity.current
+    var recorte by remember(base, caja) { mutableStateOf<Rect?>(null) }
+
+    // Zona que ocupa realmente la imagen dentro del contenedor (ContentScale.Fit deja
+    // franjas negras cuando la proporcion no coincide, y ahi no hay nada que recortar).
+    val areaImagen = remember(base, caja) { areaDibujada(base, caja) }
 
     Surface(color = Fondo, modifier = Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
 
-            // La X descarta la foto y vuelve al visor: si no gusto como salio, lo natural
-            // es cerrarla de inmediato, sin buscar el boton de repetir entre las herramientas.
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -95,9 +105,9 @@ fun PantallaAjusteFoto(
                 Column(Modifier.weight(1f)) {
                     Text("Ajusta la foto", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     Text(
-                        "Pellizca para acercar y arrastra para mover. Solo se analiza lo que quede dentro del recuadro.",
+                        "Arrastra las esquinas para dejar dentro solo la madera y pulsa Recortar.",
                         color = TextoTenue,
-                        style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodySmall,
                     )
                 }
                 IconButton(onClick = onRepetir) {
@@ -109,74 +119,94 @@ fun PantallaAjusteFoto(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1f)
-                    .padding(horizontal = 12.dp),
-                contentAlignment = Alignment.Center,
+                    .padding(12.dp)
+                    .onSizeChanged {
+                        if (it != caja) caja = it
+                    },
             ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f)
-                        .background(Color.Black)
-                        .onSizeChanged { marco = it }
-                        .pointerInput(base) {
-                            detectTransformGestures { _, paneo, acercamiento, _ ->
-                                escala = (escala * acercamiento).coerceIn(1f, 8f)
-                                desplazamiento += paneo
-                            }
-                        },
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Image(
-                        bitmap = base.asImageBitmap(),
-                        contentDescription = "Foto por ajustar",
-                        contentScale = ContentScale.Fit,
+                Image(
+                    bitmap = base.asImageBitmap(),
+                    contentDescription = "Foto por recortar",
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier.fillMaxSize(),
+                )
+
+                val marco = recorte ?: areaImagen
+                val area = areaImagen
+                if (marco != null && area != null) {
+                    VeloYMarco(marco)
+
+                    // Arrastrar por dentro mueve el recorte entero.
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .graphicsLayer(
-                                scaleX = escala,
-                                scaleY = escala,
-                                translationX = desplazamiento.x,
-                                translationY = desplazamiento.y,
-                            ),
+                            .offset { IntOffset(marco.left.roundToInt(), marco.top.roundToInt()) }
+                            .size(
+                                with(densidad) { marco.width.toDp() },
+                                with(densidad) { marco.height.toDp() },
+                            )
+                            .pointerInput(area, base) {
+                                detectDragGestures { cambio, arrastre ->
+                                    cambio.consume()
+                                    recorte = marco.desplazado(arrastre, area)
+                                }
+                            }
                     )
 
-                    // Marco de recorte: deja claro que lo de dentro es lo que se analiza.
-                    MarcoDeRecorte(Modifier.fillMaxSize())
+                    Tirador(marco.left, marco.top, area, base) { dx, dy ->
+                        recorte = marco.redimensionado(dx, dy, 0f, 0f, area)
+                    }
+                    Tirador(marco.right, marco.top, area, base) { dx, dy ->
+                        recorte = marco.redimensionado(0f, dy, dx, 0f, area)
+                    }
+                    Tirador(marco.left, marco.bottom, area, base) { dx, dy ->
+                        recorte = marco.redimensionado(dx, 0f, 0f, dy, area)
+                    }
+                    Tirador(marco.right, marco.bottom, area, base) { dx, dy ->
+                        recorte = marco.redimensionado(0f, 0f, dx, dy, area)
+                    }
                 }
             }
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
+                    .padding(horizontal = 8.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
+                BotonHerramienta("Recortar", Icons.Default.Crop, destacado = true) {
+                    val marco = recorte ?: areaImagen
+                    val area = areaImagen
+                    if (marco != null && area != null) {
+                        base = recortar(base, marco, area)
+                    }
+                }
                 BotonHerramienta("Girar", Icons.Default.RotateRight) {
                     base = girar(base, 90)
-                    giros = (giros + 1) % 4
-                    escala = 1f
-                    desplazamiento = Offset.Zero
                 }
                 BotonHerramienta("Reiniciar", Icons.Default.Refresh) {
                     base = original
-                    giros = 0
-                    escala = 1f
-                    desplazamiento = Offset.Zero
                 }
-                BotonHerramienta("Repetir", Icons.Default.PhotoCamera, onRepetir)
+                BotonHerramienta("Repetir", Icons.Default.PhotoCamera, onClick = onRepetir)
             }
 
             Text(
-                "Zoom ${"%.1f".format(escala)}×",
+                "${base.width} × ${base.height} px",
                 color = TextoTenue,
                 modifier = Modifier.padding(horizontal = 16.dp),
-                style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelSmall,
             )
 
             Spacer(Modifier.height(8.dp))
 
             Button(
-                onClick = { onConfirmar(recortar(base, marco, escala, desplazamiento)) },
+                onClick = {
+                    // Si quedo recorte sin aplicar, se aplica ahora: nadie deberia perder
+                    // el encuadre que acaba de hacer por no haber pulsado Recortar.
+                    val marco = recorte ?: areaImagen
+                    val area = areaImagen
+                    val salida = if (marco != null && area != null) recortar(base, marco, area) else base
+                    onConfirmar(salida)
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
@@ -192,44 +222,132 @@ fun PantallaAjusteFoto(
     }
 }
 
+/** Oscurece lo que queda fuera del recorte y dibuja el marco con sus esquinas. */
+@Composable
+private fun VeloYMarco(marco: Rect) {
+    Canvas(Modifier.fillMaxSize()) {
+        val velo = Color.Black.copy(alpha = 0.55f)
+        drawRect(velo, size = Size(size.width, marco.top))
+        drawRect(velo, topLeft = Offset(0f, marco.bottom), size = Size(size.width, size.height - marco.bottom))
+        drawRect(velo, topLeft = Offset(0f, marco.top), size = Size(marco.left, marco.height))
+        drawRect(
+            velo,
+            topLeft = Offset(marco.right, marco.top),
+            size = Size(size.width - marco.right, marco.height),
+        )
+
+        drawRect(
+            Color.White.copy(alpha = 0.85f),
+            topLeft = Offset(marco.left, marco.top),
+            size = Size(marco.width, marco.height),
+            style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3f),
+        )
+
+        val largo = min(marco.width, marco.height) * 0.18f
+        fun esquina(x: Float, y: Float, dx: Float, dy: Float) {
+            drawLine(Color.White, Offset(x, y), Offset(x + dx, y), 8f, StrokeCap.Round)
+            drawLine(Color.White, Offset(x, y), Offset(x, y + dy), 8f, StrokeCap.Round)
+        }
+        esquina(marco.left, marco.top, largo, largo)
+        esquina(marco.right, marco.top, -largo, largo)
+        esquina(marco.left, marco.bottom, largo, -largo)
+        esquina(marco.right, marco.bottom, -largo, -largo)
+    }
+}
+
+/** Zona sensible en una esquina del recorte. Es mayor que la marca para poder cogerla. */
+@Composable
+private fun Tirador(
+    x: Float,
+    y: Float,
+    area: Rect,
+    base: Bitmap,
+    onArrastre: (Float, Float) -> Unit,
+) {
+    val lado = 48
+    Box(
+        modifier = Modifier
+            .offset { IntOffset((x - lado / 2).roundToInt(), (y - lado / 2).roundToInt()) }
+            .size(lado.dp)
+            .pointerInput(area, base) {
+                detectDragGestures { cambio, arrastre ->
+                    cambio.consume()
+                    onArrastre(arrastre.x, arrastre.y)
+                }
+            }
+    )
+}
+
 @Composable
 private fun BotonHerramienta(
     texto: String,
-    icono: androidx.compose.ui.graphics.vector.ImageVector,
+    icono: ImageVector,
+    destacado: Boolean = false,
     onClick: () -> Unit,
 ) {
     TextButton(onClick = onClick) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Box(
                 modifier = Modifier
-                    .background(Panel, androidx.compose.foundation.shape.RoundedCornerShape(14.dp))
+                    .background(
+                        if (destacado) Verde.copy(alpha = 0.25f) else Panel,
+                        RoundedCornerShape(14.dp),
+                    )
                     .padding(12.dp)
             ) {
-                Icon(icono, contentDescription = texto, tint = Color.White)
+                Icon(icono, contentDescription = texto, tint = if (destacado) Verde else Color.White)
             }
             Spacer(Modifier.height(4.dp))
-            Text(texto, color = TextoTenue, style = androidx.compose.material3.MaterialTheme.typography.labelSmall)
+            Text(
+                texto,
+                color = if (destacado) Verde else TextoTenue,
+                style = MaterialTheme.typography.labelSmall,
+            )
         }
     }
 }
 
-/** Esquinas del area de recorte, para que se vea que ese cuadro es lo que se conserva. */
-@Composable
-private fun MarcoDeRecorte(modifier: Modifier = Modifier) {
-    androidx.compose.foundation.Canvas(modifier) {
-        val largo = size.minDimension * 0.12f
-        val grosor = 5f
-        val c = Color.White.copy(alpha = 0.9f)
+// --- Geometria -------------------------------------------------------------------
 
-        fun esquina(x: Float, y: Float, dx: Float, dy: Float) {
-            drawLine(c, Offset(x, y), Offset(x + dx, y), grosor, StrokeCap.Round)
-            drawLine(c, Offset(x, y), Offset(x, y + dy), grosor, StrokeCap.Round)
-        }
-        esquina(0f, 0f, largo, largo)
-        esquina(size.width, 0f, -largo, largo)
-        esquina(0f, size.height, largo, -largo)
-        esquina(size.width, size.height, -largo, -largo)
-    }
+/** Rectangulo que ocupa la imagen dentro del contenedor, segun ContentScale.Fit. */
+private fun areaDibujada(base: Bitmap, caja: IntSize): Rect? {
+    if (caja.width <= 0 || caja.height <= 0 || base.width <= 0 || base.height <= 0) return null
+    val ajuste = min(caja.width.toFloat() / base.width, caja.height.toFloat() / base.height)
+    val ancho = base.width * ajuste
+    val alto = base.height * ajuste
+    val izq = (caja.width - ancho) / 2f
+    val arr = (caja.height - alto) / 2f
+    return Rect(izq, arr, izq + ancho, arr + alto)
+}
+
+private fun Rect.desplazado(arrastre: Offset, limite: Rect): Rect {
+    val dx = arrastre.x.coerceIn(limite.left - left, limite.right - right)
+    val dy = arrastre.y.coerceIn(limite.top - top, limite.bottom - bottom)
+    return translate(dx, dy)
+}
+
+private fun Rect.redimensionado(dl: Float, dt: Float, dr: Float, db: Float, limite: Rect): Rect {
+    val nuevaIzq = (left + dl).coerceIn(limite.left, right - MINIMO)
+    val nuevoArr = (top + dt).coerceIn(limite.top, bottom - MINIMO)
+    val nuevaDer = (right + dr).coerceIn(nuevaIzq + MINIMO, limite.right)
+    val nuevoAba = (bottom + db).coerceIn(nuevoArr + MINIMO, limite.bottom)
+    return Rect(nuevaIzq, nuevoArr, nuevaDer, nuevoAba)
+}
+
+/** Traduce el rectangulo de pantalla a pixeles del bitmap y recorta. */
+private fun recortar(base: Bitmap, marco: Rect, area: Rect): Bitmap {
+    if (area.width <= 0f || area.height <= 0f) return base
+
+    val escala = base.width / area.width
+    val izq = ((marco.left - area.left) * escala).roundToInt().coerceIn(0, base.width - 1)
+    val arr = ((marco.top - area.top) * escala).roundToInt().coerceIn(0, base.height - 1)
+    val ancho = (marco.width * escala).roundToInt().coerceIn(1, base.width - izq)
+    val alto = (marco.height * escala).roundToInt().coerceIn(1, base.height - arr)
+
+    // Recortar menos de un 2 % no aporta nada y solo degrada la imagen.
+    if (ancho >= base.width * 0.98f && alto >= base.height * 0.98f) return base
+
+    return runCatching { Bitmap.createBitmap(base, izq, arr, ancho, alto) }.getOrDefault(base)
 }
 
 private fun girar(origen: Bitmap, grados: Int): Bitmap {
@@ -239,37 +357,3 @@ private fun girar(origen: Bitmap, grados: Int): Bitmap {
     }.getOrDefault(origen)
 }
 
-/**
- * Traduce lo que se ve dentro del recuadro a coordenadas del bitmap.
- *
- * La imagen se dibuja con ContentScale.Fit, asi que primero hay que reconstruir esa
- * escala de ajuste y sumarle la que ha aplicado el usuario con los dedos.
- */
-private fun recortar(base: Bitmap, marco: IntSize, escala: Float, desplazamiento: Offset): Bitmap {
-    if (marco.width <= 0 || marco.height <= 0) return base
-
-    val ajuste = min(marco.width.toFloat() / base.width, marco.height.toFloat() / base.height)
-    val efectiva = ajuste * escala
-    if (efectiva <= 0f) return base
-
-    // Centro del recuadro trasladado a coordenadas de la imagen.
-    val centroX = base.width / 2f - desplazamiento.x / efectiva
-    val centroY = base.height / 2f - desplazamiento.y / efectiva
-
-    val anchoVisible = marco.width / efectiva
-    val altoVisible = marco.height / efectiva
-
-    var izquierda = (centroX - anchoVisible / 2f).roundToInt()
-    var arriba = (centroY - altoVisible / 2f).roundToInt()
-    var ancho = anchoVisible.roundToInt()
-    var alto = altoVisible.roundToInt()
-
-    // El recorte no puede salirse del bitmap.
-    izquierda = izquierda.coerceIn(0, max(0, base.width - 1))
-    arriba = arriba.coerceIn(0, max(0, base.height - 1))
-    ancho = ancho.coerceIn(1, base.width - izquierda)
-    alto = alto.coerceIn(1, base.height - arriba)
-
-    return runCatching { Bitmap.createBitmap(base, izquierda, arriba, ancho, alto) }
-        .getOrDefault(base)
-}
