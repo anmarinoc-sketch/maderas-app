@@ -107,8 +107,9 @@ curso de la UNAL. **Nunca recomendar lijar**, error que hubo al principio.
 - **Generar Kotlin con scripts de shell** ha costado dos compilaciones rotas (comillas
   simples convertidas en literales de carácter, interpolaciones comidas). Usar Edit/Write.
 - **Iconos de Material**: verificar que existen antes de usarlos; `Rotate90DegreesCcw` y
-  `RestartAlt` hubo que cambiarlos. Los de `material-icons-core` (`CheckCircle`, `Close`,
-  `Warning`) sí están; los de `extended` son los que fallan.
+  `RestartAlt` hubo que cambiarlos. `material-icons-extended` sí está entre las
+  dependencias, así que el problema no era el paquete: esos dos nombres no existen.
+  Comprobar el nombre exacto, no asumir que basta con incluir el paquete.
 - **Caracteres invisibles al escribir código por shell**: un rango de marcas diacríticas
   quedó como bytes literales dentro de un regex. Funcionaba, pero era intocable. Escribir el
   fuente en ASCII (`\p{Diacritic}`, `\uXXXX`) y comprobarlo con `od -c` si hay dudas.
