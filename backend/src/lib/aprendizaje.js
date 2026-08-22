@@ -28,9 +28,21 @@ function leerArchivo(ruta) {
   }
 }
 
-/** Registro completo: lo versionado mas lo acumulado desde el ultimo despliegue. */
+/**
+ * Registro completo: lo versionado mas lo acumulado desde el ultimo despliegue.
+ *
+ * Se quitan duplicados porque el respaldo automatico copia lo acumulado a la semilla:
+ * entre ese respaldo y el siguiente redespliegue, la misma verificacion esta en los dos
+ * sitios y contaria doble al medir que confusiones se repiten.
+ */
 function todas() {
-  return [...leerArchivo(SEMILLA), ...leerArchivo(ARCHIVO)];
+  const vistas = new Set();
+  return [...leerArchivo(SEMILLA), ...leerArchivo(ARCHIVO)].filter((r) => {
+    const clave = `${r.fecha}|${r.dicho}|${r.real}`;
+    if (vistas.has(clave)) return false;
+    vistas.add(clave);
+    return true;
+  });
 }
 
 export function registrar(entrada) {

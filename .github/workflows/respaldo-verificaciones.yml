@@ -1,0 +1,77 @@
+name: Respaldar verificaciones
+
+# Las correcciones del usuario se escriben en el disco de Render, que es efimero: cada
+# redespliegue lo borra. Este respaldo las trae al repositorio, donde perduran y desde
+# donde el servidor las vuelve a cargar al arrancar.
+#
+# Una vez al dia basta: no se pierden mas que las verificaciones hechas entre el ultimo
+# respaldo y un redespliegue, y siempre se puede lanzar a mano antes de tocar el backend.
+
+on:
+  schedule:
+    - cron: '0 5 * * *'   # 00:00 en Colombia
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  respaldar:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Traer el registro del servidor
+        run: |
+          URL=$(grep -E '^baseUrl=' android/gradle.properties | cut -d= -f2- | tr -d '[:space:]')
+          if [ -z "$URL" ]; then
+            echo "Sin backend configurado; nada que respaldar."
+            exit 0
+          fi
+
+          # 90 s de margen por si el servicio estaba dormido.
+          if ! curl -sS --max-time 90 "${URL%/}/api/aprendizaje" -o exportado.json; then
+            echo "::warning::El backend no respondio; se reintentara mañana."
+            exit 0
+          fi
+
+          node -e '
+            const fs = require("fs");
+            const exportado = JSON.parse(fs.readFileSync("exportado.json", "utf8"));
+            if (!exportado.ok || !Array.isArray(exportado.registro)) {
+              console.log("Respuesta inesperada; no se toca nada.");
+              process.exit(0);
+            }
+
+            const ruta = "backend/src/datos/verificaciones.json";
+            const actuales = JSON.parse(fs.readFileSync(ruta, "utf8"));
+
+            // El export ya incluye lo versionado: se deduplica por fecha y contenido.
+            const vistas = new Set();
+            const unidas = [...actuales, ...exportado.registro].filter((r) => {
+              const clave = `${r.fecha}|${r.dicho}|${r.real}`;
+              if (vistas.has(clave)) return false;
+              vistas.add(clave);
+              return true;
+            });
+            unidas.sort((a, b) => String(a.fecha).localeCompare(String(b.fecha)));
+
+            fs.writeFileSync(ruta, JSON.stringify(unidas, null, 2) + "\n");
+            console.log(`Verificaciones: ${actuales.length} -> ${unidas.length}`);
+          '
+          rm -f exportado.json
+
+      - name: Guardar los cambios
+        run: |
+          if git diff --quiet -- backend/src/datos/verificaciones.json; then
+            echo "Sin verificaciones nuevas."
+            exit 0
+          fi
+          TOTAL=$(node -e "console.log(require('./backend/src/datos/verificaciones.json').length)")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backend/src/datos/verificaciones.json
+          git commit -m "Respalda las verificaciones del usuario ($TOTAL en total)"
+          git push

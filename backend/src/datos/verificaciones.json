@@ -6,5 +6,61 @@
     "real": "Cedrela odorata",
     "confianza": 0.72,
     "nota": "Confusion observada en pruebas con la lamina de cedro de la guia de la UNAL."
+  },
+  {
+    "fecha": "2026-08-22T18:27:50.804Z",
+    "acierto": false,
+    "dicho": "Cedrela odorata",
+    "real": "Es teca",
+    "confianza": 0.65,
+    "nota": null
+  },
+  {
+    "fecha": "2026-08-22T18:28:32.607Z",
+    "acierto": true,
+    "dicho": "Tectona grandis L. f.",
+    "real": "Tectona grandis L. f.",
+    "confianza": 0.75,
+    "nota": null
+  },
+  {
+    "fecha": "2026-08-22T19:24:30.270Z",
+    "acierto": false,
+    "dicho": "Virola spp.",
+    "real": "Balso",
+    "confianza": 0.6,
+    "nota": null
+  },
+  {
+    "fecha": "2026-08-22T19:29:14.534Z",
+    "acierto": false,
+    "dicho": "Hymenaea courbaril L.",
+    "real": "Chingale",
+    "confianza": 0.65,
+    "nota": null
+  },
+  {
+    "fecha": "2026-08-22T19:31:46.066Z",
+    "acierto": true,
+    "dicho": "Jacaranda copaia (Aubl.) D. Don",
+    "real": "Jacaranda copaia (Aubl.) D. Don",
+    "confianza": 0.6,
+    "nota": null
+  },
+  {
+    "fecha": "2026-08-22T19:49:00.566Z",
+    "acierto": false,
+    "dicho": "Tabebuia rosea",
+    "real": "Chingale",
+    "confianza": 0.6,
+    "nota": null
+  },
+  {
+    "fecha": "2026-08-22T19:49:54.911Z",
+    "acierto": false,
+    "dicho": "Hymenaea courbaril L.",
+    "real": "Chingale",
+    "confianza": 0.6,
+    "nota": null
   }
 ]
