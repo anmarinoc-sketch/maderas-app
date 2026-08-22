@@ -11,9 +11,16 @@ const servidor = app.listen(config.port, config.host, () => {
   console.log(`  POST http://localhost:${config.port}/api/identificar-madera\n`);
 });
 
-// Timeouts generosos: subir una foto desde movil con mala cobertura es lento.
-servidor.requestTimeout = config.geminiTimeoutMs + 30_000;
-servidor.headersTimeout = servidor.requestTimeout + 5_000;
+// Detras de un proxy (Render, Cloud Run, nginx) el servidor NUNCA debe cerrar una
+// conexion keep-alive antes que el proxy. Node cierra a los 5 s por defecto; si el
+// proxy reutiliza esa conexion justo despues, ve la conexion caida y responde un
+// error que nuestro codigo jamas llega a ver: peticiones perdidas sin rastro en los
+// logs. Por eso keepAliveTimeout va holgadamente por encima del idle del proxy.
+servidor.keepAliveTimeout = 120_000;
+// Node exige que headersTimeout supere keepAliveTimeout.
+servidor.headersTimeout = servidor.keepAliveTimeout + 5_000;
+// Subir una foto desde el movil con mala cobertura puede ser lento.
+servidor.requestTimeout = 300_000;
 
 for (const senal of ['SIGINT', 'SIGTERM']) {
   process.on(senal, () => {
