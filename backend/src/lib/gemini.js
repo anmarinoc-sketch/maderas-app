@@ -88,6 +88,9 @@ function traducirError(error) {
         mensajeOriginal
       );
     case 429:
+      // El detalle de Google dice que limite se agoto (por minuto, por dia, tokens).
+      // Se registra en el servidor, nunca se devuelve al cliente.
+      console.warn(`[cuota] ${bruto}`);
       return new AppError(
         429,
         'CUOTA_EXCEDIDA',
