@@ -14,9 +14,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -52,7 +50,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -86,12 +83,12 @@ fun PantallaAjusteFoto(
 ) {
     var base by remember(original) { mutableStateOf(original) }
     var caja by remember { mutableStateOf(IntSize.Zero) }
-    val densidad = androidx.compose.ui.platform.LocalDensity.current
     var recorte by remember(base, caja) { mutableStateOf<Rect?>(null) }
 
     // Zona que ocupa realmente la imagen dentro del contenedor (ContentScale.Fit deja
     // franjas negras cuando la proporcion no coincide, y ahi no hay nada que recortar).
     val areaImagen = remember(base, caja) { areaDibujada(base, caja) }
+    val imagenCompose = remember(base) { base.asImageBitmap() }
 
     Surface(color = Fondo, modifier = Modifier.fillMaxSize()) {
         Column(Modifier.fillMaxSize()) {
@@ -125,7 +122,7 @@ fun PantallaAjusteFoto(
                     },
             ) {
                 Image(
-                    bitmap = base.asImageBitmap(),
+                    bitmap = imagenCompose,
                     contentDescription = "Foto por recortar",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier.fillMaxSize(),
@@ -136,34 +133,38 @@ fun PantallaAjusteFoto(
                 if (marco != null && area != null) {
                     VeloYMarco(marco)
 
-                    // Arrastrar por dentro mueve el recorte entero.
+                    // Un unico detector para todo el area. Antes habia cinco cajas
+                    // superpuestas y una de ellas se redimensionaba en cada fotograma del
+                    // arrastre, lo que obligaba a recalcular el layout sin parar.
                     Box(
                         modifier = Modifier
-                            .offset { IntOffset(marco.left.roundToInt(), marco.top.roundToInt()) }
-                            .size(
-                                with(densidad) { marco.width.toDp() },
-                                with(densidad) { marco.height.toDp() },
-                            )
+                            .fillMaxSize()
                             .pointerInput(area, base) {
-                                detectDragGestures { cambio, arrastre ->
+                                var zona = Zona.NINGUNA
+                                detectDragGestures(
+                                    onDragStart = { punto ->
+                                        zona = zonaTocada(punto, recorte ?: area)
+                                    },
+                                    onDragEnd = { zona = Zona.NINGUNA },
+                                    onDragCancel = { zona = Zona.NINGUNA },
+                                ) { cambio, arrastre ->
                                     cambio.consume()
-                                    recorte = marco.desplazado(arrastre, area)
+                                    val r = recorte ?: area
+                                    recorte = when (zona) {
+                                        Zona.DENTRO -> r.desplazado(arrastre, area)
+                                        Zona.SUP_IZQ ->
+                                            r.redimensionado(arrastre.x, arrastre.y, 0f, 0f, area)
+                                        Zona.SUP_DER ->
+                                            r.redimensionado(0f, arrastre.y, arrastre.x, 0f, area)
+                                        Zona.INF_IZQ ->
+                                            r.redimensionado(arrastre.x, 0f, 0f, arrastre.y, area)
+                                        Zona.INF_DER ->
+                                            r.redimensionado(0f, 0f, arrastre.x, arrastre.y, area)
+                                        Zona.NINGUNA -> r
+                                    }
                                 }
                             }
                     )
-
-                    Tirador(marco.left, marco.top, area, base) { dx, dy ->
-                        recorte = marco.redimensionado(dx, dy, 0f, 0f, area)
-                    }
-                    Tirador(marco.right, marco.top, area, base) { dx, dy ->
-                        recorte = marco.redimensionado(0f, dy, dx, 0f, area)
-                    }
-                    Tirador(marco.left, marco.bottom, area, base) { dx, dy ->
-                        recorte = marco.redimensionado(dx, 0f, 0f, dy, area)
-                    }
-                    Tirador(marco.right, marco.bottom, area, base) { dx, dy ->
-                        recorte = marco.redimensionado(0f, 0f, dx, dy, area)
-                    }
                 }
             }
 
@@ -255,29 +256,6 @@ private fun VeloYMarco(marco: Rect) {
     }
 }
 
-/** Zona sensible en una esquina del recorte. Es mayor que la marca para poder cogerla. */
-@Composable
-private fun Tirador(
-    x: Float,
-    y: Float,
-    area: Rect,
-    base: Bitmap,
-    onArrastre: (Float, Float) -> Unit,
-) {
-    val lado = 48
-    Box(
-        modifier = Modifier
-            .offset { IntOffset((x - lado / 2).roundToInt(), (y - lado / 2).roundToInt()) }
-            .size(lado.dp)
-            .pointerInput(area, base) {
-                detectDragGestures { cambio, arrastre ->
-                    cambio.consume()
-                    onArrastre(arrastre.x, arrastre.y)
-                }
-            }
-    )
-}
-
 @Composable
 private fun BotonHerramienta(
     texto: String,
@@ -308,6 +286,26 @@ private fun BotonHerramienta(
 }
 
 // --- Geometria -------------------------------------------------------------------
+
+private enum class Zona { NINGUNA, DENTRO, SUP_IZQ, SUP_DER, INF_IZQ, INF_DER }
+
+/** Radio en pixeles alrededor de cada esquina que se considera "tocar la esquina". */
+private const val RADIO_ESQUINA = 90f
+
+/** Decide que se esta arrastrando segun donde empezo el dedo. */
+private fun zonaTocada(punto: Offset, r: Rect): Zona {
+    fun cerca(x: Float, y: Float) =
+        kotlin.math.abs(punto.x - x) < RADIO_ESQUINA && kotlin.math.abs(punto.y - y) < RADIO_ESQUINA
+
+    return when {
+        cerca(r.left, r.top) -> Zona.SUP_IZQ
+        cerca(r.right, r.top) -> Zona.SUP_DER
+        cerca(r.left, r.bottom) -> Zona.INF_IZQ
+        cerca(r.right, r.bottom) -> Zona.INF_DER
+        r.contains(punto) -> Zona.DENTRO
+        else -> Zona.NINGUNA
+    }
+}
 
 /** Rectangulo que ocupa la imagen dentro del contenedor, segun ContentScale.Fit. */
 private fun areaDibujada(base: Bitmap, caja: IntSize): Rect? {
