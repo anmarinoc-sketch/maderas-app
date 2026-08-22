@@ -15,10 +15,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.filled.PhotoCamera
@@ -84,6 +86,10 @@ fun PantallaAjusteFoto(
     var base by remember(original) { mutableStateOf(original) }
     var caja by remember { mutableStateOf(IntSize.Zero) }
     var recorte by remember(base, caja) { mutableStateOf<Rect?>(null) }
+
+    // Estado del ultimo recorte: sirve para acusar recibo y para poder deshacerlo.
+    var recorteAplicado by remember(original) { mutableStateOf(false) }
+    var anterior by remember(original) { mutableStateOf<Bitmap?>(null) }
 
     // Zona que ocupa realmente la imagen dentro del contenedor (ContentScale.Fit deja
     // franjas negras cuando la proporcion no coincide, y ahi no hay nada que recortar).
@@ -178,16 +184,68 @@ fun PantallaAjusteFoto(
                     val marco = recorte ?: areaImagen
                     val area = areaImagen
                     if (marco != null && area != null) {
-                        base = recortar(base, marco, area)
+                        val recortada = recortar(base, marco, area)
+                        // Solo se acusa el recorte si de verdad cambio algo.
+                        if (recortada !== base) {
+                            anterior = base
+                            base = recortada
+                            recorteAplicado = true
+                        }
                     }
                 }
                 BotonHerramienta("Girar", Icons.Default.RotateRight) {
                     base = girar(base, 90)
+                    recorteAplicado = false
                 }
                 BotonHerramienta("Reiniciar", Icons.Default.Refresh) {
                     base = original
+                    anterior = null
+                    recorteAplicado = false
                 }
                 BotonHerramienta("Repetir", Icons.Default.PhotoCamera, onClick = onRepetir)
+            }
+
+            if (recorteAplicado) {
+                // Acuse del recorte: sin esto no hay forma de saber si el boton hizo algo.
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .background(Verde.copy(alpha = 0.18f), RoundedCornerShape(12.dp))
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = Verde,
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            "Recorte aplicado",
+                            color = Verde,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.labelLarge,
+                        )
+                        Text(
+                            "Revisa cómo quedó. Puedes recortar otra vez o deshacer.",
+                            color = TextoTenue,
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                    anterior?.let { previa ->
+                        TextButton(onClick = {
+                            base = previa
+                            anterior = null
+                            recorteAplicado = false
+                        }) {
+                            Text("Deshacer", color = Color.White)
+                        }
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
             }
 
             Text(
