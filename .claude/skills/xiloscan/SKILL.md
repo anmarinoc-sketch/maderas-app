@@ -73,6 +73,21 @@ de pasar de 0,5 con menos de tres caracteres coincidentes. Antes decía 0,93 al 
 errores comprobados. **Gemini no aprende entre peticiones**: esto es memoria prestada, no
 entrenamiento. No prometer lo contrario.
 
+**Cada verificación va atada a su foto** (`huella.js`). El aviso genérico no bastaba: el
+usuario cargaba la misma imagen, la corregía y seguía fallando, porque nada relacionaba el
+aviso con la foto que el modelo tenía delante. Van dos huellas: `sha256` de los bytes, que
+calcula el servidor y solo casa con el archivo idéntico, y un **dHash de 64 bits que calcula
+la app** —tiene el bitmap decodificado; el backend no, y meter `sharp` en Render por esto no
+compensa—. Casan hasta 8 bits de distancia de Hamming: en pruebas, variantes de la misma
+pieza quedan a 1-2 bits y piezas distintas a 27. El dato de la especie viaja en el **turno de
+usuario, pegado a la imagen**, no en la instrucción de sistema. Se le sigue pidiendo que
+describa la anatomía y avise si la contradice: una huella puede casar por parecido y una
+verificación no es dogma. El respaldo diario conserva las huellas.
+
+**Los nombres se emparejan con la guía** (`nombreCanonico` en `referencia.js`). El usuario
+escribe «chingale» unas veces y «Jacaranda copaia» otras; sin unificar, los tres fallos del
+chingalé se repartían entre dos avisos y ninguno pesaba.
+
 **Método de campo:** bisturí o navaja (cortar, no raspar) y humedecer con agua. Es el del
 curso de la UNAL. **Nunca recomendar lijar**, error que hubo al principio.
 
