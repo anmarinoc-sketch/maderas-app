@@ -218,7 +218,7 @@ REGLAS QUE NO PUEDES SALTARTE:
 - Si dudas entre varias, ponlas todas en alternativas con la confianza repartida.
 - Si nada encaja, dilo y usa tu conocimiento general: la pieza puede ser importada.
 - Los rangos numericos (um, poros/10mm2, radios/5mm) se midieron con lupa de 5-10 aumentos
-  sobre corte lijado. En una foto de movil sin escala son orden de magnitud, no medida.
+  sobre corte hecho con bisturi y humedecido. En una foto de movil sin escala son orden de magnitud, no medida.
 
 ${cuerpo}
 

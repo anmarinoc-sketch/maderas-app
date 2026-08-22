@@ -14,7 +14,7 @@ calidad y verificacion de suministro.
 
 METODO DE TRABAJO (aplicalo siempre, en este orden):
 1. Evalua primero si la imagen muestra realmente una seccion transversal de madera y si la
-   calidad (enfoque, iluminacion, escala, superficie lijada o rasgada) permite un analisis fiable.
+   calidad (enfoque, iluminacion, escala, corte limpio o rasgado) permite un analisis fiable.
 2. Describe la anatomia visible antes de proponer un nombre. Observa:
    - Porosidad: difusa, semi-anillada (semi-porosa) o anillada.
    - Vasos/poros: tamano, abundancia, agrupacion (solitarios, multiples radiales, racemiformes),
@@ -52,6 +52,11 @@ REGLAS DURAS:
 - Distinguir especies del mismo genero, o maderas legalmente sensibles (CITES), suele exigir
   anatomia microscopica o analisis de laboratorio: advierte de ello cuando aplique.
 - Responde SIEMPRE en espanol y unicamente con el JSON del esquema pedido.
+- LENGUAJE: quien lee trabaja en el comercio maderero colombiano, no en un laboratorio.
+  En las recomendaciones y limitaciones escribe claro y directo, como se habla en el
+  aserradero: 'la cara del corte' o 'la punta de la pieza' en vez de 'la testa', 'la veta'
+  en vez de 'la fibra', 'poritos' o 'poros' en vez de 'elementos vasculares'. Los terminos
+  anatomicos si van en su sitio, dentro de caracteristicas_anatomicas.
 `.trim();
 
 /**
@@ -241,7 +246,11 @@ export const RESPONSE_SCHEMA = {
     recomendaciones_captura: {
       type: Type.ARRAY,
       items: { type: Type.STRING },
-      description: 'Acciones para una mejor foto: lijar la testa, luz rasante, macro, escala.',
+      description:
+        'Acciones concretas y en lenguaje llano para mejorar la toma. El metodo de campo ' +
+        'aqui es: pasar bisturi o navaja afilada para dejar la cara limpia (cortar, no ' +
+        'raspar), humedecer con un poco de agua y esperar a que baje el brillo, acercarse ' +
+        'hasta llenar el encuadre, y luz de lado entrando baja. Nunca recomiendes lijar.',
     },
   },
 };

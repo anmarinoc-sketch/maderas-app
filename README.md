@@ -1,4 +1,4 @@
-# Maderas App
+# XiloScan
 
 Identificación de especies de madera a partir de una fotografía del corte transversal,
 para profesionales del sector: aserraderos, carpintería, control de calidad y verificación

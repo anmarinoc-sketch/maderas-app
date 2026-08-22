@@ -20,5 +20,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "IdentificaMadera"
+rootProject.name = "XiloScan"
 include(":app")

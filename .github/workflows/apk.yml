@@ -64,12 +64,12 @@ jobs:
         run: |
           mkdir -p entrega
           cp app/build/outputs/apk/debug/app-debug.apk \
-             "entrega/identifica-madera-${GITHUB_SHA::7}.apk"
+             "entrega/xiloscan-${GITHUB_SHA::7}.apk"
 
       - name: Publicar el APK como artefacto
         uses: actions/upload-artifact@v4
         with:
-          name: identifica-madera-apk
+          name: xiloscan-apk
           path: android/entrega/*.apk
           if-no-files-found: error
           retention-days: 30
@@ -84,7 +84,7 @@ jobs:
       - name: Recuperar el APK compilado
         uses: actions/download-artifact@v4
         with:
-          name: identifica-madera-apk
+          name: xiloscan-apk
           path: entrega
 
       # Un release da una URL estable que se puede abrir desde el navegador del movil
@@ -95,5 +95,5 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           gh release create "$GITHUB_REF_NAME" entrega/*.apk \
-            --title "Identifica Madera $GITHUB_REF_NAME" \
+            --title "XiloScan $GITHUB_REF_NAME" \
             --notes "APK de debug. Descárgalo desde el móvil y permite la instalación de orígenes desconocidos."

@@ -1,4 +1,4 @@
-# Identifica Madera — app Android
+# XiloScan — app Android
 
 App Android que fotografía el corte transversal de una pieza de madera, la envía al
 backend [`madera-backend`](../madera-backend) y muestra la especie identificada junto con la
@@ -22,7 +22,7 @@ No hace falta Android Studio ni el SDK: lo compila GitHub Actions.
 3. Ve a la pestaña **Actions → Compilar APK → Run workflow**. También puedes indicar la URL
    ahí mismo, en el campo del formulario, sin tocar la configuración del repositorio.
 4. Cuando termine (unos 3-5 minutos la primera vez), descarga el artefacto
-   `identifica-madera-apk` desde la página de la ejecución.
+   `xiloscan-apk` desde la página de la ejecución.
 
 Para instalarlo directamente desde el móvil, crea una etiqueta:
 

@@ -144,8 +144,8 @@ fun PantallaCaptura(
                 Aviso(titulo = "No se pudo usar esa imagen", detalle = mensaje, alerta = true)
             } else {
                 Aviso(
-                    titulo = "Toma una foto clara del corte transversal",
-                    detalle = "Asegúrate de que la testa esté perpendicular a la fibra.",
+                    titulo = "Fotografía la cara del corte",
+                    detalle = "La punta de la pieza, la que atraviesa la veta. No la cara larga.",
                 )
             }
 
@@ -261,7 +261,7 @@ private fun BarraSuperior(onAyuda: () -> Unit, onAjustes: () -> Unit) {
             Icon(Icons.Default.Settings, contentDescription = "Ajustes", tint = Color.White)
         }
         Text(
-            "Identifica Madera",
+            "XiloScan",
             color = Color.White,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f),
@@ -363,9 +363,9 @@ private fun FilaDeConsejos() {
             .padding(vertical = 14.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
-        Consejo("Centra la pieza", "Coloca el corte dentro del marco.")
-        Consejo("Enfoca los detalles", "Que se vean poros y anillos.")
-        Consejo("Luz natural", "Evita reflejos y sombras duras.")
+        Consejo("Centra la pieza", "Que el corte llene el marco.")
+        Consejo("Acércate", "Hasta ver los poritos y los anillos.")
+        Consejo("Luz de lado", "Sin flash de frente ni brillos.")
     }
 }
 
@@ -480,7 +480,8 @@ private fun ConsejoRapido() {
                 style = androidx.compose.material3.MaterialTheme.typography.labelMedium,
             )
             Text(
-                "Lija suavemente la testa para revelar mejor los poros y anillos.",
+                "Pasa el bisturí para dejar la cara limpia y mójala con un poquito de " +
+                    "agua: los poros se ven mucho mejor.",
                 color = TextoTenue,
                 style = androidx.compose.material3.MaterialTheme.typography.bodySmall,
             )
@@ -530,13 +531,18 @@ private fun DialogoAyuda(onCerrar: () -> Unit) {
         title = { Text("Cómo tomar la foto") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                // Método del curso de Anatomía e Identificación de Maderas de la UNAL
+                // sede Medellín: corte limpio con bisturí (no raspado) y humedecido.
                 listOf(
-                    "Fotografía la testa: el corte perpendicular a la fibra, no la cara larga.",
-                    "Lija hasta grano 320-400. Un corte de sierra tapa los poros.",
-                    "Llena el encuadre con 3-5 cm de madera; acércate al límite de enfoque.",
-                    "Luz lateral rasante, sin flash directo. La linterna ayuda en ángulo bajo.",
-                    "Humedecer levemente la testa realza el contraste de los poros.",
-                    "Si puedes, incluye una regla o moneda como escala.",
+                    "Fotografía la punta de la pieza, la cara que atraviesa la veta.",
+                    "Pasa el bisturí o una navaja bien afilada: corta, no raspes. " +
+                        "El corte de sierra deja la madera peluda y tapa los poros.",
+                    "Échale un poco de agua con el dedo o un trapito. Espera a que se " +
+                        "vaya el brillo y toma la foto.",
+                    "Acércate hasta que el corte llene la pantalla, unos 3 a 5 cm de madera.",
+                    "Luz de lado, entrando bajita. Nada de flash de frente.",
+                    "Si tiene, ponle al lado una regla o una moneda para dar el tamaño.",
+                    "Busca una zona limpia: sin nudos, sin corteza y sin manchas.",
                 ).forEach { Text("•  $it", style = androidx.compose.material3.MaterialTheme.typography.bodySmall) }
             }
         },

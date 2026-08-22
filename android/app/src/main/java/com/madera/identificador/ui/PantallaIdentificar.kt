@@ -119,7 +119,7 @@ fun PantallaIdentificar(vm: IdentificarViewModel = viewModel()) {
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             TopAppBar(
-                title = { Text("Identifica Madera") },
+                title = { Text("XiloScan") },
                 actions = {
                     IconButton(onClick = { mostrarAjustes = true }) {
                         Icon(Icons.Default.Settings, contentDescription = "Ajustes del servidor")
@@ -168,7 +168,7 @@ fun PantallaIdentificar(vm: IdentificarViewModel = viewModel()) {
             }
 
             when (val analisis = estado.analisis) {
-                is EstadoAnalisis.Inicial -> if (estado.imagen == null) TarjetaConsejos()
+                is EstadoAnalisis.Inicial -> Unit
 
                 is EstadoAnalisis.Cargando -> TarjetaCargando()
 
@@ -237,11 +237,11 @@ private fun ZonaImagen(
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "Fotografía el corte transversal",
+                    "Fotografía la cara del corte",
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    "La testa de la pieza, perpendicular a la fibra",
+                    "La punta de la pieza, la que atraviesa la veta",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -284,21 +284,6 @@ private fun ZonaImagen(
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun TarjetaConsejos() {
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Text("Para un buen análisis", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-            listOf(
-                "Lija la testa: una superficie rasgada oculta los poros.",
-                "Luz lateral rasante, sin flash directo ni sombras duras.",
-                "Acércate hasta llenar el encuadre con la madera.",
-                "Si puedes, incluye una regla o una moneda como escala.",
-            ).forEach { Text("•  $it", style = MaterialTheme.typography.bodySmall) }
         }
     }
 }
@@ -503,8 +488,8 @@ private fun BloqueResultado(resultado: ResultadoMadera, modelo: String?, latenci
         )
 
         Text(
-            "Resultado orientativo generado por IA. La identificación pericial de una especie " +
-                "requiere anatomía microscópica y, en maderas protegidas, análisis de laboratorio.",
+            "Esto es una ayuda, no un peritaje. Confirmar una especie con seguridad exige " +
+                "microscopio y, en maderas protegidas, análisis de laboratorio.",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
