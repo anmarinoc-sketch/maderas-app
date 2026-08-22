@@ -87,6 +87,10 @@ fun PantallaAjusteFoto(
     var caja by remember { mutableStateOf(IntSize.Zero) }
     var recorte by remember(base, caja) { mutableStateOf<Rect?>(null) }
 
+    // El recorte es un modo, como en las apps de mensajeria: se entra, se ajusta y se
+    // confirma o se cancela. Fuera de ese modo la foto se ve limpia, sin marcos encima.
+    var modoRecorte by remember(original) { mutableStateOf(false) }
+
     // Estado del ultimo recorte: sirve para acusar recibo y para poder deshacerlo.
     var recorteAplicado by remember(original) { mutableStateOf(false) }
     var anterior by remember(original) { mutableStateOf<Bitmap?>(null) }
@@ -108,7 +112,11 @@ fun PantallaAjusteFoto(
                 Column(Modifier.weight(1f)) {
                     Text("Ajusta la foto", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Bold)
                     Text(
-                        "Arrastra las esquinas para dejar dentro solo la madera y pulsa Recortar.",
+                        if (modoRecorte) {
+                            "Arrastra las esquinas para dejar dentro solo la madera y pulsa Listo."
+                        } else {
+                            "Recorta para que el análisis vea la madera de cerca, y gira si hace falta."
+                        },
                         color = TextoTenue,
                         style = MaterialTheme.typography.bodySmall,
                     )
@@ -136,7 +144,7 @@ fun PantallaAjusteFoto(
 
                 val marco = recorte ?: areaImagen
                 val area = areaImagen
-                if (marco != null && area != null) {
+                if (modoRecorte && marco != null && area != null) {
                     VeloYMarco(marco)
 
                     // Un unico detector para todo el area. Antes habia cinco cajas
@@ -180,29 +188,45 @@ fun PantallaAjusteFoto(
                     .padding(horizontal = 8.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
-                BotonHerramienta("Recortar", Icons.Default.Crop, destacado = true) {
-                    val marco = recorte ?: areaImagen
-                    val area = areaImagen
-                    if (marco != null && area != null) {
-                        val recortada = recortar(base, marco, area)
-                        // Solo se acusa el recorte si de verdad cambio algo.
-                        if (recortada !== base) {
-                            anterior = base
-                            base = recortada
-                            recorteAplicado = true
-                        }
+                if (modoRecorte) {
+                    BotonHerramienta("Cancelar", Icons.Default.Close) {
+                        recorte = null
+                        modoRecorte = false
                     }
+                    BotonHerramienta("Girar", Icons.Default.RotateRight) {
+                        base = girar(base, 90)
+                        recorteAplicado = false
+                    }
+                    BotonHerramienta("Listo", Icons.Default.Check, destacado = true) {
+                        val marco = recorte ?: areaImagen
+                        val area = areaImagen
+                        if (marco != null && area != null) {
+                            val recortada = recortar(base, marco, area)
+                            // Solo se acusa el recorte si de verdad cambio algo.
+                            if (recortada !== base) {
+                                anterior = base
+                                base = recortada
+                                recorteAplicado = true
+                            }
+                        }
+                        modoRecorte = false
+                    }
+                } else {
+                    BotonHerramienta("Recortar", Icons.Default.Crop, destacado = true) {
+                        recorte = null
+                        modoRecorte = true
+                    }
+                    BotonHerramienta("Girar", Icons.Default.RotateRight) {
+                        base = girar(base, 90)
+                        recorteAplicado = false
+                    }
+                    BotonHerramienta("Reiniciar", Icons.Default.Refresh) {
+                        base = original
+                        anterior = null
+                        recorteAplicado = false
+                    }
+                    BotonHerramienta("Repetir", Icons.Default.PhotoCamera, onClick = onRepetir)
                 }
-                BotonHerramienta("Girar", Icons.Default.RotateRight) {
-                    base = girar(base, 90)
-                    recorteAplicado = false
-                }
-                BotonHerramienta("Reiniciar", Icons.Default.Refresh) {
-                    base = original
-                    anterior = null
-                    recorteAplicado = false
-                }
-                BotonHerramienta("Repetir", Icons.Default.PhotoCamera, onClick = onRepetir)
             }
 
             if (recorteAplicado) {
@@ -257,24 +281,24 @@ fun PantallaAjusteFoto(
 
             Spacer(Modifier.height(8.dp))
 
-            Button(
-                onClick = {
-                    // Si quedo recorte sin aplicar, se aplica ahora: nadie deberia perder
-                    // el encuadre que acaba de hacer por no haber pulsado Recortar.
-                    val marco = recorte ?: areaImagen
-                    val area = areaImagen
-                    val salida = if (marco != null && area != null) recortar(base, marco, area) else base
-                    onConfirmar(salida)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .height(52.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Verde, contentColor = Color(0xFF14210F)),
-            ) {
-                Icon(Icons.Default.Check, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text("Usar esta foto", fontWeight = FontWeight.Bold)
+            // Durante el recorte no se ofrece terminar: primero se confirma el encuadre
+            // con Listo, y solo entonces se decide si la foto vale.
+            if (!modoRecorte) {
+                Button(
+                    onClick = { onConfirmar(base) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp)
+                        .height(52.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Verde,
+                        contentColor = Color(0xFF14210F),
+                    ),
+                ) {
+                    Icon(Icons.Default.Check, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text("Usar esta foto", fontWeight = FontWeight.Bold)
+                }
             }
             Spacer(Modifier.height(16.dp))
         }
