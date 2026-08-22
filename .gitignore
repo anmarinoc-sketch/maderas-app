@@ -1,17 +1,26 @@
+# --- Android ---
 *.iml
 .gradle/
-/local.properties
 /.idea/
-.DS_Store
-/build
-/captures
+local.properties
+android/build/
+android/app/build/
+android/entrega/
 .externalNativeBuild
 .cxx
-local.properties
-app/build/
-build/
+/captures
 
-# Nunca versionar claves de firma
+# --- Backend Node ---
+node_modules/
+npm-debug.log*
+*.log
+
+# --- Secretos: nunca versionar ---
+.env
+.env.*
+!.env.example
 *.jks
 *.keystore
 key.properties
+
+.DS_Store

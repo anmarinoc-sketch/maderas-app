@@ -1,15 +1,20 @@
 name: Compilar APK
 
 on:
+  # Sin filtro de rutas en push: al etiquetar una version, GitHub evalua `paths`
+  # de forma poco fiable y el release podria no llegar a publicarse nunca.
   push:
     branches: [main]
     tags: ['v*']
   pull_request:
     branches: [main]
+    paths:
+      - 'android/**'
+      - '.github/workflows/apk.yml'
   workflow_dispatch:
     inputs:
       base_url:
-        description: 'URL pública del backend (ej. https://madera.onrender.com). Vacío = usa la variable BASE_URL del repositorio.'
+        description: 'URL pública del backend (ej. https://madera-backend-xxx.run.app). Vacío = usa la variable BASE_URL del repositorio.'
         required: false
         default: ''
 
@@ -20,6 +25,9 @@ jobs:
   apk:
     name: APK de debug
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android
 
     steps:
       - name: Descargar el código
@@ -41,13 +49,14 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.10.2'
+          build-root-directory: android
 
       - name: Compilar APK
         env:
           # Se inyecta en BuildConfig.BASE_URL al compilar. El usuario puede cambiarla
           # despues desde los ajustes de la app sin recompilar.
           BASE_URL: ${{ github.event.inputs.base_url || vars.BASE_URL }}
-          # Secreto compartido opcional con el backend. Vacio si no esta configurado.
+          # Secreto compartido con el backend. Vacio si no esta configurado.
           APP_API_KEY: ${{ secrets.APP_API_KEY }}
         run: gradle assembleDebug --no-daemon --stacktrace
 
@@ -61,7 +70,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: identifica-madera-apk
-          path: entrega/*.apk
+          path: android/entrega/*.apk
           if-no-files-found: error
           retention-days: 30
 
