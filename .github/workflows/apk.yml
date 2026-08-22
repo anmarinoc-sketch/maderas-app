@@ -76,6 +76,23 @@ jobs:
           APP_API_KEY: ${{ secrets.APP_API_KEY }}
         run: gradle assembleDebug --no-daemon --stacktrace
 
+      # La huella permite comprobar que todas las compilaciones firman con la MISMA
+      # clave. Si cambia entre una version y otra, Android rechazara la actualizacion.
+      - name: Mostrar la huella de firma
+        run: |
+          FIRMADOR=$(ls "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1)
+          if [ -z "$FIRMADOR" ]; then
+            echo "No se encontro apksigner; se omite la comprobacion."
+            exit 0
+          fi
+          HUELLA=$("$FIRMADOR" verify --print-certs app/build/outputs/apk/debug/app-debug.apk \
+                   | grep -i "SHA-256 digest" | head -1 | awk '{print $NF}')
+          echo "Huella SHA-256 de la firma: $HUELLA"
+          echo "### Firma del APK" >> "$GITHUB_STEP_SUMMARY"
+          echo "SHA-256: \`$HUELLA\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "Clave estable esperada: \`498db233e7e1278ef52c34e4d371f57e0f89a8d30dfb65dd2e994b521b86d7eb\`" >> "$GITHUB_STEP_SUMMARY"
+
       - name: Renombrar el APK con el commit
         run: |
           mkdir -p entrega

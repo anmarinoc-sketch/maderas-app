@@ -53,7 +53,11 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.madera.identificador"
+        // El identificador cambia con el nombre de la app. Efecto util ahora mismo:
+        // Android instala esta version como app nueva en vez de chocar con la firma
+        // distinta de la anterior, asi que la transicion se hace sin desinstalar nada.
+        // La app vieja queda al lado y se borra cuando se quiera.
+        applicationId = "com.xiloscan.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
