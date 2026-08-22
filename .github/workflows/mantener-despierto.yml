@@ -1,0 +1,53 @@
+name: Mantener despierto el backend
+
+# El plan gratuito de Render duerme el servicio tras 15 minutos sin trafico, y
+# despertarlo añade 40-70 s a la siguiente peticion. Una llamada periodica a /health
+# lo mantiene en pie, de modo que la app responde siempre igual de rapido.
+#
+# Consumo: mantener un servicio despierto todo el mes son unas 730 horas, por debajo
+# de las 750 horas gratuitas de Render.
+
+on:
+  schedule:
+    # Cada 10 minutos. GitHub puede retrasar los cron cuando hay mucha carga;
+    # con este margen el servicio no llega a dormirse aunque haya retrasos.
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Llamar a /health
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Leer la URL del backend
+        id: url
+        run: |
+          URL=$(grep -E '^baseUrl=' android/gradle.properties | cut -d= -f2- | tr -d '[:space:]')
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+          if [ -z "$URL" ]; then
+            echo "baseUrl está vacía en android/gradle.properties: no hay backend que despertar."
+          else
+            echo "Backend configurado: $URL"
+          fi
+
+      - name: Comprobar el estado
+        if: steps.url.outputs.url != ''
+        env:
+          URL: ${{ steps.url.outputs.url }}
+          APP_API_KEY: ${{ secrets.APP_API_KEY }}
+        run: |
+          # 90 s de margen: si el servicio estaba dormido, esta es la llamada que lo despierta.
+          codigo=$(curl -s -o respuesta.json -w '%{http_code}' --max-time 90 \
+                   ${APP_API_KEY:+-H "X-App-Key: $APP_API_KEY"} \
+                   "${URL%/}/health")
+          echo "GET ${URL%/}/health -> HTTP $codigo"
+          cat respuesta.json || true
+          echo
+          if [ "$codigo" != "200" ]; then
+            echo "::warning::El backend no respondió 200. Puede estar caído o mal configurado."
+            exit 1
+          fi

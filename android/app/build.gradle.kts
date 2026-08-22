@@ -6,14 +6,17 @@ plugins {
 
 /**
  * URL del backend. Orden de precedencia:
- *   1. -PbaseUrl=https://mi-backend.example.com/   (linea de comandos)
- *   2. Variable de entorno BASE_URL                (la usa GitHub Actions)
- *   3. 10.0.2.2:3000                               (localhost visto desde el emulador)
+ *   1. Variable de entorno BASE_URL     (override puntual desde GitHub Actions)
+ *   2. baseUrl en gradle.properties     (el valor habitual, versionado en el repo)
+ *   3. 10.0.2.2:3000                    (localhost visto desde el emulador)
  * Ademas el usuario puede cambiarla en caliente desde los ajustes de la app.
+ *
+ * El entorno va primero para que el campo "URL del backend" del workflow manual
+ * pueda imponerse sobre el valor comprometido en el repositorio.
  */
 val baseUrlPorDefecto: String =
-    (project.findProperty("baseUrl") as String?)?.takeIf { it.isNotBlank() }
-        ?: System.getenv("BASE_URL")?.takeIf { it.isNotBlank() }
+    System.getenv("BASE_URL")?.takeIf { it.isNotBlank() }
+        ?: (project.findProperty("baseUrl") as String?)?.takeIf { it.isNotBlank() }
         ?: "http://10.0.2.2:3000/"
 
 /** Secreto compartido opcional (X-App-Key). Nunca se escribe en el repositorio. */
