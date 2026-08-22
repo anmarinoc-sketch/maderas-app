@@ -109,12 +109,13 @@ fun PantallaBienvenida(onEmpezar: () -> Unit) {
 }
 
 /**
- * Explicacion de como funciona y de hasta donde llega. Se abre desde la ayuda del visor;
- * ya no interrumpe el arranque, donde solo estorbaba a quien ya la conoce.
+ * Metodo de trabajo en tres pasos. Se abre desde la ayuda del visor; ya no interrumpe
+ * el arranque, donde solo estorbaba a quien ya lo conoce.
  *
- * Se dice el margen de error de forma honesta: en pruebas internas acierta la especie
- * en torno a la mitad de las veces con imagenes buenas, y esa cifra viene de una muestra
- * pequeña. Prometer mas seria enganar a alguien que decide compras con esto.
+ * El apartado sobre el margen de error se retiro de aqui a peticion del usuario. La
+ * advertencia sigue donde mas pesa: junto a cada resultado, que por debajo del 60 % de
+ * confianza se presenta como "candidata sin confirmar" y lleva la nota de que esto es
+ * una ayuda y no un peritaje.
  */
 @Composable
 fun PantallaExplicacion(onEmpezar: () -> Unit) {
@@ -144,55 +145,28 @@ fun PantallaExplicacion(onEmpezar: () -> Unit) {
             Paso(
                 numero = "1",
                 titulo = "Prepara la cara del corte",
-                detalle = "Pasa el bisturí o una navaja afilada por la punta de la pieza y " +
-                    "mójala con un poco de agua. Así se ven los poritos y los anillos.",
+                detalle = "Trabaja sobre la punta de la pieza, la cara que atraviesa la veta. " +
+                    "Pasa el bisturí o una navaja bien afilada: corta, no raspes, porque el " +
+                    "aserrín tapa el tejido. Humedece con una gota de agua para levantar el " +
+                    "contraste y ver mejor las características microscópicas.",
             )
             Paso(
                 numero = "2",
                 titulo = "Toma la foto",
-                detalle = "Acércate hasta que el corte llene el marco, con luz entrando de " +
-                    "lado. La app te avisa si hay poca luz.",
+                detalle = "Acércate hasta que el corte llene el encuadre, unos 3 a 5 cm de " +
+                    "madera, ayudándote del zoom del visor. La luz debe entrar de lado y baja: " +
+                    "así los poros y el parénquima proyectan sombra y se distinguen. Nunca de " +
+                    "frente, que aplana el relieve. Después recorta para dejar solo madera.",
             )
             Paso(
                 numero = "3",
-                titulo = "Lee el resultado",
-                detalle = "Verás la especie más probable, la anatomía que el análisis dice " +
-                    "haber visto, otras especies compatibles y qué le faltó a la foto.",
-            )
-
-            Spacer(Modifier.height(24.dp))
-
-            Text(
-                "Hasta dónde llega",
-                color = VerdeClaro,
-                fontWeight = FontWeight.Bold,
-            )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                "XiloScan es una ayuda de campo, no un peritaje. En nuestras pruebas acierta " +
-                    "la especie aproximadamente la mitad de las veces con fotos buenas, y esa " +
-                    "cifra sale de una muestra pequeña: tómala como orden de magnitud.",
-                color = TextoSuave,
-            )
-            Spacer(Modifier.height(10.dp))
-            Text(
-                "Por eso el resultado viene con un porcentaje de confianza. Cuando no llega al " +
-                    "60 % aparece como «candidata sin confirmar»: ahí conviene mirar también " +
-                    "las otras especies compatibles.",
-                color = TextoSuave,
-            )
-            Spacer(Modifier.height(10.dp))
-            Text(
-                "Mirando solo una foto, muchas maderas no se pueden separar más allá del " +
-                    "género. Confirmar una especie con seguridad exige microscopio y, en " +
-                    "maderas protegidas, análisis de laboratorio.",
-                color = TextoSuave,
-            )
-            Spacer(Modifier.height(10.dp))
-            Text(
-                "Está afinada para las maderas comerciales que se mueven en la zona. Con " +
-                    "especies de fuera acierta menos.",
-                color = TextoSuave,
+                titulo = "Contrasta el resultado",
+                detalle = "El análisis describe primero lo que observa —porosidad, tamaño y " +
+                    "agrupación de los poros, tipo de parénquima axial y finura de los radios— " +
+                    "y solo después propone la especie, con su confianza y otras compatibles. " +
+                    "Compara esa descripción con tu pieza: si la anatomía no cuadra, el nombre " +
+                    "no vale, por convincente que suene. Confirma o corrige el resultado y esa " +
+                    "corrección se tendrá en cuenta en los análisis siguientes.",
             )
 
             Spacer(Modifier.height(32.dp))
