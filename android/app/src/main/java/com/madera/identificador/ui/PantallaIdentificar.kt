@@ -81,15 +81,31 @@ fun PantallaIdentificar(vm: IdentificarViewModel = viewModel()) {
     var mostrarAjustes by remember { mutableStateOf(false) }
     var aviso by remember { mutableStateOf<String?>(null) }
 
-    // La camara del sistema escribe en este URI; lo guardamos para leerlo al volver.
-    var uriCaptura by remember { mutableStateOf<Uri?>(null) }
-
-    val galeria = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
-        uri?.let(vm::seleccionarImagen)
-    }
-
-    val camara = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { exito ->
-        if (exito) uriCaptura?.let(vm::seleccionarImagen)
+    // Sin foto elegida, la app arranca en el visor de camara. Es la pantalla de trabajo:
+    // la calidad del encuadre y de la luz decide el resto del analisis.
+    if (estado.imagen == null) {
+        val error = estado.analisis as? EstadoAnalisis.Error
+        PantallaCaptura(
+            onFoto = vm::seleccionarImagen,
+            onError = { aviso = it },
+            onAjustes = { mostrarAjustes = true },
+            mensaje = aviso ?: error?.mensaje,
+        )
+        if (mostrarAjustes) {
+            DialogoAjustes(
+                urlActual = estado.urlServidor,
+                claveActual = estado.claveApp,
+                comprobando = estado.comprobandoServidor,
+                mensaje = estado.mensajeServidor,
+                onProbar = vm::probarServidor,
+                onGuardar = { url, clave ->
+                    vm.guardarAjustes(url, clave)
+                    mostrarAjustes = false
+                },
+                onCerrar = { mostrarAjustes = false },
+            )
+        }
+        return
     }
 
     LaunchedEffect(aviso) {
@@ -131,41 +147,13 @@ fun PantallaIdentificar(vm: IdentificarViewModel = viewModel()) {
                 onQuitar = vm::limpiar,
             )
 
-            Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedButton(
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        runCatching {
-                            val archivo = Imagenes.archivoTemporalDeCaptura(context)
-                            val uri = FileProvider.getUriForFile(
-                                context,
-                                "${BuildConfig.APPLICATION_ID}.fileprovider",
-                                archivo,
-                            )
-                            uriCaptura = uri
-                            camara.launch(uri)
-                        }.onFailure {
-                            aviso = "No se pudo abrir la cámara: ${it.message}"
-                        }
-                    },
-                ) {
-                    Icon(Icons.Default.PhotoCamera, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Cámara")
-                }
-
-                OutlinedButton(
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        galeria.launch(
-                            PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
-                        )
-                    },
-                ) {
-                    Icon(Icons.Default.PhotoLibrary, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text("Galería")
-                }
+            OutlinedButton(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = vm::limpiar,
+            ) {
+                Icon(Icons.Default.PhotoCamera, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text("Repetir foto")
             }
 
             val cargando = estado.analisis is EstadoAnalisis.Cargando
