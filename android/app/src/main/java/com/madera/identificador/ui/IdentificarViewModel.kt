@@ -127,8 +127,8 @@ class IdentificarViewModel(application: Application) : AndroidViewModel(applicat
                     _estado.update {
                         it.copy(
                             analisis = EstadoAnalisis.Error(
-                                codigo = 'RECORTE_FALLIDO',
-                                mensaje = e.message ?: 'No se pudo aplicar el recorte.',
+                                codigo = "RECORTE_FALLIDO",
+                                mensaje = e.message ?: "No se pudo aplicar el recorte.",
                                 detalle = null,
                             )
                         )

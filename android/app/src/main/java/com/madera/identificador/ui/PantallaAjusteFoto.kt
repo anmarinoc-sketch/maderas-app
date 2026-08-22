@@ -19,8 +19,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.RestartAlt
-import androidx.compose.material.icons.filled.Rotate90DegreesCcw
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -133,19 +133,19 @@ fun PantallaAjusteFoto(
                     .padding(16.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
             ) {
-                BotonHerramienta("Girar", Icons.Default.Rotate90DegreesCcw) {
+                BotonHerramienta("Girar", Icons.Default.RotateRight) {
                     base = girar(base, 90)
                     giros = (giros + 1) % 4
                     escala = 1f
                     desplazamiento = Offset.Zero
                 }
-                BotonHerramienta("Reiniciar", Icons.Default.RestartAlt) {
+                BotonHerramienta("Reiniciar", Icons.Default.Refresh) {
                     base = original
                     giros = 0
                     escala = 1f
                     desplazamiento = Offset.Zero
                 }
-                BotonHerramienta("Repetir", Icons.Default.Refresh, onRepetir)
+                BotonHerramienta("Repetir", Icons.Default.PhotoCamera, onRepetir)
             }
 
             Text(
