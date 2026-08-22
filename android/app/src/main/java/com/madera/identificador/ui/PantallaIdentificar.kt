@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.PhotoLibrary
@@ -69,6 +70,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.madera.identificador.BuildConfig
 import com.madera.identificador.data.Alternativa
 import com.madera.identificador.data.ResultadoMadera
+import com.madera.identificador.data.Verificada
 import com.madera.identificador.util.Imagenes
 import kotlin.math.roundToInt
 
@@ -210,6 +212,7 @@ fun PantallaIdentificar(
                         resultado = analisis.resultado,
                         modelo = analisis.modelo,
                         latenciaMs = analisis.latenciaMs,
+                        verificada = analisis.verificada,
                     )
                     TarjetaVerificacion(
                         propuesta = analisis.resultado.nombreCientifico ?: "desconocido",
@@ -380,8 +383,48 @@ private fun TarjetaError(
 }
 
 @Composable
-private fun BloqueResultado(resultado: ResultadoMadera, modelo: String?, latenciaMs: Long?) {
+private fun BloqueResultado(
+    resultado: ResultadoMadera,
+    modelo: String?,
+    latenciaMs: Long?,
+    verificada: Verificada? = null,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+
+        // Cuando la foto ya la verificó el usuario, conviene que lo vea antes que nada:
+        // el resultado no viene solo de la foto, viene de lo que él mismo confirmó.
+        verificada?.let { v ->
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                )
+            ) {
+                Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.CheckCircle, contentDescription = null)
+                    Spacer(Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            "Esta pieza ya la identificó usted",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold,
+                        )
+                        Text(
+                            v.especie ?: "especie confirmada",
+                            style = MaterialTheme.typography.bodyMedium,
+                        )
+                        Text(
+                            if (v.exacta == true) {
+                                "Es la misma foto que ya corrigió."
+                            } else {
+                                "La foto se parece a una que ya corrigió."
+                            },
+                            style = MaterialTheme.typography.labelSmall,
+                        )
+                    }
+                }
+            }
+        }
 
         if (resultado.identificacionPosible != true) {
             Card(
@@ -461,6 +504,7 @@ private fun BloqueResultado(resultado: ResultadoMadera, modelo: String?, latenci
                     when (resultado.origenIdentificacion) {
                         "guia_valle_aburra" -> "Contrastada con la guía de maderas comerciales del Valle de Aburrá"
                         "conocimiento_general" -> "Fuera de la guía regional: identificación por conocimiento general"
+                        "verificada_por_el_usuario" -> "Confirmada sobre la madera física por usted mismo"
                         else -> null
                     }?.let {
                         Spacer(Modifier.height(6.dp))

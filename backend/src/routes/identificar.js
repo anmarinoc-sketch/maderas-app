@@ -1,8 +1,9 @@
 import { Router } from 'express';
 
-import { exportar, registrar } from '../lib/aprendizaje.js';
+import { exportar, registrar, verificacionDeImagen } from '../lib/aprendizaje.js';
 import { identificarMadera } from '../lib/gemini.js';
 import { bufferDesdeBase64, validarImagen } from '../lib/image.js';
+import { normalizar as normalizarHuella, sha256 } from '../lib/huella.js';
 import { AppError, errores } from '../lib/errors.js';
 import { requiereAppKey } from '../middleware/auth.js';
 import { rateLimit } from '../middleware/rateLimit.js';
@@ -36,13 +37,22 @@ router.post(
 
     const imagen = validarImagen(bruto);
 
+    // Huellas de esta foto. La exacta se calcula aqui; la perceptual la manda la app,
+    // que es quien tiene el bitmap. Las versiones antiguas no la envian y no pasa nada.
+    const exacta = sha256(imagen.buffer);
+    const perceptual = normalizarHuella(req.body?.huella);
+
+    // Si el usuario ya verifico esta misma pieza, el dato viaja pegado a la imagen.
+    const verificada = verificacionDeImagen({ sha256: exacta, huella: perceptual });
+
     const inicio = Date.now();
-    const { resultado, modelo, uso } = await identificarMadera(imagen);
+    const { resultado, modelo, uso } = await identificarMadera(imagen, { verificada });
     const latenciaMs = Date.now() - inicio;
 
     console.log(
       `[ok] ${req.requestId} ${imagen.mimeType} ${(imagen.bytes / 1024).toFixed(0)} KB ` +
-        `-> ${resultado?.nombre_cientifico ?? 'sin nombre'} (${latenciaMs} ms)`
+        `-> ${resultado?.nombre_cientifico ?? 'sin nombre'} (${latenciaMs} ms)` +
+        (verificada ? ` [verificada: ${verificada.especie}]` : '')
     );
 
     res.json({
@@ -50,7 +60,16 @@ router.post(
       request_id: req.requestId,
       modelo,
       latencia_ms: latenciaMs,
-      imagen: { mime_type: imagen.mimeType, bytes: imagen.bytes },
+      // Las huellas vuelven a la app para que las adjunte al verificar esta foto.
+      imagen: {
+        mime_type: imagen.mimeType,
+        bytes: imagen.bytes,
+        sha256: exacta,
+        huella: perceptual,
+      },
+      verificada: verificada
+        ? { especie: verificada.especie, fecha: verificada.fecha, exacta: verificada.exacta }
+        : null,
       uso,
       resultado,
     });
@@ -67,7 +86,7 @@ router.post(
   '/verificacion',
   requiereAppKey,
   asyncHandler(async (req, res) => {
-    const { acierto, dicho, real, confianza, nota } = req.body ?? {};
+    const { acierto, dicho, real, confianza, nota, sha256: exacta, huella } = req.body ?? {};
 
     if (typeof acierto !== 'boolean') {
       throw new AppError(
@@ -87,7 +106,7 @@ router.post(
       );
     }
 
-    const entrada = registrar({ acierto, dicho, real, confianza, nota });
+    const entrada = registrar({ acierto, dicho, real, confianza, nota, sha256: exacta, huella });
     console.log(
       `[verificacion] ${entrada.acierto ? 'acierto' : 'fallo'}: ` +
         `dicho="${entrada.dicho}" real="${entrada.real}"`

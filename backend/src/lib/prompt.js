@@ -69,8 +69,8 @@ export function construirSystemPrompt() {
   return [ROL, REFERENCIA_REGIONAL, notasDeCorreccion()].filter(Boolean).join('\n\n');
 }
 
-/** Texto que acompana a la imagen en el turno del usuario. */
-export const USER_PROMPT = `
+/** Texto base que acompana a la imagen en el turno del usuario. */
+const USER_PROMPT = `
 Analiza esta fotografia del corte transversal de una pieza de madera e identifica la especie.
 
 Contrasta lo que observes con la clave de las ${NUMERO_ESPECIES} maderas comerciales del Valle de Aburra
@@ -82,6 +82,35 @@ nombre cientifico, familia, confianza calibrada, origen de la identificacion, al
 plausibles, limitaciones del analisis y recomendaciones concretas para mejorar la toma si la
 imagen no es optima.
 `.trim();
+
+/**
+ * Turno del usuario: la peticion de analisis y, si la foto ya fue verificada en campo,
+ * el dato de que especie es.
+ *
+ * El aviso va aqui y no en la instruccion de sistema a proposito: pegado a la imagen es
+ * donde el modelo lo relaciona con lo que esta mirando. Se le pide igualmente que
+ * describa la anatomia y que avise si la contradice, porque una huella puede casar por
+ * parecido con otra pieza y no queremos convertir un error del usuario en dogma.
+ */
+export function promptDeUsuario(verificada) {
+  if (!verificada) return USER_PROMPT;
+
+  return `${USER_PROMPT}
+
+=== ESTA FOTOGRAFIA YA FUE VERIFICADA EN CAMPO ===
+El usuario, profesional del sector maderero, ya identifico esta misma pieza sobre la
+madera fisica y confirmo que es: ${verificada.especie}.
+Es un dato de campo, mas fiable que cualquier lectura de la foto.
+
+Que debes hacer:
+1. Describe la anatomia que ves, con el mismo cuidado de siempre.
+2. Confirma esa especie: es la respuesta correcta salvo contradiccion anatomica flagrante.
+3. Senala que caracteres visibles la sostienen. Sirven para reconocerla la proxima vez.
+4. Pon origen_identificacion en "verificada_por_el_usuario" y confianza en 0,95.
+5. Si de verdad la anatomia la contradice de forma clara, dilo en limitaciones y explica
+   que rasgo no encaja; aun asi manten la especie verificada como principal.
+=== FIN DEL DATO VERIFICADO ===`;
+}
 
 /**
  * Esquema de salida estructurada. Gemini lo respeta en modo application/json,
@@ -212,11 +241,17 @@ export const RESPONSE_SCHEMA = {
     },
     origen_identificacion: {
       type: Type.STRING,
-      enum: ['guia_valle_aburra', 'conocimiento_general', 'no_identificada'],
+      enum: [
+        'guia_valle_aburra',
+        'conocimiento_general',
+        'no_identificada',
+        'verificada_por_el_usuario',
+      ],
       description:
         'guia_valle_aburra si la especie coincide con una ficha de la clave regional; ' +
         'conocimiento_general si la anatomia no encaja en la clave y recurres a otra fuente; ' +
-        'no_identificada si no se pudo identificar.',
+        'no_identificada si no se pudo identificar; ' +
+        'verificada_por_el_usuario si la foto venia con una verificacion de campo.',
     },
     alternativas: {
       type: Type.ARRAY,

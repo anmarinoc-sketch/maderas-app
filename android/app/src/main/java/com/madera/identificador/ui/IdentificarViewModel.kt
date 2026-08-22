@@ -8,6 +8,7 @@ import com.madera.identificador.data.Repositorio
 import com.madera.identificador.data.ResultadoLlamada
 import com.madera.identificador.data.ResultadoMadera
 import com.madera.identificador.data.Verificacion
+import com.madera.identificador.data.Verificada
 import com.madera.identificador.util.Ajustes
 import com.madera.identificador.util.ImagenPreparada
 import com.madera.identificador.util.Imagenes
@@ -25,6 +26,11 @@ sealed interface EstadoAnalisis {
         val resultado: ResultadoMadera,
         val modelo: String?,
         val latenciaMs: Long?,
+        /** Huellas de la foto analizada; viajan de vuelta al verificarla. */
+        val sha256: String? = null,
+        val huella: String? = null,
+        /** No nulo si esta foto ya la habia verificado el usuario en campo. */
+        val verificada: Verificada? = null,
     ) : EstadoAnalisis
 
     data class Error(
@@ -104,6 +110,7 @@ class IdentificarViewModel(application: Application) : AndroidViewModel(applicat
                 baseUrl = ajustes.urlServidor,
                 appKey = ajustes.claveApp,
                 jpeg = imagen.jpeg,
+                huella = imagen.huella,
             )
 
             _estado.update {
@@ -113,6 +120,9 @@ class IdentificarViewModel(application: Application) : AndroidViewModel(applicat
                             resultado = respuesta.resultado,
                             modelo = respuesta.modelo,
                             latenciaMs = respuesta.latenciaMs,
+                            sha256 = respuesta.sha256,
+                            huella = respuesta.huella,
+                            verificada = respuesta.verificada,
                         )
 
                         is ResultadoLlamada.Fallo -> EstadoAnalisis.Error(
@@ -170,6 +180,10 @@ class IdentificarViewModel(application: Application) : AndroidViewModel(applicat
                     dicho = exito.resultado.nombreCientifico,
                     real = if (acierto) exito.resultado.nombreCientifico else especieReal,
                     confianza = exito.resultado.confianza,
+                    // Sin esto la correccion quedaria suelta y el modelo no reconoceria
+                    // esta misma foto la proxima vez que se cargue.
+                    sha256 = exito.sha256,
+                    huella = exito.huella,
                 ),
             )
 

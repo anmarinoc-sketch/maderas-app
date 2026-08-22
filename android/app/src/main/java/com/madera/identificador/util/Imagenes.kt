@@ -8,13 +8,18 @@ import android.net.Uri
 import androidx.exifinterface.media.ExifInterface
 import java.io.ByteArrayOutputStream
 import java.io.File
+import java.util.Locale
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-/** Imagen lista para enviar: los bytes JPEG y una miniatura para pintar en pantalla. */
+/**
+ * Imagen lista para enviar: los bytes JPEG, una miniatura para pintar en pantalla y la
+ * huella con la que el servidor reconoce si esta pieza ya fue verificada.
+ */
 data class ImagenPreparada(
     val jpeg: ByteArray,
     val vistaPrevia: Bitmap,
+    val huella: String,
 ) {
     val kilobytes: Int get() = jpeg.size / 1024
 
@@ -63,7 +68,11 @@ object Imagenes {
         val salida = ByteArrayOutputStream()
         escalada.compress(Bitmap.CompressFormat.JPEG, CALIDAD_JPEG, salida)
 
-        ImagenPreparada(jpeg = salida.toByteArray(), vistaPrevia = escalada)
+        ImagenPreparada(
+            jpeg = salida.toByteArray(),
+            vistaPrevia = escalada,
+            huella = huellaDe(escalada),
+        )
     }
 
     /**
@@ -74,7 +83,54 @@ object Imagenes {
         val escalada = escalar(bitmap)
         val salida = ByteArrayOutputStream()
         escalada.compress(Bitmap.CompressFormat.JPEG, CALIDAD_JPEG, salida)
-        ImagenPreparada(jpeg = salida.toByteArray(), vistaPrevia = escalada)
+        ImagenPreparada(
+            jpeg = salida.toByteArray(),
+            vistaPrevia = escalada,
+            huella = huellaDe(escalada),
+        )
+    }
+
+    /**
+     * Huella perceptual de 64 bits (dHash), en 16 digitos hexadecimales.
+     *
+     * Reduce la foto a una rejilla de 9x8 en gris y anota, por cada pareja de vecinos de
+     * una misma fila, cual sale mas claro. Lo que guarda es el patron de claros y oscuros,
+     * no los pixeles: sobrevive a la recompresion, a un recorte leve y a un cambio de luz,
+     * que es justo lo que cambia cuando se vuelve a fotografiar la misma tabla.
+     *
+     * Se calcula aqui, y no en el servidor, porque aqui ya esta el bitmap decodificado;
+     * alla habria que anadir una dependencia nativa a un despliegue que funciona.
+     */
+    fun huellaDe(bitmap: Bitmap): String {
+        val ancho = 9
+        val alto = 8
+        val rejilla = Bitmap.createScaledBitmap(bitmap, ancho, alto, true)
+        val pixeles = IntArray(ancho * alto)
+        rejilla.getPixels(pixeles, 0, ancho, 0, 0, ancho, alto)
+        if (rejilla !== bitmap) rejilla.recycle()
+
+        // Luminancia percibida: el verde pesa mas que el rojo, y el rojo mas que el azul.
+        fun gris(pixel: Int): Int {
+            val r = (pixel shr 16) and 0xFF
+            val g = (pixel shr 8) and 0xFF
+            val b = pixel and 0xFF
+            return (r * 299 + g * 587 + b * 114) / 1000
+        }
+
+        var bits = 0L
+        var posicion = 0
+        for (y in 0 until alto) {
+            for (x in 0 until ancho - 1) {
+                val izquierda = gris(pixeles[y * ancho + x])
+                val derecha = gris(pixeles[y * ancho + x + 1])
+                if (izquierda > derecha) bits = bits or (1L shl posicion)
+                posicion += 1
+            }
+        }
+
+        // toHexString sin relleno se come los ceros de la izquierda y el servidor exige 16.
+        // Locale.US fijo: con el idioma del telefono, algunos locales escriben otros digitos.
+        return String.format(Locale.US, "%016x", bits)
     }
 
     /** Archivo temporal en cache/capturas para que la camara del sistema escriba la foto. */

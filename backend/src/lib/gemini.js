@@ -2,7 +2,7 @@ import { GoogleGenAI } from '@google/genai';
 
 import { config } from '../config.js';
 import { AppError } from './errors.js';
-import { RESPONSE_SCHEMA, construirSystemPrompt, USER_PROMPT } from './prompt.js';
+import { RESPONSE_SCHEMA, construirSystemPrompt, promptDeUsuario } from './prompt.js';
 
 // La clave solo vive aqui, en el proceso del servidor. Nunca viaja al cliente.
 const ai = new GoogleGenAI({ apiKey: config.geminiApiKey });
@@ -180,7 +180,12 @@ export function estadoModelos() {
  * @param {{ buffer: Buffer, mimeType: string }} imagen
  * @returns {Promise<{ resultado: object, modelo: string, uso: object|null }>}
  */
-export async function identificarMadera({ buffer, mimeType }) {
+/**
+ * @param imagen  bytes y tipo de la foto.
+ * @param opciones.verificada  { especie } si esta misma foto ya fue verificada en campo
+ *        por el usuario; el dato viaja pegado a la imagen en el turno de usuario.
+ */
+export async function identificarMadera({ buffer, mimeType }, { verificada = null } = {}) {
   const cadena = disponibles();
   if (cadena.length === 0) {
     const espera = Math.min(...config.geminiModelos.map((m) => agotados.get(m) ?? 0));
@@ -205,7 +210,7 @@ export async function identificarMadera({ buffer, mimeType }) {
             role: 'user',
             parts: [
               { inlineData: { mimeType, data: buffer.toString('base64') } },
-              { text: USER_PROMPT },
+              { text: promptDeUsuario(verificada) },
             ],
           },
         ],

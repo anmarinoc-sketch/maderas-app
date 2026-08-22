@@ -224,3 +224,71 @@ ${cuerpo}
 
 === FIN DE LA CLAVE ===
 `.trim();
+
+/**
+ * Emparejamiento de nombres escritos a mano con las fichas de la guia.
+ *
+ * Cuando el usuario corrige una identificacion escribe lo que dice en el patio:
+ * "chingale", "Es teca", "Balso". Sin esto, "Chingale" y "Jacaranda copaia" quedan
+ * registrados como dos maderas distintas y los avisos de error se reparten entre las
+ * dos, justo en la especie que mas ha fallado. Con esto, todo aterriza en su ficha.
+ */
+
+/** Minusculas, sin tildes y sin las palabras que el usuario intercala al escribir. */
+function llave(texto) {
+  return String(texto ?? '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .replace(/\b(es|era|un|una|el|la|los|las|de|del|madera|palo|tipo|creo que|parece)\b/g, ' ')
+    .replace(/[^a-z0-9 ]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+/** Indice nombre -> ficha. El binomio entra tambien sin el autor: "Tectona grandis L. f.". */
+const PORNOMBRE = new Map();
+for (const e of especies) {
+  const candidatos = [
+    ...e.nombres,
+    ...(e.otros_nombres ?? []),
+    e.comercial,
+    e.botanico,
+    // Genero + epiteto: la app devuelve el binomio con autor y el usuario lo copia tal cual.
+    e.botanico.split(/\s+/).slice(0, 2).join(' '),
+    // Solo el genero, util cuando la identificacion no paso de ahi.
+    e.botanico.split(/\s+/)[0],
+  ];
+  for (const c of candidatos) {
+    const k = llave(c);
+    // El genero suelto puede repetirse entre fichas: no se pisa la primera.
+    if (k && !PORNOMBRE.has(k)) PORNOMBRE.set(k, e);
+  }
+}
+
+/** Ficha de la guia que corresponde a un texto libre, o null si no es de las 34. */
+export function buscarEspecie(texto) {
+  const k = llave(texto);
+  if (!k) return null;
+  if (PORNOMBRE.has(k)) return PORNOMBRE.get(k);
+
+  // "es teca" -> "teca": se prueba palabra por palabra antes de darla por desconocida.
+  const palabras = k.split(' ');
+  for (let i = 0; i < palabras.length; i += 1) {
+    const par = palabras.slice(i, i + 2).join(' ');
+    if (par && PORNOMBRE.has(par)) return PORNOMBRE.get(par);
+    if (PORNOMBRE.has(palabras[i])) return PORNOMBRE.get(palabras[i]);
+  }
+  return null;
+}
+
+/**
+ * Nombre canonico para el registro y los avisos: binomio y nombre comun juntos, para
+ * que el modelo lo reconozca venga como venga y el usuario lo lea como lo dice.
+ * Si no es una de las 34, se devuelve lo que escribio el usuario, limpio.
+ */
+export function nombreCanonico(texto) {
+  const e = buscarEspecie(texto);
+  if (!e) return String(texto ?? '').trim();
+  return `${e.botanico} (${e.nombres[0].toLowerCase()})`;
+}

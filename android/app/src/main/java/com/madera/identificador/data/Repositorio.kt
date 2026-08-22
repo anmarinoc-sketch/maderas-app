@@ -18,6 +18,11 @@ sealed interface ResultadoLlamada {
         val resultado: ResultadoMadera,
         val modelo: String?,
         val latenciaMs: Long?,
+        /** Huellas de esta foto; hay que devolverlas al verificar para que quede pegada a ella. */
+        val sha256: String? = null,
+        val huella: String? = null,
+        /** No nulo si el servidor reconocio la foto como una pieza ya verificada por el usuario. */
+        val verificada: Verificada? = null,
     ) : ResultadoLlamada
 
     data class Fallo(
@@ -37,6 +42,7 @@ class Repositorio(private val gson: Gson = Gson()) {
         baseUrl: String,
         appKey: String,
         jpeg: ByteArray,
+        huella: String,
     ): ResultadoLlamada = withContext(Dispatchers.IO) {
         val parte = MultipartBody.Part.createFormData(
             "imagen",
@@ -45,8 +51,11 @@ class Repositorio(private val gson: Gson = Gson()) {
         )
 
         try {
-            val respuesta = ApiFactory.para(baseUrl)
-                .identificar(parte, appKey.ifBlank { null })
+            val respuesta = ApiFactory.para(baseUrl).identificar(
+                parte,
+                huella.toRequestBody("text/plain".toMediaType()),
+                appKey.ifBlank { null },
+            )
 
             val cuerpo = respuesta.body()
 
@@ -55,6 +64,10 @@ class Repositorio(private val gson: Gson = Gson()) {
                     resultado = cuerpo.resultado,
                     modelo = cuerpo.modelo,
                     latenciaMs = cuerpo.latenciaMs,
+                    sha256 = cuerpo.imagen?.sha256,
+                    // Si el servidor no la devuelve (version antigua), vale la que calculamos.
+                    huella = cuerpo.imagen?.huella ?: huella,
+                    verificada = cuerpo.verificada,
                 )
             }
 

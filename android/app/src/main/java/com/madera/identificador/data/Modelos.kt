@@ -16,8 +16,29 @@ data class RespuestaIdentificacion(
     @SerializedName("request_id") val requestId: String? = null,
     val modelo: String? = null,
     @SerializedName("latencia_ms") val latenciaMs: Long? = null,
+    val imagen: ImagenInfo? = null,
+    val verificada: Verificada? = null,
     val resultado: ResultadoMadera? = null,
     val error: ErrorApi? = null,
+)
+
+/**
+ * Huellas con las que el servidor reconoce esta foto.
+ *
+ * Se guardan al identificar y se devuelven al verificar: asi la correccion del usuario
+ * queda pegada a la foto concreta, y no como un aviso suelto sobre la especie.
+ */
+data class ImagenInfo(
+    val sha256: String? = null,
+    val huella: String? = null,
+)
+
+/** Presente cuando esta misma foto ya fue identificada en campo por el usuario. */
+data class Verificada(
+    val especie: String? = null,
+    val fecha: String? = null,
+    /** true si es la misma foto byte a byte; false si casó por parecido. */
+    val exacta: Boolean? = null,
 )
 
 /** Error estructurado del backend. `codigo` es estable y se puede usar en un `when`. */
@@ -36,7 +57,7 @@ data class ResultadoMadera(
     @SerializedName("nombre_cientifico") val nombreCientifico: String? = null,
     val familia: String? = null,
     val confianza: Double? = null,
-    /** guia_valle_aburra · conocimiento_general · no_identificada */
+    /** guia_valle_aburra · conocimiento_general · no_identificada · verificada_por_el_usuario */
     @SerializedName("origen_identificacion") val origenIdentificacion: String? = null,
     val alternativas: List<Alternativa>? = null,
     @SerializedName("usos_habituales") val usos: List<String>? = null,
@@ -87,6 +108,9 @@ data class Verificacion(
     val real: String?,
     val confianza: Double?,
     val nota: String? = null,
+    /** Huellas de la foto verificada, tal como las devolvio el servidor al identificarla. */
+    val sha256: String? = null,
+    val huella: String? = null,
 )
 
 data class RespuestaVerificacion(
