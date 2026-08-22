@@ -82,7 +82,9 @@ compensa—. Casan hasta 8 bits de distancia de Hamming: en pruebas, variantes d
 pieza quedan a 1-2 bits y piezas distintas a 27. El dato de la especie viaja en el **turno de
 usuario, pegado a la imagen**, no en la instrucción de sistema. Se le sigue pidiendo que
 describa la anatomía y avise si la contradice: una huella puede casar por parecido y una
-verificación no es dogma. El respaldo diario conserva las huellas.
+verificación no es dogma. El respaldo diario conserva las huellas. **Probado en campo por el
+usuario el 22-08-2026: funciona.** Ojo, las verificaciones anteriores a esa fecha no llevan
+huella y solo valen como avisos genéricos.
 
 **Los nombres se emparejan con la guía** (`nombreCanonico` en `referencia.js`). El usuario
 escribe «chingale» unas veces y «Jacaranda copaia» otras; sin unificar, los tres fallos del
@@ -105,16 +107,22 @@ curso de la UNAL. **Nunca recomendar lijar**, error que hubo al principio.
 - **Generar Kotlin con scripts de shell** ha costado dos compilaciones rotas (comillas
   simples convertidas en literales de carácter, interpolaciones comidas). Usar Edit/Write.
 - **Iconos de Material**: verificar que existen antes de usarlos; `Rotate90DegreesCcw` y
-  `RestartAlt` hubo que cambiarlos.
+  `RestartAlt` hubo que cambiarlos. Los de `material-icons-core` (`CheckCircle`, `Close`,
+  `Warning`) sí están; los de `extended` son los que fallan.
+- **Caracteres invisibles al escribir código por shell**: un rango de marcas diacríticas
+  quedó como bytes literales dentro de un regex. Funcionaba, pero era intocable. Escribir el
+  fuente en ASCII (`\p{Diacritic}`, `\uXXXX`) y comprobarlo con `od -c` si hay dudas.
 - **La caché de la web de GitHub** engaña: comprobar el estado por la API.
 
 ## Qué queda pendiente
 
-**Medir el acierto.** Es lo importante y sigue sin hacerse. Hay 34 láminas extraídas de la
-guía y un banco de pruebas listo (`scratchpad/evaluar.js` de la sesión original, recreable:
-POST de cada lámina y comparación con la especie real de su página). Las 8 verificaciones
-del usuario dan 2 aciertos y 6 fallos; **chingalé** falló 3 de 3, siempre confundido con
-leguminosas: sospechar de su ficha en la clave.
+**Medir el acierto.** Es lo importante y sigue sin hacerse. El PDF de la guía está en
+`C:\Users\amo\Downloads\Anatomia e identificacion de maderas.pdf`: de ahí salen las 34
+láminas y el banco de pruebas (POST de cada lámina y comparación con la especie real de su
+página). Cuesta 34 peticiones de las ~160 diarias. Las 8 verificaciones del usuario dan 2
+aciertos y 6 fallos; **chingalé** falló 3 de 3, siempre confundido con leguminosas:
+sospechar de su ficha en la clave. Al medir, contar solo fotos sin verificación previa: una
+lámina ya verificada acierta por la huella y no mide nada.
 
 **Banco de imágenes de referencia.** Enviar unas pocas fotos verificadas como ejemplos
 etiquetados junto a la consulta. Es lo más parecido a enseñarle. Pendiente por el coste en
