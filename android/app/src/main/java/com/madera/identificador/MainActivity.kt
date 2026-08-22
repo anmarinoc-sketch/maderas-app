@@ -41,9 +41,9 @@ private fun Arranque() {
     var fase by remember { mutableStateOf(Fase.BIENVENIDA) }
 
     when (fase) {
-        // La explicacion aparece en cada arranque: recuerda los limites de la
-        // herramienta antes de cada jornada, y se pasa con un boton.
-        Fase.BIENVENIDA -> PantallaBienvenida(onTerminar = { fase = Fase.EXPLICACION })
+        // La bienvenida espera a que se pulse Empezar. La explicacion ya no interrumpe
+        // el arranque: se consulta desde la ayuda del visor cuando hace falta.
+        Fase.BIENVENIDA -> PantallaBienvenida(onEmpezar = { fase = Fase.TRABAJO })
 
         Fase.EXPLICACION -> PantallaExplicacion(onEmpezar = { fase = Fase.TRABAJO })
 

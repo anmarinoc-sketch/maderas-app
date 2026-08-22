@@ -36,7 +36,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.madera.identificador.R
-import kotlinx.coroutines.delay
 
 private val VerdeFondo = Color(0xFF1E2B1C)
 private val Crema = Color(0xFFF0E6D2)
@@ -44,11 +43,12 @@ private val VerdeClaro = Color(0xFF8FBF6A)
 private val TextoSuave = Color(0xFFC9C3B6)
 
 /**
- * Pantalla de bienvenida. Se muestra al abrir y se va sola; el fondo coincide con
- * windowBackground para que no haya destello blanco al arrancar en frio.
+ * Pantalla de bienvenida. Espera a que se pulse Empezar en vez de irse sola: una
+ * pantalla que desaparece a destiempo obliga a reabrir la app para volver a leerla.
+ * El fondo coincide con windowBackground para que no haya destello al arrancar en frio.
  */
 @Composable
-fun PantallaBienvenida(onTerminar: () -> Unit) {
+fun PantallaBienvenida(onEmpezar: () -> Unit) {
     var visible by remember { mutableStateOf(false) }
     val opacidad by animateFloatAsState(
         targetValue = if (visible) 1f else 0f,
@@ -56,17 +56,14 @@ fun PantallaBienvenida(onTerminar: () -> Unit) {
         label = "aparicion",
     )
 
-    LaunchedEffect(Unit) {
-        visible = true
-        delay(3600)
-        onTerminar()
-    }
+    LaunchedEffect(Unit) { visible = true }
 
     Surface(color = VerdeFondo, modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .alpha(opacidad),
+                .alpha(opacidad)
+                .padding(32.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -87,13 +84,33 @@ fun PantallaBienvenida(onTerminar: () -> Unit) {
                 fontStyle = FontStyle.Italic,
                 textAlign = TextAlign.Center,
             )
+
+            Spacer(Modifier.height(48.dp))
+
+            Button(
+                onClick = onEmpezar,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = VerdeClaro,
+                    contentColor = Color(0xFF14210F),
+                ),
+            ) {
+                Text("Empezar", fontWeight = FontWeight.Bold)
+            }
+
+            Spacer(Modifier.height(14.dp))
+            Text(
+                "Versión ${com.madera.identificador.BuildConfig.VERSION_NAME}",
+                color = TextoSuave,
+                style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
+            )
         }
     }
 }
 
 /**
- * Explicacion de como funciona y de hasta donde llega. Se muestra la primera vez y
- * queda accesible desde la ayuda del visor.
+ * Explicacion de como funciona y de hasta donde llega. Se abre desde la ayuda del visor;
+ * ya no interrumpe el arranque, donde solo estorbaba a quien ya la conoce.
  *
  * Se dice el margen de error de forma honesta: en pruebas internas acierta la especie
  * en torno a la mitad de las veces con imagenes buenas, y esa cifra viene de una muestra
@@ -188,17 +205,9 @@ fun PantallaExplicacion(onEmpezar: () -> Unit) {
                     contentColor = Color(0xFF14210F),
                 ),
             ) {
-                Text("Entendido, empezar", fontWeight = FontWeight.Bold)
+                Text("Entendido", fontWeight = FontWeight.Bold)
             }
 
-            Spacer(Modifier.height(12.dp))
-            Text(
-                "Versión ${com.madera.identificador.BuildConfig.VERSION_NAME}",
-                color = TextoSuave,
-                style = androidx.compose.material3.MaterialTheme.typography.labelSmall,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-            )
             Spacer(Modifier.height(16.dp))
         }
     }
