@@ -23,8 +23,13 @@ skill también si vas a tocar el backend o la CI.
 | APK | Artefacto `bioscan-apk` del workflow `apk-bioscan.yml` |
 | Release | Etiqueta `bio-v*` (las de XiloScan son `v*`) |
 
-Creado el 23-08-2026. **Sin probar en un móvil real todavía** y **sin probar nunca contra
-Gemini de verdad**: no hay clave real en local, el `.env` tiene un marcador.
+Creado el 23-08-2026. Backend **desplegado y probado contra Gemini de verdad** ese mismo
+día; APK publicado como release `bio-v1`. Lo que sigue **sin probar es la identificación
+por foto con fotos reales**: solo se ha comprobado que el esquema funciona.
+
+BioScan tiene su clave propia en Render (`GEMINI_API_KEY_ESPECIES`, proyecto de Google
+`BioScan`). Se comprueba con `curl.exe -s https://madera-backend.onrender.com/health`:
+`cuota_propia: true`. En local no hay clave: el `.env` tiene un marcador.
 
 ## La decisión que define el proyecto
 
@@ -64,7 +69,7 @@ cd C:\Users\amo\Desktop\Claude\maderas-app\backend; node herramientas/construir-
 | `flora-colombia.json` | Catálogo de Plantas y Líquenes de Colombia (UNAL) | 44.477, de ellas 6.408 endémicas |
 | `exoticas-colombia.json` | Lista de plantas exóticas del Humboldt | 1.292 |
 | `nombres-comunes.json` | Derivado de la lista de amenazadas | 878 |
-| `vedas-colombia.json` | **Transcrito a mano.** No hay fuente legible por máquina | 13 normas |
+| `vedas-colombia.json` | **Transcrito a mano.** No hay fuente legible por máquina | 14 normas, 77 especies |
 
 Todo cabe: 107 MB de RSS, 221 ms de arranque, 9 µs por consulta. Render da 512 MB.
 
@@ -123,14 +128,11 @@ XiloScan no cambió de comportamiento.
 
 ## Qué queda pendiente
 
-1. **Probarla contra Gemini de verdad.** Nunca se ha hecho: hace falta que Andrés ponga
-   `GEMINI_API_KEY_ESPECIES` en Render. Lo primero que hay que verificar es que el modelo
-   respeta la prohibición de hablar de vedas.
+1. **Medir la identificación por foto.** Es lo importante y lo único sin tocar. Andrés
+   tiene la app instalada desde el release `bio-v1`.
 2. **Las 2 especies que faltan del Acuerdo 404** y los Acuerdos 262 de 2011 y 207 de 2008,
    que no estan publicados en la web de Cornare (probado: dan 404). Habria que pedirlos.
-3. **Medir el acierto de la identificación por foto**, igual que sigue pendiente en
-   XiloScan.
-4. Nombres comunes: solo hay 878, de las especies amenazadas. GBIF cubre el resto en
+3. Nombres comunes: solo hay 878, de las especies amenazadas. GBIF cubre el resto en
    caliente, pero un índice local más grande ahorraría llamadas.
 
 ## Trato con el usuario
