@@ -62,5 +62,15 @@
     "real": "Chingale",
     "confianza": 0.6,
     "nota": null
+  },
+  {
+    "fecha": "2026-08-22T20:35:09.449Z",
+    "acierto": true,
+    "dicho": "Jacaranda copaia (Aubl.) D. Don",
+    "real": "Jacaranda copaia (Aubl.) D. Don",
+    "confianza": 0.62,
+    "nota": null,
+    "sha256": "5341e9384830f71aefdfde00ff0d6885ff4386fd8b4afd6f3f505c00f6b70e2c",
+    "huella": "ece4e624ca94b651"
   }
 ]
