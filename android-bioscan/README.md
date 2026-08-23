@@ -62,9 +62,10 @@ peligro) y *Jacaranda copaia* (ninguna de las dos cosas).
 
 ## Lo que la app NO puede decirte
 
-- **El listado de Cornare está incompleto.** Del Acuerdo 404 de 2020 solo hay transcritas
-  10 de sus 30 especies, porque el acta original es un PDF escaneado. Los Acuerdos 262 de
-  2011 y 207 de 2008 no están transcritos. La app lo avisa en cada consulta.
+- **Faltan 2 especies de Cornare.** El Acuerdo 404 de 2020 está transcrito: 28 de las 30
+  de su artículo primero y las 12 de su artículo segundo. Dos filas del escaneo salieron
+  con el nombre repetido de la fila vecina. Los Acuerdos 262 de 2011 y 207 de 2008 siguen
+  sin transcribir. La app lo avisa en cada consulta.
 - **Solo hay vedas nacionales y de Corantioquia.** Las demás corporaciones no están
   cargadas.
 - **El AMVA no expide vedas de especies**: es autoridad urbana y regula el arbolado. En el

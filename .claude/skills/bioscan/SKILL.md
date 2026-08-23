@@ -72,12 +72,19 @@ Todo cabe: 107 MB de RSS, 221 ms de arranque, 9 µs por consulta. Render da 512 
 
 ## Huecos conocidos, que la app declara
 
-- **Cornare está incompleto.** Del Acuerdo 404 de 2020 hay 10 de 30 especies; los Acuerdos
-  262 de 2011 y 207 de 2008, ninguna. El acta es un **PDF escaneado en JBIG2**: no hay
-  forma de leerlo con las herramientas del proyecto (probado: `pdftotext` no está, poppler
-  no está, el extractor por zlib no sirve con JBIG2). Se resuelve con
-  `herramientas/transcribir-acuerdo.js`, que se lo da a Gemini como PDF; cuesta 1 consulta
-  y **no escribe nada**, imprime el JSON para revisarlo contra el original.
+- **Cornare: faltan 2 de 30.** El Acuerdo 404 de 2020 se transcribio el 23-08-2026 con
+  Gemini (el acta es un **PDF escaneado en JBIG2**, ilegible para todo lo demas: `pdftotext`
+  no esta, poppler no esta, el extractor por zlib no sirve). Estan las 28 del articulo
+  primero que se pudieron leer y las 12 del segundo. Dos filas salieron con el nombre
+  repetido de la vecina.
+  **La leccion que costo dos pasadas:** una norma de veda trae VARIAS tablas con efectos
+  juridicos distintos. La primera transcripcion las aplano en una lista de 49 y colaba
+  como veda de Cornare siete especies que son de la Resolucion 0316 de 1974. El esquema
+  de `lib/transcribir.js` ahora exige un grupo por tabla. **Nunca aceptar una
+  transcripcion plana.**
+  El control de calidad que hizo fiable el resto: el articulo tercero recopila esa
+  resolucion de 1974, cuyas 7 especies ya teniamos por otra fuente, y coincidieron las 7.
+  Buscar siempre un grupo de control asi.
 - **Corantioquia sí está completa** (Resolución 3183 de 2000). Es la autoridad de la zona
   rural del Valle de Aburrá.
 - **El AMVA no expide vedas de especies**: es autoridad urbana y regula el arbolado. Está
@@ -119,7 +126,8 @@ XiloScan no cambió de comportamiento.
 1. **Probarla contra Gemini de verdad.** Nunca se ha hecho: hace falta que Andrés ponga
    `GEMINI_API_KEY_ESPECIES` en Render. Lo primero que hay que verificar es que el modelo
    respeta la prohibición de hablar de vedas.
-2. **Transcribir el Acuerdo 404 de Cornare**, con la herramienta ya escrita.
+2. **Las 2 especies que faltan del Acuerdo 404** y los Acuerdos 262 de 2011 y 207 de 2008,
+   que no estan publicados en la web de Cornare (probado: dan 404). Habria que pedirlos.
 3. **Medir el acierto de la identificación por foto**, igual que sigue pendiente en
    XiloScan.
 4. Nombres comunes: solo hay 878, de las especies amenazadas. GBIF cubre el resto en
