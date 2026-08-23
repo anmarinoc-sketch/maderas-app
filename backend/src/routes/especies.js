@@ -58,6 +58,19 @@ async function armarFicha(nombreCientifico, { conRelato }) {
   return ficha;
 }
 
+/**
+ * Palabras con las que el modelo dice "no lo se" cuando el esquema le exige un nombre.
+ * Buscarlas en las listas devolveria una ficha vacia pero con forma de ficha, y la app
+ * pintaria una especie llamada "desconocido". Mejor devolver null y que se vea el hueco.
+ */
+const NO_ES_UN_NOMBRE = new Set(['desconocido', 'indeterminado', 'no visible', 'n/a', 'ninguno']);
+
+function fichaOficialDe(nombre) {
+  const limpio = String(nombre ?? '').trim().toLowerCase();
+  if (!limpio || NO_ES_UN_NOMBRE.has(limpio)) return null;
+  return consultarPorNombreCientifico(nombre);
+}
+
 /** Etiqueta que deja claro de donde sale cada mitad de la respuesta. */
 const PROCEDENCIA = {
   listas_oficiales:
@@ -98,13 +111,11 @@ router.post(
 
     // La ficha oficial se arma para la principal y para cada alternativa: asi el usuario
     // ve de un vistazo que la segunda opcion si esta vedada y la primera no.
-    const principal = resultado.nombre_cientifico
-      ? consultarPorNombreCientifico(resultado.nombre_cientifico)
-      : null;
+    const principal = fichaOficialDe(resultado.nombre_cientifico);
 
     const alternativas = (resultado.alternativas ?? []).map((a) => ({
       ...a,
-      oficial: a.nombre_cientifico ? consultarPorNombreCientifico(a.nombre_cientifico) : null,
+      oficial: fichaOficialDe(a.nombre_cientifico),
     }));
 
     console.log(
