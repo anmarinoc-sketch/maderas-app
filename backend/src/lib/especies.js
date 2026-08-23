@@ -245,6 +245,14 @@ export function consultarPorNombreCientifico(nombre) {
             significado: SIGNIFICADO[enAmenazadas.categoria],
             norma: amenazadas.norma,
             autoridad: amenazadas.autoridad,
+            // La resolucion a veces categoriza cada subespecie por separado y con
+            // categorias distintas. `categoria` es la PEOR del grupo, y aqui va el
+            // desglose: la danta figura como VU, pero la subespecie colombiana es CR.
+            desglose: enAmenazadas.desglose,
+            nota_desglose: enAmenazadas.desglose
+              ? 'La resolucion categoriza por separado las subespecies. Se muestra la ' +
+                'categoria mas grave del grupo; comprueba abajo cual te aplica.'
+              : undefined,
           }
         : null,
       // El Catalogo trae su propia lectura, que puede diferir de la norma vigente.

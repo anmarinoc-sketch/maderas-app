@@ -50,11 +50,24 @@ data class Endemica(
     val nota: String? = null,
 )
 
+/** Una subespecie con su propia categoría, cuando la resolución las separa. */
+data class Subcategoria(
+    val nombre: String? = null,
+    val categoria: String? = null,
+)
+
 data class AmenazaNacional(
     val categoria: String? = null,
     val significado: String? = null,
     val norma: String? = null,
     val autoridad: String? = null,
+    /**
+     * Desglose por subespecie. La resolución a veces categoriza cada una por separado y
+     * con categorías distintas: la danta figura como VU, pero la subespecie colombiana
+     * está en CR. `categoria` trae la peor del grupo y esto dice de dónde sale.
+     */
+    val desglose: List<Subcategoria>? = null,
+    @SerializedName("nota_desglose") val notaDesglose: String? = null,
 )
 
 data class AmenazaCatalogo(

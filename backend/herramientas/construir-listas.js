@@ -148,6 +148,9 @@ function indexar(taxones, construir) {
 
 /* ------------------------------------------------------------------ amenazadas */
 
+/** De menos a mas grave. Se usa para no perder la peor categoria de un grupo. */
+const GRAVEDAD = { VU: 1, EN: 2, CR: 3 };
+
 async function construirAmenazadas() {
   const archivos = await descargar('Resolucion 0126 de 2024', FUENTES.amenazadas);
   const taxones = leerTsv(archivos.get('taxon.txt'));
@@ -155,14 +158,54 @@ async function construirAmenazadas() {
 
   const categoriaPorId = new Map(distribucion.map((d) => [d.id, d.threatStatus]));
 
-  const especies = indexar(taxones, (t) => ({
-    nombre: t.scientificName,
-    categoria: categoriaPorId.get(t.id),
-    reino: t.kingdom,
-    clase: t.class,
-    familia: t.family,
-    comunes: t.vernacularName,
-  }));
+  /**
+   * La resolucion categoriza a veces la ESPECIE y a veces cada SUBESPECIE, y no siempre
+   * con la misma categoria. La danta (Tapirus terrestris) figura como VU, pero su
+   * subespecie colombiana esta en CR; Salvia sphacelioides tiene cuatro subespecies, de
+   * VU a CR. Indexando por especie y quedandose con un registro cualquiera, la app
+   * acababa diciendo VU de algo que en Colombia esta en peligro critico.
+   *
+   * Asi que la categoria de la especie es LA PEOR de su grupo, y el desglose se guarda
+   * aparte para poder enseñarlo. Subestimar el riesgo es el error que mas daño hace en
+   * esta app.
+   */
+  const grupos = new Map();
+  for (const t of taxones) {
+    const k = claveDeRegistro(t);
+    if (!k) continue;
+    const grupo = grupos.get(k) ?? [];
+    grupo.push(t);
+    grupos.set(k, grupo);
+  }
+
+  const especies = {};
+  for (const [k, grupo] of grupos) {
+    const cabeza = grupo.reduce((a, b) => (calidad(b) > calidad(a) ? b : a));
+
+    const categorias = grupo.map((t) => categoriaPorId.get(t.id)).filter(Boolean);
+    const peor = categorias.reduce(
+      (a, b) => ((GRAVEDAD[b] ?? 0) > (GRAVEDAD[a] ?? 0) ? b : a),
+      categorias[0]
+    );
+
+    // Solo interesa el desglose cuando aporta algo: varios registros que no coinciden.
+    const desglose =
+      new Set(categorias).size > 1
+        ? grupo
+            .map((t) => ({ nombre: t.scientificName, categoria: categoriaPorId.get(t.id) }))
+            .filter((x) => x.categoria)
+        : undefined;
+
+    especies[k] = limpio({
+      nombre: cabeza.scientificName,
+      categoria: peor,
+      reino: cabeza.kingdom,
+      clase: cabeza.class,
+      familia: cabeza.family,
+      comunes: cabeza.vernacularName,
+      desglose,
+    });
+  }
 
   return {
     norma: 'Resolucion 0126 de 2024',

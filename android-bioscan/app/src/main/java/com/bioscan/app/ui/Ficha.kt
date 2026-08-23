@@ -300,6 +300,36 @@ private fun BloqueAmenaza(ficha: Ficha) {
                 color = GrisNoConsta,
                 modifier = Modifier.padding(top = 6.dp),
             )
+
+            // Cuando la resolucion categoriza cada subespecie por separado, arriba se
+            // enseña la PEOR. Sin este desglose, alguien con la subespecie menos
+            // amenazada leeria una categoria que no es la suya, y al reves.
+            nacional.desglose?.takeIf { it.isNotEmpty() }?.let { desglose ->
+                nacional.notaDesglose?.let {
+                    Aviso(it, NaranjaAviso, Modifier.padding(top = 8.dp))
+                }
+                Column(modifier = Modifier.padding(top = 6.dp)) {
+                    desglose.forEach { sub ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                        ) {
+                            Text(
+                                sub.nombre ?: "",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontStyle = FontStyle.Italic,
+                                modifier = Modifier.weight(1f),
+                            )
+                            Text(
+                                sub.categoria ?: "",
+                                style = MaterialTheme.typography.labelLarge,
+                                fontWeight = FontWeight.Bold,
+                                color = if (sub.categoria == "VU") NaranjaAviso else RojoGrave,
+                            )
+                        }
+                    }
+                }
+            }
         } else {
             Text(
                 amenaza.sinCategoria ?: "No figura entre las especies amenazadas.",
