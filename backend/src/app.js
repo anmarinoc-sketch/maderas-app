@@ -45,6 +45,12 @@ export function crearApp() {
         bioscan: {
           modelos_disponibles: libresEspecies.length,
           modelos_totales: modelosEspecies.length,
+          // Solo si/no. Sirve para comprobar desde fuera que GEMINI_API_KEY_ESPECIES
+          // quedo bien puesta en Render; la clave en si nunca sale del servidor.
+          cuota_propia: config.geminiClaveEspeciesPropia,
+          cuota: config.geminiClaveEspeciesPropia
+            ? 'BioScan tiene su propia cuota diaria'
+            : 'BioScan comparte la cuota de XiloScan (falta GEMINI_API_KEY_ESPECIES)',
           // BioScan sigue sirviendo sin cuota: lo que esta en las listas no la gasta.
           listas: estadoDeListas(),
         },

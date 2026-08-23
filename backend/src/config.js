@@ -62,6 +62,15 @@ export const config = {
     process.env.GEMINI_API_KEY_ESPECIES?.trim() || requerido('GEMINI_API_KEY'),
 
   /**
+   * Si BioScan tiene clave propia o esta compartiendo la de XiloScan.
+   *
+   * Se publica en /health como un simple si/no para poder comprobar desde fuera que la
+   * variable quedo bien puesta en Render. Es un booleano, nunca la clave: el valor no
+   * sale de este proceso.
+   */
+  geminiClaveEspeciesPropia: Boolean(process.env.GEMINI_API_KEY_ESPECIES?.trim()),
+
+  /**
    * Cadena de modelos. El nivel gratuito limita a 20 peticiones diarias POR MODELO,
    * asi que cuando uno agota su cuota se pasa al siguiente y la capacidad diaria del
    * conjunto se multiplica. Van ordenados de mas a menos capaz: los "lite" son el
