@@ -4,7 +4,7 @@
   "cobertura": {
     "nacional": "completa segun la recopilacion de la Direccion General de Ecosistemas del MADS",
     "Corantioquia": "completa segun la Resolucion 3183 de 2000",
-    "Cornare": "PARCIAL. Del Acuerdo 404 de 2020 solo estan transcritas 10 de las 30 especies; los Acuerdos 262 de 2011 y 207 de 2008 no estan transcritos. El acta original es un PDF escaneado.",
+    "Cornare": "Acuerdo 404 de 2020 transcrito: 28 de las 30 especies de su articulo primero (dos filas del escaneo quedaron ilegibles) y las 12 de su articulo segundo. Los Acuerdos 262 de 2011 y 207 de 2008 siguen sin transcribir.",
     "Area Metropolitana del Valle de Aburra": "El AMVA es autoridad ambiental urbana y regula el arbolado y las talas dentro del perimetro urbano, pero no expide vedas de especies. En el Valle de Aburra aplican las vedas nacionales y las de Corantioquia."
   },
   "nota_procedimiento": "El Decreto-Ley 2106 de 2019, articulo 125, elimino el tramite independiente de levantamiento parcial de veda: ahora la autoridad ambiental impone las medidas de conservacion dentro del mismo tramite de licencia o permiso. La veda sigue vigente; lo que cambio es el procedimiento.",
@@ -17,17 +17,53 @@
       "efecto": "Veda indefinida del aprovechamiento en todo el territorio nacional.",
       "excepciones": "El roble (Quercus humboldtii) queda exceptuado en Cauca, Narino y ANTIOQUIA, siempre y cuando no se aproveche para carbon, lena o pulpa. La Resolucion 1408 de 1975 levanto ademas la veda del roble en Ospina Perez, Cabrera, Pandi y San Bernardo (Cundinamarca) con plan de manejo, y la Resolucion 1132 de 1975 la del pino colombiano en El Tablon (Narino).",
       "especies": [
-        { "cientifico": "Quercus humboldtii", "comun": "Roble, roble de tierra fria" },
-        { "cientifico": "Ocotea caparrapi", "comun": "Caparrapi" },
-        { "cientifico": "Talauma caricifragans", "tambien": ["Magnolia caricifragans"], "comun": "Hojarasco" },
-        { "cientifico": "Talauma hernandezii", "tambien": ["Magnolia hernandezii"], "comun": "Molinillo" },
-        { "cientifico": "Podocarpus oleifolius", "comun": "Pino colombiano, chaquiro" },
-        { "cientifico": "Podocarpus montanus", "comun": "Pino colombiano" },
-        { "cientifico": "Podocarpus rospigliosii", "tambien": ["Retrophyllum rospigliosii"], "comun": "Pino colombiano, chaquiro" }
+        {
+          "cientifico": "Quercus humboldtii",
+          "comun": "Roble, roble de tierra fria"
+        },
+        {
+          "cientifico": "Ocotea caparrapi",
+          "comun": "Caparrapi"
+        },
+        {
+          "cientifico": "Talauma caricifragans",
+          "tambien": [
+            "Magnolia caricifragans"
+          ],
+          "comun": "Hojarasco"
+        },
+        {
+          "cientifico": "Talauma hernandezii",
+          "tambien": [
+            "Magnolia hernandezii"
+          ],
+          "comun": "Molinillo"
+        },
+        {
+          "cientifico": "Podocarpus oleifolius",
+          "comun": "Pino colombiano, chaquiro"
+        },
+        {
+          "cientifico": "Podocarpus montanus",
+          "comun": "Pino colombiano"
+        },
+        {
+          "cientifico": "Podocarpus rospigliosii",
+          "tambien": [
+            "Retrophyllum rospigliosii"
+          ],
+          "comun": "Pino colombiano, chaquiro"
+        }
       ],
       "generos": [
-        { "genero": "Juglans", "comun": "Nogal, cedro negro" },
-        { "genero": "Erythroxylum", "comun": "Comino de la Macarena (la norma lo escribe 'Erithroxylon sp.')" }
+        {
+          "genero": "Juglans",
+          "comun": "Nogal, cedro negro"
+        },
+        {
+          "genero": "Erythroxylum",
+          "comun": "Comino de la Macarena (la norma lo escribe 'Erithroxylon sp.')"
+        }
       ],
       "fuente": "Recopilacion de vedas de la Direccion General de Ecosistemas, MADS"
     },
@@ -39,13 +75,36 @@
       "efecto": "Veda en todo el territorio nacional del aprovechamiento, transporte y comercializacion. Las declara plantas y productos protegidos. Cubre tambien la lama, el capote y la broza, y los arbolitos, cortezas y ramajes que forman parte del habitat de esas especies.",
       "excepciones": "Quedan fuera los arbustos, arbolitos, cortezas, ramajes y demas productos de cultivos de flores y de plantas ornamentales procedentes de plantaciones artificiales en tierras de propiedad privada.",
       "familias": [
-        { "familia": "Orchidaceae", "comun": "Orquideas" },
-        { "familia": "Bromeliaceae", "comun": "Quiches, bromelias" }
+        {
+          "familia": "Orchidaceae",
+          "comun": "Orquideas"
+        },
+        {
+          "familia": "Bromeliaceae",
+          "comun": "Quiches, bromelias"
+        }
       ],
       "grupos": [
-        { "grupo": "musgos", "comun": "Musgos", "coincide_phylum": ["Bryophyta", "Marchantiophyta", "Anthocerotophyta"] },
-        { "grupo": "liquenes", "comun": "Liquenes", "coincide_reino": ["Fungi"] },
-        { "grupo": "parasitas", "comun": "Plantas parasitas" }
+        {
+          "grupo": "musgos",
+          "comun": "Musgos",
+          "coincide_phylum": [
+            "Bryophyta",
+            "Marchantiophyta",
+            "Anthocerotophyta"
+          ]
+        },
+        {
+          "grupo": "liquenes",
+          "comun": "Liquenes",
+          "coincide_reino": [
+            "Fungi"
+          ]
+        },
+        {
+          "grupo": "parasitas",
+          "comun": "Plantas parasitas"
+        }
       ],
       "fuente": "Recopilacion de vedas de la Direccion General de Ecosistemas, MADS"
     },
@@ -56,17 +115,44 @@
       "ambito": "nacional",
       "efecto": "Veda permanente en todo el territorio nacional del aprovechamiento, comercializacion y movilizacion, y declaracion como planta protegida.",
       "familias": [
-        { "familia": "Cyatheaceae", "comun": "Helecho macho, palma boba, palma de helecho" },
-        { "familia": "Dicksoniaceae", "comun": "Palma boba" }
+        {
+          "familia": "Cyatheaceae",
+          "comun": "Helecho macho, palma boba, palma de helecho"
+        },
+        {
+          "familia": "Dicksoniaceae",
+          "comun": "Palma boba"
+        }
       ],
       "generos": [
-        { "genero": "Dicksonia", "comun": "Palma boba" },
-        { "genero": "Cnemidaria", "comun": "Helecho arborescente" },
-        { "genero": "Cyathea", "comun": "Helecho arborescente, palma boba" },
-        { "genero": "Nephelea", "comun": "Helecho arborescente" },
-        { "genero": "Sphaeropteris", "comun": "Helecho arborescente" },
-        { "genero": "Trichipteris", "comun": "Helecho arborescente" },
-        { "genero": "Alsophila", "comun": "Helecho arborescente (genero al que se han pasado muchas Cyathea)" }
+        {
+          "genero": "Dicksonia",
+          "comun": "Palma boba"
+        },
+        {
+          "genero": "Cnemidaria",
+          "comun": "Helecho arborescente"
+        },
+        {
+          "genero": "Cyathea",
+          "comun": "Helecho arborescente, palma boba"
+        },
+        {
+          "genero": "Nephelea",
+          "comun": "Helecho arborescente"
+        },
+        {
+          "genero": "Sphaeropteris",
+          "comun": "Helecho arborescente"
+        },
+        {
+          "genero": "Trichipteris",
+          "comun": "Helecho arborescente"
+        },
+        {
+          "genero": "Alsophila",
+          "comun": "Helecho arborescente (genero al que se han pasado muchas Cyathea)"
+        }
       ],
       "fuente": "Recopilacion de vedas de la Direccion General de Ecosistemas, MADS"
     },
@@ -87,7 +173,10 @@
       "ambito": "nacional",
       "efecto": "Declara la especie arbol nacional y simbolo patrio, y prohibe su tala de manera indefinida en todo el territorio nacional.",
       "especies": [
-        { "cientifico": "Ceroxylon quindiuense", "comun": "Palma de cera del Quindio" }
+        {
+          "cientifico": "Ceroxylon quindiuense",
+          "comun": "Palma de cera del Quindio"
+        }
       ],
       "fuente": "Recopilacion de vedas de la Direccion General de Ecosistemas, MADS"
     },
@@ -99,14 +188,41 @@
       "efecto": "Prohibe los aprovechamientos forestales unicos y las fuentes de impacto directo e indirecto sobre el manglar.",
       "excepciones": "Se exceptuan las labores comunitarias de acuicultura artesanal que no danen el manglar. Se permite el aprovechamiento forestal persistente en areas zonificadas como productoras, y el aprovechamiento para carbon y lena en areas excluidas de veda, solo para grupos etnicos tradicionalmente asentados alli.",
       "especies": [
-        { "cientifico": "Rhizophora harrisonii", "comun": "Mangle" },
-        { "cientifico": "Rhizophora mangle", "comun": "Mangle rojo" },
-        { "cientifico": "Laguncularia racemosa", "comun": "Mangle blanco" },
-        { "cientifico": "Conocarpus erectus", "comun": "Mangle zaragoza, jeli" },
-        { "cientifico": "Avicennia germinans", "comun": "Mangle negro, salado" },
-        { "cientifico": "Avicennia tonduzii", "comun": "Mangle negro" },
-        { "cientifico": "Pelliciera rhizophorae", "comun": "Mangle pinuelo" },
-        { "cientifico": "Mora megistosperma", "tambien": ["Mora oleifera"], "comun": "Nato" }
+        {
+          "cientifico": "Rhizophora harrisonii",
+          "comun": "Mangle"
+        },
+        {
+          "cientifico": "Rhizophora mangle",
+          "comun": "Mangle rojo"
+        },
+        {
+          "cientifico": "Laguncularia racemosa",
+          "comun": "Mangle blanco"
+        },
+        {
+          "cientifico": "Conocarpus erectus",
+          "comun": "Mangle zaragoza, jeli"
+        },
+        {
+          "cientifico": "Avicennia germinans",
+          "comun": "Mangle negro, salado"
+        },
+        {
+          "cientifico": "Avicennia tonduzii",
+          "comun": "Mangle negro"
+        },
+        {
+          "cientifico": "Pelliciera rhizophorae",
+          "comun": "Mangle pinuelo"
+        },
+        {
+          "cientifico": "Mora megistosperma",
+          "tambien": [
+            "Mora oleifera"
+          ],
+          "comun": "Nato"
+        }
       ],
       "fuente": "Recopilacion de vedas de la Direccion General de Ecosistemas, MADS"
     },
@@ -118,15 +234,42 @@
       "territorio": "Toda la jurisdiccion de Corantioquia (incluye la zona rural del Valle de Aburra)",
       "efecto": "PROHIBE el aprovechamiento de estas especies en toda la jurisdiccion.",
       "especies": [
-        { "cientifico": "Talauma espinalii", "tambien": ["Magnolia espinalii"], "comun": "Almanegra, magnolio de monte" },
-        { "cientifico": "Aniba perutilis", "comun": "Comino, comino crespo" },
-        { "cientifico": "Godoya antioquensis", "comun": "Caunce" },
-        { "cientifico": "Juglans neotropica", "comun": "Cedro negro, nogal" },
-        { "cientifico": "Cedrela montana", "comun": "Cedro de altura" }
+        {
+          "cientifico": "Talauma espinalii",
+          "tambien": [
+            "Magnolia espinalii"
+          ],
+          "comun": "Almanegra, magnolio de monte"
+        },
+        {
+          "cientifico": "Aniba perutilis",
+          "comun": "Comino, comino crespo"
+        },
+        {
+          "cientifico": "Godoya antioquensis",
+          "comun": "Caunce",
+          "tambien": [
+            "Godoya antioquiensis"
+          ]
+        },
+        {
+          "cientifico": "Juglans neotropica",
+          "comun": "Cedro negro, nogal"
+        },
+        {
+          "cientifico": "Cedrela montana",
+          "comun": "Cedro de altura"
+        }
       ],
       "generos": [
-        { "genero": "Nectandra", "comun": "Piedro, laurel piedro" },
-        { "genero": "Aniba", "comun": "Canelo" }
+        {
+          "genero": "Nectandra",
+          "comun": "Piedro, laurel piedro"
+        },
+        {
+          "genero": "Aniba",
+          "comun": "Canelo"
+        }
       ],
       "fuente": "Recopilacion de vedas de la Direccion General de Ecosistemas, MADS"
     },
@@ -138,20 +281,62 @@
       "territorio": "Toda la jurisdiccion de Corantioquia (incluye la zona rural del Valle de Aburra)",
       "efecto": "RESTRINGE el uso y aprovechamiento de estas especies, por presentar algun grado de riesgo y haber desaparecido de algunas regiones de la jurisdiccion. No es prohibicion absoluta: exige autorizacion.",
       "especies": [
-        { "cientifico": "Cariniana pyriformis", "comun": "Abarco" },
-        { "cientifico": "Hymenaea courbaril", "comun": "Algarrobo" },
-        { "cientifico": "Caryocar glabrum", "comun": "Almendra, cagui" },
-        { "cientifico": "Prioria copaifera", "comun": "Cativo" },
-        { "cientifico": "Podocarpus oleifolius", "comun": "Chaquiro" },
-        { "cientifico": "Astronium graveolens", "comun": "Diomato" },
-        { "cientifico": "Tabebuia chrysantha", "tambien": ["Handroanthus chrysanthus"], "comun": "Guayacan amarillo" },
-        { "cientifico": "Wettinia kalbreyeri", "comun": "Macana" },
-        { "cientifico": "Wettinia hirsuta", "comun": "Macana" },
-        { "cientifico": "Retrophyllum rospigliosii", "tambien": ["Podocarpus rospigliosii"], "comun": "Pino colombiano" },
-        { "cientifico": "Quercus humboldtii", "comun": "Roble de tierra fria" }
+        {
+          "cientifico": "Cariniana pyriformis",
+          "comun": "Abarco"
+        },
+        {
+          "cientifico": "Hymenaea courbaril",
+          "comun": "Algarrobo"
+        },
+        {
+          "cientifico": "Caryocar glabrum",
+          "comun": "Almendra, cagui"
+        },
+        {
+          "cientifico": "Prioria copaifera",
+          "comun": "Cativo"
+        },
+        {
+          "cientifico": "Podocarpus oleifolius",
+          "comun": "Chaquiro"
+        },
+        {
+          "cientifico": "Astronium graveolens",
+          "comun": "Diomato"
+        },
+        {
+          "cientifico": "Tabebuia chrysantha",
+          "tambien": [
+            "Handroanthus chrysanthus"
+          ],
+          "comun": "Guayacan amarillo"
+        },
+        {
+          "cientifico": "Wettinia kalbreyeri",
+          "comun": "Macana"
+        },
+        {
+          "cientifico": "Wettinia hirsuta",
+          "comun": "Macana"
+        },
+        {
+          "cientifico": "Retrophyllum rospigliosii",
+          "tambien": [
+            "Podocarpus rospigliosii"
+          ],
+          "comun": "Pino colombiano"
+        },
+        {
+          "cientifico": "Quercus humboldtii",
+          "comun": "Roble de tierra fria"
+        }
       ],
       "generos": [
-        { "genero": "Humiriastrum", "comun": "Aceituno" }
+        {
+          "genero": "Humiriastrum",
+          "comun": "Aceituno"
+        }
       ],
       "fuente": "Recopilacion de vedas de la Direccion General de Ecosistemas, MADS"
     },
@@ -163,11 +348,26 @@
       "territorio": "Toda la jurisdiccion de Corantioquia",
       "efecto": "PROHIBE el uso de las hojas para ramos de Semana Santa en toda la jurisdiccion.",
       "especies": [
-        { "cientifico": "Ceroxylon quindiuense", "comun": "Palma de cera, palma de ramo" },
-        { "cientifico": "Ceroxylon alpinum", "comun": "Palma de cera, palma real" },
-        { "cientifico": "Ceroxylon vogelianum", "comun": "Palma de cera" },
-        { "cientifico": "Ceroxylon parvifrons", "comun": "Palma de cera" },
-        { "cientifico": "Attalea amygdalina", "comun": "Palma taparo" }
+        {
+          "cientifico": "Ceroxylon quindiuense",
+          "comun": "Palma de cera, palma de ramo"
+        },
+        {
+          "cientifico": "Ceroxylon alpinum",
+          "comun": "Palma de cera, palma real"
+        },
+        {
+          "cientifico": "Ceroxylon vogelianum",
+          "comun": "Palma de cera"
+        },
+        {
+          "cientifico": "Ceroxylon parvifrons",
+          "comun": "Palma de cera"
+        },
+        {
+          "cientifico": "Attalea amygdalina",
+          "comun": "Palma taparo"
+        }
       ],
       "fuente": "Recopilacion de vedas de la Direccion General de Ecosistemas, MADS"
     },
@@ -179,36 +379,237 @@
       "territorio": "Toda la jurisdiccion de Corantioquia",
       "efecto": "PROHIBE el aprovechamiento, uso y comercializacion en toda la jurisdiccion.",
       "familias": [
-        { "familia": "Orchidaceae", "comun": "Orquideas silvestres" },
-        { "familia": "Bromeliaceae", "comun": "Bromelias, quiches" },
-        { "familia": "Heliconiaceae", "comun": "Heliconias silvestres" }
+        {
+          "familia": "Orchidaceae",
+          "comun": "Orquideas silvestres"
+        },
+        {
+          "familia": "Bromeliaceae",
+          "comun": "Bromelias, quiches"
+        },
+        {
+          "familia": "Heliconiaceae",
+          "comun": "Heliconias silvestres"
+        }
       ],
       "grupos": [
-        { "grupo": "musgos", "comun": "Musgos", "coincide_phylum": ["Bryophyta", "Marchantiophyta", "Anthocerotophyta"] },
-        { "grupo": "liquenes", "comun": "Liquenes, sarros", "coincide_reino": ["Fungi"] }
+        {
+          "grupo": "musgos",
+          "comun": "Musgos",
+          "coincide_phylum": [
+            "Bryophyta",
+            "Marchantiophyta",
+            "Anthocerotophyta"
+          ]
+        },
+        {
+          "grupo": "liquenes",
+          "comun": "Liquenes, sarros",
+          "coincide_reino": [
+            "Fungi"
+          ]
+        }
       ],
       "fuente": "Recopilacion de vedas de la Direccion General de Ecosistemas, MADS"
     },
     {
-      "id": "cornare-acuerdo-404-2020",
-      "norma": "Acuerdo 404 del 29 de mayo de 2020",
+      "id": "cornare-acuerdo-404-2020-art1",
+      "norma": "Acuerdo 404 del 29 de mayo de 2020, articulo primero",
       "autoridad": "CORNARE",
       "ambito": "regional",
-      "territorio": "Jurisdiccion de Cornare (Oriente antioqueno). NO cubre el Valle de Aburra.",
-      "efecto": "Declara la veda de 30 especies de flora silvestre consideradas carismaticas e importantes para la conservacion, la mayoria endemicas de Colombia o de Antioquia. Ademas de restringir el uso, obliga a quien necesite intervenirlas a desarrollar antes acciones de conservacion, propagacion o restauracion.",
+      "territorio": "Jurisdiccion de Cornare (Oriente antioqueno). NO cubre el Valle de Aburra, que es de Corantioquia.",
+      "efecto": "Declara la veda indefinida y PROHIBE el uso y aprovechamiento de estas especies en la jurisdiccion. Ademas de restringir el uso, obliga a quien necesite intervenirlas a desarrollar antes acciones de conservacion, propagacion o restauracion.",
       "listado_incompleto": true,
-      "aviso_listado": "Solo estan transcritas 10 de las 30 especies. El acta original es un PDF escaneado que aun no se ha transcrito. Si consultas una especie del Oriente antioqueno y la app dice que no esta vedada, NO lo des por bueno: consulta el Acuerdo 404 directamente.",
+      "aviso_listado": "El acuerdo veda 30 especies y aqui hay 28. Al leer el escaneo, dos filas de la tabla salieron con el nombre repetido de la fila vecina, asi que faltan dos especies por identificar. Si consultas una especie del Oriente antioqueno y no aparece, confirma en el Acuerdo 404 antes de darla por libre.",
+      "revision": "Transcrita del PDF escaneado con Gemini el 23-08-2026 y cotejada despues contra el Catalogo de Plantas de Colombia y GBIF. Control de calidad: el articulo tercero del mismo acuerdo recoge la Resolucion 0316 de 1974, cuyas 7 especies ya se conocian por otra fuente, y coincidieron las 7. No sustituye la lectura del original.",
       "especies": [
-        { "cientifico": "Aiphanes leiostachys", "comun": "Palma mararay" },
-        { "cientifico": "Ceroxylon sasaimae", "comun": "Palma de Sasaima" },
-        { "cientifico": "Wettinia hirsuta", "comun": "Palma macana" },
-        { "cientifico": "Phytelephas macrocarpa", "comun": "Tagua" },
-        { "cientifico": "Clathrotropis brachypetala", "comun": "Aramata" },
-        { "cientifico": "Colombobalanus excelsa", "comun": "Roble negro" },
-        { "cientifico": "Caryodaphnopsis cogolloi", "comun": "Yumbe" },
-        { "cientifico": "Iryanthera megistocarpa", "comun": "Cuangare" },
-        { "cientifico": "Magnolia silvioi", "comun": "Guanabano de monte" },
-        { "cientifico": "Caryocar amygdaliferum", "comun": "Cagui" }
+        {
+          "cientifico": "Campnosperma panamense",
+          "comun": "Sajo"
+        },
+        {
+          "cientifico": "Ceroxylon sasaimae",
+          "comun": "Palma de cera de Sasaima"
+        },
+        {
+          "cientifico": "Wettinia hirsuta",
+          "comun": "Palma macana"
+        },
+        {
+          "cientifico": "Aiphanes leiostachys",
+          "comun": "Palma mararay"
+        },
+        {
+          "cientifico": "Phytelephas macrocarpa",
+          "comun": "Palma tagua"
+        },
+        {
+          "cientifico": "Tabebuia guayacan",
+          "tambien": [
+            "Handroanthus guayacan"
+          ],
+          "comun": "Chicala"
+        },
+        {
+          "cientifico": "Caryocar amygdaliferum",
+          "comun": "Almendron, cagui"
+        },
+        {
+          "cientifico": "Calophyllum mariae",
+          "tambien": [
+            "Calophyllum brasiliense"
+          ],
+          "comun": "Aceite maria"
+        },
+        {
+          "cientifico": "Centrolobium paraense",
+          "comun": "Balaustre, guayacan jobo"
+        },
+        {
+          "cientifico": "Clathrotropis brachypetala",
+          "comun": "Sapan, aramata"
+        },
+        {
+          "cientifico": "Colombobalanus excelsa",
+          "comun": "Roble negro, roble morado, roble rosado"
+        },
+        {
+          "cientifico": "Caryodaphnopsis cogolloi",
+          "comun": "Yumbe"
+        },
+        {
+          "cientifico": "Lecythis tuyrana",
+          "comun": "Olleto, olla de mono"
+        },
+        {
+          "cientifico": "Cariniana pyriformis",
+          "comun": "Abarco"
+        },
+        {
+          "cientifico": "Eschweilera coriacea",
+          "comun": "Cabuyo, coco cazuelo, machamachingo"
+        },
+        {
+          "cientifico": "Lecythis minor",
+          "comun": "Coco, cocuelo, olla de mono"
+        },
+        {
+          "cientifico": "Magnolia mahechae",
+          "comun": "Almanegra, laurel almanegra"
+        },
+        {
+          "cientifico": "Magnolia silvioi",
+          "comun": "Alma negra, guanabano de monte"
+        },
+        {
+          "cientifico": "Magnolia guatapensis",
+          "comun": "Almanegra de Guatape"
+        },
+        {
+          "cientifico": "Iryanthera megistocarpa",
+          "comun": "Sota"
+        },
+        {
+          "cientifico": "Compsoneura claroensis",
+          "comun": "Castano de rio Claro, soto sangre"
+        },
+        {
+          "cientifico": "Iryanthera megistophylla",
+          "comun": "Cuangare de loma, cuangare cholo"
+        },
+        {
+          "cientifico": "Otoba acuminata",
+          "comun": "Otobo, ocoba, mamo"
+        },
+        {
+          "cientifico": "Otoba gracilipes",
+          "comun": "Otobo, ocoba, mamito"
+        },
+        {
+          "cientifico": "Otoba lehmannii",
+          "comun": "Cuangare otobo, castano"
+        },
+        {
+          "cientifico": "Quiina pteridophylla",
+          "comun": "Yaya"
+        },
+        {
+          "cientifico": "Prumnopitys harmsiana",
+          "comun": "Pino chaquiro"
+        },
+        {
+          "cientifico": "Prumnopitys montana",
+          "comun": "Pino colombiano, chaquiro, pino de montana"
+        }
+      ],
+      "fuente": "https://www.cornare.gov.co/Acuerdos/Acuerdo_404_2020_cornare.pdf"
+    },
+    {
+      "id": "cornare-acuerdo-404-2020-art2",
+      "norma": "Acuerdo 404 del 29 de mayo de 2020, articulo segundo",
+      "autoridad": "CORNARE",
+      "ambito": "regional",
+      "territorio": "Jurisdiccion de Cornare (Oriente antioqueno). NO cubre el Valle de Aburra, que es de Corantioquia.",
+      "efecto": "CONFIRMA la veda regional de estas especies en la jurisdiccion, ya declarada por acuerdos anteriores.",
+      "revision": "Transcrita del PDF escaneado con Gemini el 23-08-2026 y cotejada despues contra el Catalogo de Plantas de Colombia y GBIF. Control de calidad: el articulo tercero del mismo acuerdo recoge la Resolucion 0316 de 1974, cuyas 7 especies ya se conocian por otra fuente, y coincidieron las 7. No sustituye la lectura del original.",
+      "especies": [
+        {
+          "cientifico": "Caryodaphnopsis cogolloi",
+          "comun": "Yumbe"
+        },
+        {
+          "cientifico": "Aspidosperma megalocarpon",
+          "comun": "Carreto"
+        },
+        {
+          "cientifico": "Ilex caliana",
+          "comun": "Cardenalillo"
+        },
+        {
+          "cientifico": "Peltogyne paniculata",
+          "comun": "Nazareno (la norma dice subsp. pubescens)"
+        },
+        {
+          "cientifico": "Myroxylon balsamum",
+          "comun": "Balsamo"
+        },
+        {
+          "cientifico": "Dussia macrophyllata",
+          "tambien": [
+            "Dussia macroprophyllata"
+          ],
+          "comun": "Ubre vaca"
+        },
+        {
+          "cientifico": "Vantanea magdalenensis",
+          "comun": "Marfil"
+        },
+        {
+          "cientifico": "Alfaroa colombiana",
+          "comun": "Escobo"
+        },
+        {
+          "cientifico": "Eschweilera antioquensis",
+          "comun": "Cabuyo"
+        },
+        {
+          "cientifico": "Gaiadendron punctatum",
+          "comun": "Tagua, platero"
+        },
+        {
+          "cientifico": "Talauma espinalii",
+          "tambien": [
+            "Magnolia espinalii"
+          ],
+          "comun": "Alma negra"
+        },
+        {
+          "cientifico": "Godoya antioquensis",
+          "tambien": [
+            "Godoya antioquiensis"
+          ],
+          "comun": "Caunce"
+        }
       ],
       "fuente": "https://www.cornare.gov.co/Acuerdos/Acuerdo_404_2020_cornare.pdf"
     },
@@ -220,7 +621,7 @@
       "territorio": "Jurisdiccion de Cornare (Oriente antioqueno). NO cubre el Valle de Aburra.",
       "efecto": "Declara veda indefinida para algunas especies forestales en la jurisdiccion.",
       "listado_incompleto": true,
-      "aviso_listado": "El listado de especies no esta transcrito en la app. Consulta el acuerdo directamente ante Cornare.",
+      "aviso_listado": "El listado de este acuerdo no esta transcrito. Es probable que sus especies sean las 12 que confirma el articulo segundo del Acuerdo 404 de 2020, que si estan cargadas, pero no esta comprobado. Consulta el acuerdo ante Cornare.",
       "especies": [],
       "fuente": "CORNARE"
     },
@@ -232,7 +633,7 @@
       "territorio": "Jurisdiccion de Cornare (Oriente antioqueno). NO cubre el Valle de Aburra.",
       "efecto": "Declara en peligro de extincion algunas especies de flora silvestre de la jurisdiccion.",
       "listado_incompleto": true,
-      "aviso_listado": "El listado de especies no esta transcrito en la app. Consulta el acuerdo directamente ante Cornare.",
+      "aviso_listado": "El listado de este acuerdo no esta transcrito. Es probable que sus especies sean las 12 que confirma el articulo segundo del Acuerdo 404 de 2020, que si estan cargadas, pero no esta comprobado. Consulta el acuerdo ante Cornare.",
       "especies": [],
       "fuente": "CORNARE"
     }
