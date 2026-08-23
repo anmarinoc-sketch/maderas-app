@@ -179,6 +179,70 @@ Notas prácticas:
   desarrollo necesitarás un `network_security_config.xml` que lo permita; en producción, HTTPS.
 - La foto no se guarda en disco en ningún momento: se procesa en memoria y se descarta.
 
+## BioScan: identificación de especies
+
+El mismo servidor atiende a una segunda app, **BioScan**, que dice de una especie de flora
+o fauna si es nativa o exótica, endémica, amenazada o vedada. Se comparte servidor porque
+el plan gratuito de Render da 750 horas de instancia al mes y un servicio despierto las
+consume casi todas.
+
+La diferencia de fondo con XiloScan: aquí **el modelo no dictamina**. Gemini no tiene base
+de datos, y preguntarle si una especie está vedada produce números de resolución
+inventados. Lo normativo sale de listas oficiales guardadas en `src/datos/`, y Gemini solo
+reconoce fotos y redacta.
+
+### `GET /api/especie?q=<nombre>&relato=1`
+
+Nombre común o científico. Resuelve en cuatro pasos, de más barato a más caro, y para en
+cuanto uno responde: listas locales → índice de nombres comunes → GBIF → el modelo. Los
+tres primeros **no gastan cuota de Gemini**; con `relato=0` la consulta no gasta ninguna.
+
+```bash
+curl "http://localhost:3000/api/especie?q=roble&relato=0"
+```
+
+Si el nombre designa varias especies devuelve `hay_que_elegir: true` y la lista de
+candidatas, cada una con su endemismo, amenaza y veda: la elección es del usuario.
+
+### `POST /api/identificar-especie`
+
+Igual que el de maderas, campo `imagen` en multipart o `imagen_base64` en JSON. Devuelve
+la identificación del modelo y, aparte, la ficha oficial de la especie propuesta **y la de
+cada alternativa**.
+
+### `GET /api/listas`
+
+Qué listas hay cargadas y de cuándo son.
+
+### Las listas
+
+| Archivo | Qué es | Entradas |
+| --- | --- | --- |
+| `amenazadas-colombia.json` | Resolución 0126 de 2024 (MADS), que derogó la 1912 de 2017 | 2.087 |
+| `flora-colombia.json` | Catálogo de Plantas y Líquenes de Colombia: origen, endemismo, departamentos, altitud, CITES | 44.477 |
+| `exoticas-colombia.json` | Lista de plantas exóticas del Instituto Humboldt | 1.292 |
+| `nombres-comunes.json` | Nombre común → científico | 878 |
+| `vedas-colombia.json` | Vedas nacionales y regionales, **transcritas a mano** | 13 normas |
+
+Las cuatro primeras se regeneran solas cuando cambie una norma:
+
+```bash
+cd C:\Users\amo\Desktop\Claude\maderas-app\backend; node herramientas/construir-listas.js
+```
+
+Las vedas no: no existe ninguna fuente legible por máquina. Están transcritas y **el
+listado de Cornare está incompleto**, porque el Acuerdo 404 de 2020 solo existe como PDF
+escaneado. Para transcribirlo hace falta que lo lea el propio Gemini:
+
+```bash
+cd C:\Users\amo\Desktop\Claude\maderas-app\backend; node herramientas/transcribir-acuerdo.js acuerdo.pdf
+```
+
+Cuesta 1 consulta y no escribe nada: imprime el JSON para revisarlo contra el original
+antes de pegarlo.
+
+Cargarlo todo cuesta **107 MB de RSS y 221 ms de arranque**; Render da 512 MB.
+
 ## Estructura
 
 ```
@@ -186,15 +250,32 @@ src/
   server.js               arranque, timeouts y apagado limpio
   app.js                  montaje de Express, /health, manejo de errores
   config.js               lectura y validación de variables de entorno
-  routes/identificar.js   endpoint POST /api/identificar-madera
-  lib/gemini.js           llamada a Gemini, reintentos y traducción de errores
+
+  routes/identificar.js   XiloScan: POST /api/identificar-madera
+  routes/especies.js      BioScan: GET /api/especie y POST /api/identificar-especie
+
+  lib/motor-gemini.js     rotación de modelos, cuotas y errores; una instancia por clave
+  lib/gemini.js           XiloScan sobre el motor
+  lib/gemini-especies.js  BioScan sobre el motor, con OTRA clave
   lib/prompt.js           rol de dendrólogo + esquema JSON de salida
+  lib/prompt-especies.js  prompts de BioScan; le prohíben pronunciarse sobre normas
+  lib/especies.js         cruce de un nombre contra las listas oficiales
+  lib/gbif.js             nombres vulgares y normalización, API pública sin clave
   lib/image.js            validación real de la imagen y decodificación base64
   lib/errors.js           AppError y catálogo de errores
   middleware/upload.js    multer en memoria (multipart)
   middleware/auth.js      secreto compartido opcional X-App-Key
   middleware/rateLimit.js límite por IP en memoria
+
+  datos/                  las listas oficiales y la clave de las 34 maderas
+herramientas/             regeneración de las listas (se ejecuta a mano)
 ```
+
+Las dos apps usan **claves de Gemini distintas** (`GEMINI_API_KEY` y
+`GEMINI_API_KEY_ESPECIES`). El nivel gratuito limita 20 peticiones diarias por modelo *y
+por proyecto*, así que con una sola clave un día de identificar especies se comería las
+identificaciones de madera. Si la segunda no se configura, se cae en la primera y
+comparten cuota.
 
 ## Siguientes pasos sugeridos
 

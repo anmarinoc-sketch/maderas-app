@@ -20,6 +20,13 @@ Para Andrés, del comercio maderero del Valle de Aburrá (Medellín, Colombia).
 
 Estructura: `android/` (Kotlin + Compose) y `backend/` (Node 22 + Express).
 
+**El repositorio ya no es solo de XiloScan.** Desde el 23-08-2026 alberga también
+**BioScan** (`android-bioscan/`), una app que identifica especies de flora y fauna y dice
+si están vedadas o amenazadas. Comparte backend, clave de firma y CI; si vas a tocar
+`backend/` o los workflows, invoca también la skill `bioscan`. Lo que cambió en XiloScan:
+la rotación de modelos salió de `lib/gemini.js` a `lib/motor-gemini.js` para que las dos
+apps la compartan con claves distintas. El comportamiento de XiloScan es el mismo.
+
 ## Cómo trabajar
 
 Cambio → commit → push. La CI compila el APK; Render redespliega **solo** si el cambio
