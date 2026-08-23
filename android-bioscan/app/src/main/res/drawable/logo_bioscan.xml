@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Icono de BioScan: una hoja dentro de una lupa.
+    La hoja dice de que va la app y la lupa dice que la identifica, que es justo la
+    diferencia con XiloScan, cuyo icono es el anillado de un tronco.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Nervio central y limbo de la hoja -->
+    <path
+        android:fillColor="#7CC499"
+        android:pathData="M62,26c-16,2 -28,12 -31,27c-1.5,8 0.5,15 4,20l4,-4c-3,-4 -4.5,-10 -3.5,-16c2,-12 11,-20 24,-22c1,7 -1,15 -6,21c-4,5 -10,8 -15,10l-3,3l-9,9c-1.6,1.6 -1.6,4.1 0,5.7c1.6,1.6 4.1,1.6 5.7,0l8.6,-8.6c7,-1 15,-4 21,-10C70,53 66,36 62,26z" />
+
+    <!-- Aro de la lupa -->
+    <path
+        android:fillColor="#E8F3EC"
+        android:pathData="M54,10c-24.3,0 -44,19.7 -44,44s19.7,44 44,44s44,-19.7 44,-44S78.3,10 54,10zM54,18c19.9,0 36,16.1 36,36S73.9,90 54,90S18,73.9 18,54S34.1,18 54,18z" />
+
+    <!-- Mango -->
+    <path
+        android:fillColor="#E8F3EC"
+        android:pathData="M83.5,83.5c1.9,-1.9 5.1,-1.9 7,0l9,9c1.9,1.9 1.9,5.1 0,7c-1.9,1.9 -5.1,1.9 -7,0l-9,-9C81.6,88.6 81.6,85.4 83.5,83.5z" />
+</vector>

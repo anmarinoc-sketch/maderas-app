@@ -1,0 +1,129 @@
+name: Compilar APK de BioScan
+
+# Workflow aparte del de XiloScan a proposito: son dos apps independientes y un fallo
+# de compilacion en una no debe impedir que salga el APK de la otra.
+
+on:
+  # Sin filtro de rutas en push, igual que en el workflow de XiloScan: al etiquetar una
+  # version GitHub evalua `paths` de forma poco fiable y el release podria no publicarse
+  # nunca. Ya se piso esa piedra una vez.
+  push:
+    branches: [main]
+    tags: ['bio-v*']
+  pull_request:
+    branches: [main]
+    paths:
+      - 'android-bioscan/**'
+      - '.github/workflows/apk-bioscan.yml'
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'URL pública del backend. Vacío = usa la del repositorio.'
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    name: APK de debug
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: android-bioscan
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Instalar el SDK de Android
+        uses: android-actions/setup-android@v3
+
+      # El repositorio no incluye gradle-wrapper.jar (es un binario), asi que la CI usa
+      # una distribucion de Gradle propia.
+      - name: Preparar Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.10.2'
+          build-root-directory: android-bioscan
+
+      # BioScan firma con la MISMA clave que XiloScan. No hay conflicto porque el
+      # applicationId es distinto: para Android son dos apps sin relacion. Lo que si
+      # importa es que la clave sea siempre la misma, o no se podra actualizar encima.
+      - name: Preparar la clave de firma
+        working-directory: .
+        env:
+          CLAVE_B64: ${{ secrets.DEBUG_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$CLAVE_B64" ]; then
+            mkdir -p android/keystore
+            printf '%s' "$CLAVE_B64" | base64 -d > android/keystore/xiloscan.p12
+            echo "Firmando con la clave del secreto DEBUG_KEYSTORE_B64."
+          elif [ -f android/keystore/xiloscan.p12 ]; then
+            echo "Firmando con la clave versionada en el repositorio."
+          else
+            echo "Sin clave estable: Gradle generara una y no se podra actualizar encima."
+          fi
+
+      - name: Compilar APK
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || vars.BASE_URL }}
+          APP_API_KEY: ${{ secrets.APP_API_KEY }}
+        run: gradle assembleDebug --no-daemon --stacktrace
+
+      - name: Mostrar la huella de firma
+        run: |
+          FIRMADOR=$(ls "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1)
+          if [ -z "$FIRMADOR" ]; then
+            echo "No se encontro apksigner; se omite la comprobacion."
+            exit 0
+          fi
+          HUELLA=$("$FIRMADOR" verify --print-certs app/build/outputs/apk/debug/app-debug.apk \
+                   | grep -i "SHA-256 digest" | head -1 | awk '{print $NF}')
+          echo "### Firma del APK de BioScan" >> "$GITHUB_STEP_SUMMARY"
+          echo "SHA-256: \`$HUELLA\`" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Renombrar el APK con el commit
+        run: |
+          mkdir -p entrega
+          cp app/build/outputs/apk/debug/app-debug.apk \
+             "entrega/bioscan-${GITHUB_SHA::7}.apk"
+
+      - name: Publicar el APK como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: bioscan-apk
+          path: android-bioscan/entrega/*.apk
+          if-no-files-found: error
+          retention-days: 30
+
+  publicar:
+    name: Publicar release
+    needs: apk
+    if: startsWith(github.ref, 'refs/tags/bio-v')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Recuperar el APK compilado
+        uses: actions/download-artifact@v4
+        with:
+          name: bioscan-apk
+          path: entrega
+
+      # Un release da una URL estable que se puede abrir desde el navegador del movil
+      # para instalar el APK directamente, sin pasar por el PC.
+      - name: Crear el release con el APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" entrega/*.apk \
+            --title "BioScan $GITHUB_REF_NAME" \
+            --notes "APK de debug. Descárgalo desde el móvil y permite la instalación de orígenes desconocidos."
