@@ -50,6 +50,18 @@ export const config = {
   geminiApiKey: requerido('GEMINI_API_KEY'),
 
   /**
+   * Clave para BioScan (identificacion de especies). Va aparte de la de XiloScan a
+   * proposito: el nivel gratuito limita 20 peticiones diarias por modelo Y POR
+   * PROYECTO, asi que dos apps con la misma clave se reparten las ~160 consultas
+   * diarias. Con un proyecto de Google Cloud distinto cada app tiene las suyas.
+   *
+   * Si no esta configurada se cae en la de XiloScan: la app funciona igual, solo que
+   * compartiendo cuota. Asi se puede desplegar antes de crear el segundo proyecto.
+   */
+  geminiApiKeyEspecies:
+    process.env.GEMINI_API_KEY_ESPECIES?.trim() || requerido('GEMINI_API_KEY'),
+
+  /**
    * Cadena de modelos. El nivel gratuito limita a 20 peticiones diarias POR MODELO,
    * asi que cuando uno agota su cuota se pasa al siguiente y la capacidad diaria del
    * conjunto se multiplica. Van ordenados de mas a menos capaz: los "lite" son el
