@@ -1,40 +1,72 @@
-# XiloScan
+# XiloScan y BioScan
 
-Identificación de especies de madera a partir de una fotografía del corte transversal,
-para profesionales del sector: aserraderos, carpintería, control de calidad y verificación
-de suministro.
+Dos apps Android para trabajo de campo y comercio de madera en Colombia, y un servidor
+que comparten.
 
-```
-App Android  ──foto──▶  backend  ──foto + prompt──▶  Gemini
-             ◀─JSON──            ◀──JSON estructurado──
-```
+> El repositorio se llama `maderas-app` porque nació con la primera. El nombre se quedó;
+> dentro hay dos apps.
 
-| Carpeta | Qué es |
-| --- | --- |
-| [`android/`](android) | App Android (Kotlin + Jetpack Compose). Su README explica cómo obtener el APK. |
-| [`backend/`](backend) | Servidor Node.js + Express que custodia la clave de Gemini. Su README documenta la API. |
+| App | Qué hace | Dónde |
+| --- | --- | --- |
+| **XiloScan** | Identifica la **especie de madera** fotografiando el corte transversal | [`android/`](android) |
+| **BioScan** | Dice si una **especie de flora o fauna** es nativa, endémica, amenazada o vedada | [`android-bioscan/`](android-bioscan) |
+| Servidor | El mismo para las dos | [`backend/`](backend) |
+
+Cada carpeta tiene su propio README con el detalle.
+
+## Por qué comparten servidor
+
+El plan gratuito de Render da **750 horas de instancia al mes por cuenta**, y un servicio
+despierto las consume casi todas. Un segundo servicio agotaría la cuota y Render
+suspendería **los dos** hasta el mes siguiente. Así que un solo servicio,
+`madera-backend.onrender.com`, atiende a las dos apps por rutas distintas.
+
+Lo que sí va separado son las **claves de Gemini**: `GEMINI_API_KEY` para XiloScan y
+`GEMINI_API_KEY_ESPECIES` para BioScan, de proyectos distintos de Google Cloud. El nivel
+gratuito limita 20 peticiones diarias por modelo **y por proyecto**, así que con una sola
+clave un día de identificar especies se comería las identificaciones de madera.
 
 ## Por qué hay un backend
 
-La clave de la API de Gemini **no puede vivir dentro del APK**: cualquiera puede
-descompilar una app y extraerla. El backend la guarda en una variable de entorno del
-servidor y la app solo conoce la URL pública. Si algún día hay que rotar la clave, se
-cambia en un sitio y ningún usuario necesita actualizar nada.
+La clave de Gemini **no puede vivir dentro del APK**: cualquiera puede descompilar una app
+y extraerla. El backend la guarda en una variable de entorno del servidor y la app solo
+conoce la URL pública. Si hay que rotar la clave, se cambia en un sitio y nadie tiene que
+actualizar nada.
 
-## Puesta en marcha rápida
+## Las dos filosofías, que no son la misma
 
-**Backend en local:**
+**XiloScan** le pregunta a Gemini y calibra la respuesta. La clave de determinación de las
+34 maderas del Valle de Aburrá va en el prompt, y la confianza está forzada a una escala
+explícita porque sin eso decía 0,93 tanto al acertar como al fallar.
+
+**BioScan hace lo contrario: el modelo no dictamina.** Gemini no tiene base de datos, y
+preguntarle si una especie está vedada produce números de resolución inventados con total
+seguridad. Lo normativo sale de listas oficiales guardadas en el servidor —Resolución 0126
+de 2024, Catálogo de Plantas de Colombia, vedas nacionales y regionales— y Gemini solo
+reconoce fotos y redacta. En pantalla cada bloque lleva su etiqueta: **Lista oficial** o
+**Redactado por IA**.
+
+Consecuencia práctica: BioScan **sigue sirviendo sin cuota**. Lo que está en las listas se
+responde desde disco.
+
+## Compilar los APK
+
+Los compila GitHub Actions en cada push; no hay forma de compilarlos en local en el equipo
+del proyecto (no hay JDK 17 ni SDK de Android).
+
+| App | Artefacto | Etiqueta para publicar release |
+| --- | --- | --- |
+| XiloScan | `xiloscan-apk` | `v1`, `v2`… |
+| BioScan | `bioscan-apk` | `bio-v1`, `bio-v2`… |
 
 ```bash
-cd backend; npm install; copy .env.example .env
+cd C:\Users\amo\Desktop\Claude\maderas-app; git push
 ```
 
-Pon tu clave de [AI Studio](https://aistudio.google.com/apikey) en `.env` y arranca con
-`npm run dev`. Detalles en [backend/README.md](backend/README.md).
-
-**APK:** lo compila GitHub Actions en cada push. Descárgalo desde la pestaña
-**Actions**, o crea una etiqueta `vX.Y.Z` para que se publique como release instalable
-desde el móvil. Detalles en [android/README.md](android/README.md).
+Las dos firman con la **misma clave** ([`android/keystore/`](android/keystore)). No hay
+conflicto porque el `applicationId` es distinto: para Android son dos apps sin relación,
+solo firmadas por el mismo autor. La clave estable es lo que permite instalar una versión
+encima de la anterior sin desinstalar.
 
 ## Configuración del repositorio
 
@@ -42,21 +74,22 @@ En **Settings → Secrets and variables → Actions**:
 
 | Tipo | Nombre | Para qué |
 | --- | --- | --- |
-| Variable | `BASE_URL` | URL pública del backend. Se compila dentro del APK. |
+| Variable | `BASE_URL` | URL pública del backend. Se compila dentro de los APK. |
 | Secret | `APP_API_KEY` | Secreto compartido app ↔ backend. Debe coincidir con el del servidor. |
+| Secret | `DEBUG_KEYSTORE_B64` | Opcional. Tiene prioridad sobre la clave versionada. |
 
-La `GEMINI_API_KEY` **no se configura aquí**: solo existe en el entorno del servidor
+Las claves de Gemini **no se configuran aquí**: solo existen en el entorno del servidor
 desplegado y en el `.env` local, que está en `.gitignore`.
 
-## Despliegue del backend
+## Despliegue
 
-Hay dos caminos preparados:
+El backend corre en **Render**, definido en [`render.yaml`](render.yaml). El plan gratuito
+duerme el servicio tras 15 minutos sin tráfico, así que el propio servidor se llama a sí
+mismo cada 10 minutos para no dormirse.
 
-- **Cloud Run** — con el [`backend/Dockerfile`](backend/Dockerfile). Escala a cero, arranque
-  en frío de pocos segundos y capa gratuita amplia. Al configurar el despliegue continuo hay
-  que indicar `backend` como directorio de contexto.
-- **Render** — con [`render.yaml`](render.yaml). No pide tarjeta, pero el plan
-  gratuito duerme el servicio tras 15 minutos de inactividad.
+Queda preparado un [`backend/Dockerfile`](backend/Dockerfile) por si algún día se mueve a
+Cloud Run.
 
-En cuanto el backend sea público, define `APP_API_KEY` en el servidor: sin él, cualquiera
-que descubra la URL puede consumir tu cuota de Gemini.
+**Pendiente:** `APP_API_KEY` no está configurado, así que el backend es público. El límite
+por IP protege de ráfagas, pero quien descubra la URL puede consumir cuota de Gemini.
+Ponerlo obliga a recompilar y reinstalar las dos apps.
