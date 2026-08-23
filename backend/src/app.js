@@ -9,6 +9,7 @@ import { estadoModelos as estadoModelosEspecies } from './lib/gemini-especies.js
 import { estadoDeListas } from './lib/especies.js';
 import { router as identificarRouter } from './routes/identificar.js';
 import { router as especiesRouter } from './routes/especies.js';
+import { router as transcripcionRouter } from './routes/transcripcion.js';
 
 export function crearApp() {
   const app = express();
@@ -60,6 +61,8 @@ export function crearApp() {
 
   app.use('/api', identificarRouter);
   app.use('/api', especiesRouter);
+  // Temporal: se retira en cuanto el Acuerdo 404 este transcrito y revisado.
+  app.use('/api', transcripcionRouter);
 
   app.use(noEncontrado);
   app.use(manejadorErrores);
