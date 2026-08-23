@@ -44,7 +44,8 @@ router.get('/transcribir-norma', rateLimit, async (req, res, next) => {
       );
     }
 
-    if (cache.has(id)) {
+    // refrescar=1 fuerza una transcripcion nueva; hace falta al cambiar el esquema.
+    if (cache.has(id) && req.query.refrescar !== '1') {
       return res.json({ ok: true, id, desde_cache: true, ...cache.get(id) });
     }
 
