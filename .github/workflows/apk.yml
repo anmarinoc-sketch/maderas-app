@@ -1,4 +1,4 @@
-name: Compilar APK
+name: Compilar APK de XiloScan
 
 on:
   # Sin filtro de rutas en push: al etiquetar una version, GitHub evalua `paths`
