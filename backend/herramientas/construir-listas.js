@@ -33,6 +33,7 @@ const FUENTES = {
   amenazadas: 'https://ipt.biodiversidad.co/sib/archive.do?r=especies-amenazadas-mads-2024',
   catalogo: 'https://ipt.biodiversidad.co/sib/archive.do?r=catalogo_plantas_liquenes',
   exoticas: 'https://ipt.biodiversidad.co/iavh/archive.do?r=ls_colombia_plantaeexoticas_2021',
+  invasoras: 'https://ipt.biodiversidad.co/sib/archive.do?r=resolucion0067-2023invasoras-mads',
   avesEndemicas: 'http://ipt.biodiversidad.co/iavh/archive.do?r=biota_v14_n2_09',
 
   // Fauna de Colombia, por grupos. Sin esto la app conocia 407 aves de las casi 2.000
@@ -314,6 +315,72 @@ async function construirExoticas() {
   };
 }
 
+/* -------------------------------------------------------------------- invasoras */
+
+/**
+ * Especies exoticas DECLARADAS INVASORAS por el Estado colombiano.
+ *
+ * No es lo mismo que el analisis de riesgo del Humboldt, y la diferencia tiene
+ * consecuencias. El Humboldt dice que una planta PODRIA invadir: es un pronostico
+ * tecnico. La Resolucion 0067 de 2023, que modifica el articulo 1 de la 848 de 2008,
+ * dice que el pais YA la declaro invasora, con obligacion de prevenir, manejar y
+ * controlar. Una opina y la otra manda.
+ *
+ * Son 26 nombres —25 especies y un genero—, de los que seis son flora. Ahi esta la
+ * Paulownia tomentosa, que se ha vendido en Colombia como madera de crecimiento rapido y
+ * desde 2023 esta declarada invasora: exactamente lo que alguien del sector necesita
+ * saber ANTES de plantar. Y ahi esta tambien el hipopotamo.
+ *
+ * La resolucion nombra varias especies por sinonimos ya superados (Eichornia crassipes,
+ * Teline monspessulana, Achatina fulica). El archivo del SiB los conserva en
+ * `taxonRemarks`, y aqui se indexan TAMBIEN por ese nombre: quien busca lo que dice el
+ * papel tiene que encontrarlo.
+ */
+async function construirInvasoras() {
+  const archivos = await descargar('Resolucion 0067 de 2023, invasoras', FUENTES.invasoras);
+  const taxones = leerTsv(archivos.get('taxon.txt'));
+
+  const especies = {};
+  for (const t of taxones) {
+    const k = claveDeRegistro(t);
+    if (!k) continue;
+
+    // "Nombre original en la resolucion: Eichornia crassipes (sinonimo). Nombre aceptado: ..."
+    // Se corta en el primer punto o parentesis, que es donde acaba el nombre.
+    const enLaNorma = /Nombre original en la resoluci.n:\s*([^.(]+)/i.exec(t.taxonRemarks ?? '');
+    const comoLaLlamaLaNorma = enLaNorma?.[1]?.trim();
+
+    const entrada = limpio({
+      nombre: t.scientificName,
+      familia: t.family,
+      reino: t.kingdom,
+      clase: t.class,
+      comun: t.vernacularName,
+      rango: t.taxonRank,
+      nombre_en_la_norma: comoLaLlamaLaNorma,
+    });
+
+    especies[k] = entrada;
+
+    const kNorma = clave(comoLaLlamaLaNorma);
+    if (kNorma && kNorma !== k) especies[kNorma] = entrada;
+  }
+
+  return {
+    norma: 'Resolucion 0067 de 2023',
+    autoridad: 'Ministerio de Ambiente y Desarrollo Sostenible',
+    modifica: 'Articulo 1 de la Resolucion 848 de 2008',
+    efecto:
+      'Declarada especie exotica invasora en Colombia. La declaratoria obliga a prevenir ' +
+      'su propagacion y a manejarla y controlarla, y restringe su introduccion y ' +
+      'movilizacion. Antes de plantarla, moverla o comercializarla, consulta a la ' +
+      'autoridad ambiental.',
+    fuente: 'Lista de especies exoticas declaradas como invasoras en Colombia (MADS), publicada en el SiB',
+    url: 'https://ipt.biodiversidad.co/sib/resource?r=resolucion0067-2023invasoras-mads',
+    especies,
+  };
+}
+
 /* -------------------------------------------------------------- aves endemicas */
 
 /**
@@ -578,13 +645,48 @@ function construirNombresComunes(...listas) {
 
 /* ------------------------------------------------------------------------ main */
 
+/**
+ * Listas que se pueden regenerar sueltas:
+ *   node herramientas/construir-listas.js invasoras
+ *
+ * Sirve para anadir o corregir una sin bajar el Catalogo entero, que son 44.000 especies
+ * y varios minutos, y sobre todo para que el diff del commit enseñe solo lo que se toco.
+ *
+ * Solo estan las que no alimentan a ninguna otra. El Catalogo, las amenazadas, las aves
+ * y la fauna NO pueden ir aqui: de ellas sale el indice de nombres comunes, y regenerar
+ * una sin rehacer el indice lo dejaria descuadrado sin que nada avisara.
+ */
+const SUELTAS = {
+  invasoras: {
+    archivo: 'invasoras-colombia.json',
+    descripcion: 'Res. 0067 de 2023',
+    construir: construirInvasoras,
+  },
+};
+
 async function principal() {
   mkdirSync(DESTINO, { recursive: true });
+
+  const solo = process.argv[2];
+  if (solo) {
+    const lista = SUELTAS[solo];
+    if (!lista) {
+      throw new Error(
+        `No se puede construir "${solo}" por separado. Sueltas: ${Object.keys(SUELTAS).join(', ')}`
+      );
+    }
+    console.log(`\nConstruyendo solo ${solo}\n`);
+    escribir(lista.archivo, await lista.construir(), lista.descripcion);
+    console.log('');
+    return;
+  }
+
   console.log('\nConstruyendo las listas oficiales de BioScan\n');
 
   const amenazadas = await construirAmenazadas();
   const catalogo = await construirCatalogo();
   const exoticas = await construirExoticas();
+  const invasoras = await construirInvasoras();
   const aves = await construirAvesEndemicas();
   const fauna = await construirFauna();
   const herpeto = await construirHerpetofauna();
@@ -594,6 +696,7 @@ async function principal() {
   escribir('amenazadas-colombia.json', amenazadas, 'Res. 0126 de 2024');
   escribir('flora-colombia.json', catalogo, 'origen, endemismo, distribucion, CITES');
   escribir('exoticas-colombia.json', exoticas, 'plantas no nativas');
+  escribir('invasoras-colombia.json', invasoras, 'Res. 0067 de 2023');
   escribir('aves-endemicas-colombia.json', aves, 'endemismo de aves');
   escribir('fauna-colombia.json', fauna, 'aves, mamiferos y peces');
   escribir('herpetofauna-colombia.json', herpeto, 'reptiles y anfibios, via GBIF');

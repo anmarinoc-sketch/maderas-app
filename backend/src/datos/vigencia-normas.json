@@ -56,7 +56,20 @@
       "norma": "Resolucion 0126 de 2024",
       "estado": "vigente",
       "nota": "Es la vigente y la mas reciente: derogo la Resolucion 1912 de 2017 el 6 de febrero de 2024. No se encontro resolucion posterior que la sustituya. Si alguien te menciona la 1912, esta derogada."
+    },
+    "res-0067-2023": {
+      "norma": "Resolucion 0067 de 2023",
+      "estado": "vigente",
+      "nota": "Es la version vigente del listado de invasoras: modifica el articulo 1 de la Resolucion 848 de 2008 y anade el ganso del Nilo, la paulonia (Paulownia tomentosa) y el cangrejo rojo americano. La paulonia entro tras una sentencia del Consejo de Estado del 19 de agosto de 2022, y eso importa a quien la haya plantado como madera de rapido crecimiento. No se encontro resolucion posterior."
     }
+  },
+  "_sobre_el_ica": "Buscado el 24-08-2026 y NO se encontro ninguna figura oficial del ICA llamada 'circular roja'. Lo que el ICA si publica son las plagas reglamentadas de la Resolucion ICA 3593 de 2015 (modificada por las 6630 de 2017, 29064 de 2018, 00032 y 79193 de 2020), en tres listados —cuarentenarias ausentes, cuarentenarias presentes y no cuarentenarias reglamentadas— que incluyen la categoria MALEZA, o sea plantas. No hay archivo descargable: son paginas ASPX alfabeticas, asi que cargarlo seria transcribirlo a mano. Mientras no este cargado, la app lo DICE en vez de callarse, que no es lo mismo que decir que la especie no figura.",
+  "ica": {
+    "estado": "no_cargado",
+    "norma": "Resolucion ICA 3593 de 2015 y sus modificatorias",
+    "autoridad": "Instituto Colombiano Agropecuario (ICA)",
+    "nota": "Esta app NO consulta los listados de plagas reglamentadas del ICA, que incluyen malezas. Que aqui no aparezca nada del ICA no significa que la especie no figure alli: significa que no se ha mirado.",
+    "fuente": "https://www.ica.gov.co/areas/agricola/servicios/epidemiologia-agricola/plagas-reglamentadas.aspx"
   },
   "cites": {
     "ultima_reunion_revisada": "CoP20 (Samarcanda, 24 de noviembre a 5 de diciembre de 2025)",

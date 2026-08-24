@@ -31,6 +31,7 @@ const comunes = leer('nombres-comunes.json');
 const vedas = leer('vedas-colombia.json');
 const citesNuevo = leer('cites-actualizaciones.json');
 const vigencia = leer('vigencia-normas.json');
+const invasoras = leer('invasoras-colombia.json');
 
 /* -------------------------------------------------------------------- vigencia */
 
@@ -139,6 +140,63 @@ const GENEROS_FAUNA = new Set(
     ...Object.keys(herpeto.especies),
   ].map(genero)
 );
+
+/* -------------------------------------------------------------------- invasoras */
+
+/**
+ * Que se sabe de esta especie como invasora, y de donde sale cada cosa.
+ *
+ * Son tres cosas distintas y se enseñan por separado a proposito, porque no pesan igual:
+ *
+ *   1. DECLARADA INVASORA. Resolucion 0067 de 2023, que modifica el articulo 1 de la 848
+ *      de 2008. Es un acto administrativo: el pais ya decidio. Seis plantas, entre ellas
+ *      la Paulownia tomentosa, que se ha vendido en Colombia como madera de crecimiento
+ *      rapido y desde 2023 esta declarada invasora.
+ *   2. POTENCIAL INVASOR. Analisis de riesgo del Instituto Humboldt. Es un pronostico
+ *      tecnico, no una norma: dice que PODRIA invadir, con su nivel de riesgo.
+ *   3. EL ICA. No esta cargado, y se dice. Sus listados de plagas reglamentadas incluyen
+ *      malezas, o sea plantas, pero no hay archivo descargable. Callarse aqui daria a
+ *      entender que se comprobo algo que no se comprobo.
+ *
+ * Confundir la 1 con la 2 seria el error de siempre en esta app: dar el mismo peso a un
+ * mandato y a una opinion tecnica bien fundada.
+ */
+function estadoInvasora(k, enExoticas) {
+  const declarada = invasoras.especies[k] ?? invasoras.especies[genero(k)];
+
+  const riesgo = enExoticas?.invasividad?.trim();
+
+  return {
+    declarada: Boolean(declarada),
+    // La norma va SIEMPRE, tambien cuando no figura: "no esta en el listado" solo
+    // significa algo si se dice en que listado se miro.
+    norma: invasoras.norma,
+    autoridad: declarada ? invasoras.autoridad : undefined,
+    modifica: declarada ? invasoras.modifica : undefined,
+    efecto: declarada ? invasoras.efecto : undefined,
+    // La resolucion llama "Eichornia crassipes" al buchon y "Teline monspessulana" al
+    // retamo liso. Quien tenga el papel delante busca esos nombres, no los aceptados.
+    nombre_en_la_norma:
+      declarada?.nombre_en_la_norma !== declarada?.nombre ? declarada?.nombre_en_la_norma : undefined,
+    comun_en_la_norma: declarada?.comun,
+    fuente: declarada ? invasoras.fuente : undefined,
+    url: declarada ? invasoras.url : undefined,
+    vigencia: declarada ? vigenciaDe('res-0067-2023') : undefined,
+
+    // El Humboldt, que es analisis de riesgo y no norma. Se enseña aunque no este
+    // declarada: saber que una planta es de alto riesgo antes de que lo sea oficialmente
+    // es justo para lo que sirve.
+    potencial: riesgo
+      ? {
+          riesgo,
+          fuente: exoticas.fuente,
+          nota: 'Analisis de riesgo del Instituto Humboldt. Es una valoracion tecnica, no una norma: dice que podria invadir, no que este declarada invasora.',
+        }
+      : null,
+
+    ica: vigencia.ica,
+  };
+}
 
 /* ------------------------------------------------------------------------ vedas */
 
@@ -379,6 +437,8 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
   const esExotica =
     elOrigen.valor === 'exotica' && !enAmenazadas && !enFlora?.amenaza_catalogo;
 
+  const laInvasora = estadoInvasora(k, enExoticas);
+
   return {
     clave: k,
     nombre_cientifico: enFlora?.nombre ?? enAmenazadas?.nombre ?? enExoticas?.nombre ?? nombre,
@@ -409,6 +469,10 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
     fauna_exotica: esFauna && esExotica,
 
     origen: elOrigen,
+
+    // Solo tiene sentido preguntarselo a una exotica. Si por lo que fuera una especie
+    // figurase declarada sin estar marcada como exotica, manda la resolucion y se enseña.
+    invasora: esExotica || laInvasora.declarada ? laInvasora : undefined,
 
     // Se devuelve el objeto, nunca null: quien consume esto lee `endemica.valor` directo.
     endemica: esExotica
@@ -813,6 +877,15 @@ export function estadoDeListas() {
     amenazadas: { norma: amenazadas.norma, especies: Object.keys(amenazadas.especies).length },
     flora: { fuente: flora.url, especies: Object.keys(flora.especies).length },
     exoticas: { especies: Object.keys(exoticas.especies).length },
+    invasoras: {
+      norma: invasoras.norma,
+      autoridad: invasoras.autoridad,
+      // Mas claves que taxones: las que la resolucion nombra por un sinonimo se indexan
+      // tambien por ese nombre, para que se encuentren buscando lo que dice el papel.
+      claves: Object.keys(invasoras.especies).length,
+      claves_de_flora: Object.values(invasoras.especies).filter((e) => e.reino === 'Plantae').length,
+    },
+    ica: vigencia.ica,
     fauna: {
       fuente: 'Aves (ACO), mamiferos y peces de agua dulce, SiB Colombia',
       especies: Object.keys(fauna.especies).length,

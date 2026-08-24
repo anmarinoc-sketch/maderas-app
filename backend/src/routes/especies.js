@@ -94,6 +94,9 @@ async function armarFicha(nombreCientifico, { conRelato, reinoSugerido, respaldo
       es_exotica: oficial.es_exotica,
       oficial: {
         origen: oficial.origen,
+        // Para que ante una exotica pueda contar que hace aqui apoyandose en si esta
+        // declarada invasora, en vez de improvisarlo.
+        invasora: oficial.invasora,
         endemica: oficial.endemica,
         amenaza: oficial.amenaza,
         cites: oficial.cites,

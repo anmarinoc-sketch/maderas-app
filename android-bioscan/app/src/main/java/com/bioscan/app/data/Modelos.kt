@@ -48,6 +48,47 @@ data class Origen(
     val nota: String? = null,
 )
 
+/** Análisis de riesgo del Humboldt: un pronóstico técnico, no una norma. */
+data class PotencialInvasor(
+    val riesgo: String? = null,
+    val fuente: String? = null,
+    val nota: String? = null,
+)
+
+/** Lo que la app NO tiene del ICA. Se dice, en vez de callarlo. */
+data class NotaIca(
+    val estado: String? = null,
+    val norma: String? = null,
+    val autoridad: String? = null,
+    val nota: String? = null,
+    val fuente: String? = null,
+)
+
+/**
+ * Qué se sabe de una exótica como invasora. Tres cosas distintas, y no pesan igual:
+ *
+ *   `declarada` → la Resolución 0067 de 2023 ya lo decidió. Es un acto administrativo.
+ *   `potencial` → el Humboldt dice que podría invadir. Es un pronóstico técnico.
+ *   `ica`       → no está cargado, y la app lo dice.
+ *
+ * Mezclarlas sería darle el mismo peso a un mandato y a una opinión bien fundada.
+ */
+data class Invasora(
+    val declarada: Boolean? = null,
+    val norma: String? = null,
+    val autoridad: String? = null,
+    val modifica: String? = null,
+    val efecto: String? = null,
+    /** La resolución llama "Eichornia crassipes" al buchón: quien tiene el papel busca eso. */
+    @SerializedName("nombre_en_la_norma") val nombreEnLaNorma: String? = null,
+    @SerializedName("comun_en_la_norma") val comunEnLaNorma: String? = null,
+    val fuente: String? = null,
+    val url: String? = null,
+    val vigencia: Vigencia? = null,
+    val potencial: PotencialInvasor? = null,
+    val ica: NotaIca? = null,
+)
+
 /** `valor` en null significa "no consta", que NO es lo mismo que "no es endemica". */
 data class Endemica(
     val valor: Boolean? = null,
@@ -216,6 +257,7 @@ data class Ficha(
     /** Forma antigua, la que entiende bio-v7. `esExotica` la sustituye. */
     @SerializedName("fauna_exotica") val faunaExotica: Boolean? = null,
     val origen: Origen? = null,
+    val invasora: Invasora? = null,
     val endemica: Endemica? = null,
     val amenaza: Amenaza? = null,
     val cites: Cites? = null,

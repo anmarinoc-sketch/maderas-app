@@ -98,8 +98,16 @@ fun CuerpoDeFicha(ficha: Ficha, vm: BioViewModel? = null, modifier: Modifier = M
         Etiquetas(ficha, esFauna, esExotica)
         ResumenRapido(ficha, esFauna, esExotica)
 
-        // Lo primero de todo cuando aplica: es lo que puede meter en un lio a quien consulta.
-        if (!esFauna) BloqueVedas(ficha, esExotica)
+        /*
+         * La veda es cosa de flora NATIVA.
+         *
+         * A una exótica el apartado no le dice nada útil: lo que hay que saber de una
+         * planta que no es de aquí no es si está vedada, sino si invade. Ese sitio, que es
+         * el primero de la ficha porque es el que puede meter en un lío a quien consulta,
+         * lo ocupa ahora el bloque de invasora.
+         */
+        if (!esFauna && !esExotica) BloqueVedas(ficha, esExotica)
+        BloqueInvasora(ficha)
 
         BloqueAmenaza(ficha, esExotica)
         BloqueOrigen(ficha, esExotica)
@@ -273,7 +281,23 @@ private fun ResumenRapido(ficha: Ficha, esFauna: Boolean, esExotica: Boolean) {
                 ficha.cites?.apendice?.let { "Sí · Apéndice $it" } ?: "No figura",
                 if (ficha.cites?.apendice != null) NaranjaAviso else VerdeBien,
             )
-            if (!esFauna) {
+            // De una exótica, lo que se pregunta es si invade, no si está vedada.
+            ficha.invasora?.let { inv ->
+                Pregunta(
+                    "¿Es invasora?",
+                    when {
+                        inv.declarada == true -> "Sí · declarada"
+                        !inv.potencial?.riesgo.isNullOrBlank() -> "Potencial · ${inv.potencial?.riesgo}"
+                        else -> "No figura"
+                    },
+                    when {
+                        inv.declarada == true -> RojoGrave
+                        !inv.potencial?.riesgo.isNullOrBlank() -> NaranjaAviso
+                        else -> VerdeBien
+                    },
+                )
+            }
+            if (!esFauna && !esExotica) {
                 Pregunta(
                     "¿Está vedada?",
                     when {
@@ -372,12 +396,20 @@ private fun Etiquetas(ficha: Ficha, esFauna: Boolean, esExotica: Boolean) {
             }
         }
 
-        if (!esFauna && !ficha.vedas.isNullOrEmpty()) add(Etiqueta("Vedada", RojoGrave))
+        if (!esFauna && !esExotica && !ficha.vedas.isNullOrEmpty()) {
+            add(Etiqueta("Vedada", RojoGrave))
+        }
 
         ficha.cites?.apendice?.let { add(Etiqueta("CITES $it", NaranjaAviso)) }
 
-        ficha.origen?.invasividad?.takeIf { it.isNotBlank() }?.let {
-            add(Etiqueta("Con potencial invasor", RojoGrave))
+        // Declarada e "igual invade" no son lo mismo y no pueden llevar la misma pastilla:
+        // una la decidió una resolución y la otra es un análisis de riesgo.
+        when {
+            ficha.invasora?.declarada == true -> add(Etiqueta("Invasora declarada", RojoGrave))
+            !ficha.invasora?.potencial?.riesgo.isNullOrBlank() ->
+                add(Etiqueta("Con potencial invasor", NaranjaAviso))
+            !ficha.origen?.invasividad.isNullOrBlank() ->
+                add(Etiqueta("Con potencial invasor", NaranjaAviso))
         }
     }
 
@@ -655,6 +687,117 @@ private fun TarjetaDeVeda(veda: Veda) {
     }
 }
 
+/* --------------------------------------------------------------------- invasora */
+
+/**
+ * Si la especie invade, y con qué respaldo.
+ *
+ * Tres cosas distintas, deliberadamente separadas porque no pesan igual:
+ *
+ *   1. **Declarada invasora** por la Resolución 0067 de 2023, que modifica el artículo 1
+ *      de la 848 de 2008. Es un acto administrativo: el país ya decidió. Seis plantas,
+ *      entre ellas la paulonia, que se vende como madera de crecimiento rápido.
+ *   2. **Potencial invasor**, del análisis de riesgo del Instituto Humboldt. Es un
+ *      pronóstico técnico, no una norma.
+ *   3. **El ICA**, que no está cargado y así se dice. Sus listados de plagas reglamentadas
+ *      incluyen malezas, o sea plantas, pero no hay archivo descargable.
+ *
+ * Juntarlas en una sola línea sería dar el mismo peso a un mandato y a una opinión.
+ */
+@Composable
+private fun BloqueInvasora(ficha: Ficha) {
+    val inv = ficha.invasora ?: return
+
+    val declarada = inv.declarada == true
+    val riesgo = inv.potencial?.riesgo?.takeIf { it.isNotBlank() }
+
+    Seccion(
+        "Invasora",
+        oficial = true,
+        acento = when {
+            declarada -> RojoGrave
+            riesgo != null -> NaranjaAviso
+            else -> VerdeBien
+        },
+    ) {
+        if (declarada) {
+            Text(
+                "Declarada especie exótica invasora",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+                color = RojoGrave,
+            )
+            inv.efecto?.let {
+                Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
+            }
+        } else {
+            Text(
+                "No figura en el listado oficial de especies invasoras",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+        }
+
+        Text(
+            listOfNotNull(inv.norma, inv.autoridad).joinToString(" · "),
+            style = MaterialTheme.typography.bodySmall,
+            color = GrisNoConsta,
+            modifier = Modifier.padding(top = 6.dp),
+        )
+        inv.modifica?.let {
+            Text("Modifica el $it", style = MaterialTheme.typography.bodySmall, color = GrisNoConsta)
+        }
+
+        // La resolución llama "Eichornia crassipes" al buchón y "Teline monspessulana" al
+        // retamo liso. Quien tiene el papel delante busca ESE nombre, no el aceptado.
+        inv.nombreEnLaNorma?.takeIf { it.isNotBlank() }?.let {
+            Text(
+                "En la resolución figura como $it" +
+                    (inv.comunEnLaNorma?.takeIf { c -> c.isNotBlank() }?.let { c -> " ($c)" } ?: ""),
+                style = MaterialTheme.typography.bodySmall,
+                color = GrisNoConsta,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
+
+        LineaDeVigencia(inv.vigencia, Modifier.padding(top = 6.dp))
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
+
+        Text(
+            riesgo?.let { "Potencial invasor: $it" } ?: "Sin análisis de riesgo para esta especie",
+            fontWeight = FontWeight.Bold,
+            color = if (riesgo != null) NaranjaAviso else GrisNoConsta,
+        )
+        inv.potencial?.nota?.let {
+            Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
+        }
+        inv.potencial?.fuente?.let {
+            Text(it, style = MaterialTheme.typography.bodySmall, color = GrisNoConsta, modifier = Modifier.padding(top = 4.dp))
+        }
+
+        // Lo que la app NO tiene. Callarlo daría a entender que se comprobó.
+        inv.ica?.let { ica ->
+            HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
+            Text("ICA: no consultado", fontWeight = FontWeight.Bold, color = GrisNoConsta)
+            ica.nota?.let {
+                Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
+            }
+            listOfNotNull(ica.norma, ica.autoridad).takeIf { it.isNotEmpty() }?.let {
+                Text(
+                    it.joinToString(" · "),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = GrisNoConsta,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
+            ica.fuente?.let {
+                Text(it, style = MaterialTheme.typography.bodySmall, color = GrisNoConsta)
+            }
+        }
+    }
+}
+
 /* ---------------------------------------------------------------------- amenaza */
 
 @Composable
@@ -867,8 +1010,12 @@ private fun BloqueOrigen(ficha: Ficha, esExotica: Boolean) {
         origen.origenGeografico?.takeIf { it.isNotBlank() }?.let {
             Text("Procede de: $it", style = MaterialTheme.typography.bodyMedium)
         }
-        origen.invasividad?.takeIf { it.isNotBlank() }?.let {
-            Aviso("Potencial invasor: $it", RojoGrave, Modifier.padding(top = 8.dp))
+        // Solo si el servidor no manda el apartado de invasora, que lo cuenta mejor y con
+        // su referencia. Con uno al día, esta línea sobra y se repetiría.
+        if (ficha.invasora == null) {
+            origen.invasividad?.takeIf { it.isNotBlank() }?.let {
+                Aviso("Potencial invasor: $it", RojoGrave, Modifier.padding(top = 8.dp))
+            }
         }
         origen.nota?.let {
             Text(it, style = MaterialTheme.typography.bodySmall, color = GrisNoConsta, modifier = Modifier.padding(top = 6.dp))
