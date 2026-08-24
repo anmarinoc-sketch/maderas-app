@@ -21,7 +21,7 @@ servidor, clave de firma y CI con XiloScan**: invoca también la skill `xiloscan
 | Carpeta local | `C:\Users\amo\Desktop\Claude\maderas-app` |
 | App | `android-bioscan/`, paquete `com.bioscan.app` |
 | Backend | `backend/` — el MISMO servicio de Render que XiloScan |
-| Release | Etiqueta `bio-v*`. Última: **bio-v8** |
+| Release | Etiqueta `bio-v*`. Última: **bio-v9** |
 | Clave de Gemini | `GEMINI_API_KEY_ESPECIES` en Render, proyecto Google `BioScan` |
 
 Creado el 23-08-2026 y desarrollado en una sola sesión larga. **Probado contra Gemini y
@@ -57,7 +57,7 @@ curl.exe -s https://madera-backend.onrender.com/api/listas
 `android-bioscan/app/build.gradle.kts` (la app enseña el número en Más), y etiquetar:
 
 ```bash
-cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v9; git push origin bio-v9
+cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v10; git push origin bio-v10
 ```
 
 ### Los cuatro workflows
@@ -69,7 +69,7 @@ cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v9; git push origin bio-
 | Actualizar las listas oficiales | día 1 de cada mes | regenera los datos y los sube |
 | Respaldar verificaciones | a diario | salva las correcciones de XiloScan |
 
-## Las cinco reglas que no se rompen
+## Las seis reglas que no se rompen
 
 1. **El modelo no dictamina.** Gemini no tiene base de datos: preguntarle si algo está
    vedado produce números de resolución inventados. Veda, amenaza, endemismo, origen,
@@ -104,6 +104,13 @@ cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v9; git push origin bio-
      especie a otra. Si la veda nacional alcanza a la especie, la fila vuelve.
    - **`habitos_alimenticios`** solo se rellena en fauna; en flora viene vacío y el párrafo
      no se pinta.
+6. **De una norma no importa su antigüedad, sino la de la comprobación.** Una veda de 1977
+   manda igual que una de 2020 si nadie la derogó. Por eso `src/datos/vigencia-normas.json`
+   (curado a mano, **aparte de las listas porque el workflow mensual las regenera**) guarda
+   norma por norma el estado, la fecha en que se miró y qué se encontró. La ficha lo enseña,
+   y **el aviso de caducidad lo calcula el servidor con la fecha de hoy**, no el teléfono:
+   un aparato ya instalado empieza a avisar solo el día que se cumple el plazo, sin
+   reinstalar nada. Plazo: 12 meses. Comprobado el 24-08-2026, las 13 normas vigentes.
 
 ## Mapa del código
 
@@ -127,6 +134,7 @@ cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v9; git push origin bio-
 | `herramientas/zip.js` | Lector mínimo de ZIP y TSV para los Darwin Core |
 | `herramientas/auditar-cobertura.js` | Qué cubren las listas, grupo por grupo. Pasarlo tras cada actualización |
 | `herramientas/medir-fotos.js` | Mide el acierto de la identificación por foto |
+| `herramientas/revisar-vigencia.js` | Si toca volver a comprobar las normas. Sale en rojo si el plazo venció; corre al final del workflow mensual con `always()` |
 
 Lo de XiloScan (`lib/gemini.js`, `prompt.js`, `referencia.js`, `aprendizaje.js`,
 `huella.js`, `routes/identificar.js`) **no se toca desde aquí**.
@@ -210,6 +218,11 @@ Orden de las fuentes: **listas locales → GBIF → Wikipedia (solo la foto) →
   comprobado, no es un hueco.
 - **CITES**: cargados *Cedrela* (II desde 2020) y *Handroanthus*, *Tabebuia*,
   *Roseodendron* y *Dipteryx* (II desde el 25-11-2024). **Tras cada CoP hay que revisarlo.**
+  Revisada la **CoP20** (Samarcanda, 24-11 a 5-12 de 2025; en vigor desde el 5-03-2026):
+  ninguno de sus cambios de flora toca a las maderas colombianas —palma chilena al I, dos
+  *Beaucarnea* y cuatro *Aloe* al II, enmienda a la anotación #10 del palo de Pernambuco, y
+  el padouk africano (*Pterocarpus*) **rechazado**—. Los cambios entran en vigor 90 días
+  después de la reunión.
 
 ## Trampas ya pisadas
 
