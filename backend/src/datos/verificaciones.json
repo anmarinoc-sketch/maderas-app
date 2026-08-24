@@ -72,5 +72,25 @@
     "nota": null,
     "sha256": "5341e9384830f71aefdfde00ff0d6885ff4386fd8b4afd6f3f505c00f6b70e2c",
     "huella": "ece4e624ca94b651"
+  },
+  {
+    "fecha": "2026-08-24T02:17:59.137Z",
+    "acierto": false,
+    "dicho": "Cariniana pyriformis",
+    "real": "Leche perra",
+    "confianza": 0.6,
+    "nota": null,
+    "sha256": "a85abf645ab6e0b3ffdaaec4a68ef03da714dd1f3683bf27adafdb08a8697984",
+    "huella": "b534aca2b5b3db51"
+  },
+  {
+    "fecha": "2026-08-24T02:20:57.300Z",
+    "acierto": false,
+    "dicho": "Calophyllum mariae",
+    "real": "Nogal cafetero",
+    "confianza": 0.65,
+    "nota": null,
+    "sha256": "f1fea142fc0fbeb0f190c70257e56a7b0867a144934e3b64c35e27d4459fea3f",
+    "huella": "e59b776b7b17a9d9"
   }
 ]
