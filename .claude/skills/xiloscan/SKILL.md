@@ -152,6 +152,14 @@ entrelazado renglón a renglón.
   quedó como bytes literales dentro de un regex. Funcionaba, pero era intocable. Escribir el
   fuente en ASCII (`\p{Diacritic}`, `\uXXXX`) y comprobarlo con `od -c` si hay dudas.
 - **La caché de la web de GitHub** engaña: comprobar el estado por la API.
+- **Fabricar el banco de pruebas desde el PDF de la guía sale mal por orden de
+  aparición.** Las páginas referencian 99 imágenes y del archivo salen 81 JPEG de 400x400
+  o más: el desfase corre la asignación y las láminas quedan con la especie equivocada. Se
+  detectó porque la etiquetada como chingalé resultó ser tornillo. Para hacerlo bien hay
+  que leer de cada página su `/Resources /XObject` y cruzar por número de objeto. Las 34
+  fichas están en las páginas 37-66, una por página, y el texto sale limpio con
+  `pdfjs-dist`. **Un banco mal etiquetado es peor que no tener banco:** da un número de
+  acierto falso y hace “corregir” lo que estaba bien.
 
 ## Qué queda pendiente
 
