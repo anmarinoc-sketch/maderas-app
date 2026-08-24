@@ -21,7 +21,7 @@ servidor, clave de firma y CI con XiloScan**: invoca también la skill `xiloscan
 | Carpeta local | `C:\Users\amo\Desktop\Claude\maderas-app` |
 | App | `android-bioscan/`, paquete `com.bioscan.app` |
 | Backend | `backend/` — el MISMO servicio de Render que XiloScan |
-| Release | Etiqueta `bio-v*`. Última: **bio-v6** |
+| Release | Etiqueta `bio-v*`. Última: **bio-v7** |
 | Clave de Gemini | `GEMINI_API_KEY_ESPECIES` en Render, proyecto Google `BioScan` |
 
 Creado el 23-08-2026 y desarrollado en una sola sesión larga. **Probado contra Gemini y
@@ -57,7 +57,7 @@ curl.exe -s https://madera-backend.onrender.com/api/listas
 `android-bioscan/app/build.gradle.kts` (la app enseña el número en Más), y etiquetar:
 
 ```bash
-cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v7; git push origin bio-v7
+cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v8; git push origin bio-v8
 ```
 
 ### Los cuatro workflows
@@ -69,7 +69,7 @@ cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v7; git push origin bio-
 | Actualizar las listas oficiales | día 1 de cada mes | regenera los datos y los sube |
 | Respaldar verificaciones | a diario | salva las correcciones de XiloScan |
 
-## Las cuatro reglas que no se rompen
+## Las cinco reglas que no se rompen
 
 1. **El modelo no dictamina.** Gemini no tiene base de datos: preguntarle si algo está
    vedado produce números de resolución inventados. Veda, amenaza, endemismo, origen,
@@ -82,6 +82,23 @@ cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v7; git push origin bio-
    «Redactado por IA», con estilos distintos. No mezclarlas nunca.
 4. **Sin cuota, la app sigue sirviendo.** Lo que está en disco se responde en microsegundos.
    Solo el relato gasta, y si falla, la ficha oficial se devuelve igual.
+5. **Lo que no viene al caso no se pinta.** Una respuesta que describe la lista consultada
+   en vez de la especie es un hueco con aspecto de dato, y en esta app eso vale menos que
+   el silencio. Tres consecuencias, todas de bio-v7:
+   - **Fauna exótica** (`fauna_exotica`): solo se dice que es exótica. Sin endemismo, sin
+     categoría de amenaza, sin UICN mundial. **Sí se quedan CITES** —aplica aunque la
+     especie sea introducida; el hipopótamo del Magdalena está en el Apéndice II— y el
+     potencial invasor. La bandera se decide en DOS sitios porque los casos llegan por dos
+     caminos: `especies.js` para las seis exóticas de la lista de fauna (todas aves), y
+     `routes/especies.js` para las que no están en ninguna lista y solo se sabe que son
+     introducidas cuando vuelve el relato. Las dos rutas exigen que no haya categoría
+     nacional: si la Resolución 0126 habla, manda ella.
+   - **La fila de veda nacional solo sale si hay veda nacional.** Las nacionales de flora
+     alcanzan a pocas especies y casi siempre a las mismas, así que repetía «sin veda». En
+     su sitio va la condición de amenaza de la Resolución 0126, que sí cambia de una
+     especie a otra. Si la veda nacional alcanza a la especie, la fila vuelve.
+   - **`habitos_alimenticios`** solo se rellena en fauna; en flora viene vacío y el párrafo
+     no se pinta.
 
 ## Mapa del código
 
