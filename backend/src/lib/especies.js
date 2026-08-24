@@ -11,9 +11,10 @@ import { fileURLToPath } from 'node:url';
  * un hecho verificable de una frase bien escrita.
  *
  * Regla que atraviesa todo el archivo: NO ENCONTRADO NO ES LO MISMO QUE NO APLICA.
- * Si una especie no esta en la lista de vedas puede ser que no este vedada, o que la
- * lista este incompleta (el listado de Cornare lo esta). La diferencia se devuelve
- * explicita en `cobertura`, y la app tiene que enseñarla.
+ * Una especie sin veda puede ser que no la tenga, o que la norma no este cargada, o que
+ * sea fauna y el regimen ni siquiera le aplique. Por eso `veda.aplica` tiene tres
+ * valores y `veda.por_autoridad` responde autoridad por autoridad en vez de soltar un
+ * "no figura" que no distingue nada.
  */
 
 const DATOS = join(dirname(fileURLToPath(import.meta.url)), '..', 'datos');
@@ -218,32 +219,6 @@ function porAutoridad(encontradas) {
   });
 }
 
-/** Que partes del mapa de vedas estan incompletas. Se devuelve siempre, haya o no veda. */
-function coberturaDeVedas() {
-  const incompletas = vedas.normas
-    .filter((n) => n.listado_incompleto)
-    .map((n) => `${n.norma} (${n.autoridad})`);
-
-  return {
-    completa: incompletas.length === 0,
-    listados_incompletos: incompletas,
-    // Antes esto era una advertencia en naranja que salia en cada consulta, incluso
-    // cuando no habia nada que advertir. Ahora que los listados cargados estan completos,
-    // lo unico honesto que queda por decir es cual es el alcance, y eso es un dato, no
-    // un susto.
-    advertencia:
-      'Estan cargadas las vedas nacionales, las de Corantioquia y las de Cornare. Las de ' +
-      'otras corporaciones autonomas del pais no.',
-    nota_procedimiento: vedas.nota_procedimiento,
-    detalle_cobertura: vedas.cobertura,
-    vedas_de_ambito_condicionado: INDICE.universales.map((n) => ({
-      norma: n.norma,
-      territorio: n.territorio,
-      efecto: n.efecto,
-    })),
-  };
-}
-
 /* ------------------------------------------------------------------- la consulta */
 
 /**
@@ -373,7 +348,6 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
     },
 
     vedas: lasVedas,
-    cobertura_vedas: coberturaDeVedas(),
 
     /**
      * Lo mismo, pero contestando a la pregunta tal como se hace: ¿tiene veda nacional?

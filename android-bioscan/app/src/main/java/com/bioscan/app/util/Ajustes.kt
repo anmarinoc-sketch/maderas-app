@@ -35,11 +35,6 @@ class Ajustes(context: Context) {
         get() = prefs.getBoolean(CLAVE_RELATO, true)
         set(valor) = prefs.edit().putBoolean(CLAVE_RELATO, valor).apply()
 
-    /** La bienvenida solo se muestra la primera vez. */
-    var bienvenidaVista: Boolean
-        get() = prefs.getBoolean(CLAVE_BIENVENIDA, false)
-        set(valor) = prefs.edit().putBoolean(CLAVE_BIENVENIDA, valor).apply()
-
     fun restaurarValoresDeCompilacion() {
         prefs.edit().remove(CLAVE_URL).remove(CLAVE_APP_KEY).apply()
     }
@@ -48,6 +43,5 @@ class Ajustes(context: Context) {
         const val CLAVE_URL = "url_servidor"
         const val CLAVE_APP_KEY = "clave_app"
         const val CLAVE_RELATO = "pedir_relato"
-        const val CLAVE_BIENVENIDA = "bienvenida_vista"
     }
 }

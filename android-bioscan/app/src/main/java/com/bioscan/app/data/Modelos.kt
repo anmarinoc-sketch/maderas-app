@@ -116,12 +116,10 @@ data class Distribucion(
 data class Veda(
     val norma: String? = null,
     val autoridad: String? = null,
-    val ambito: String? = null,
     val territorio: String? = null,
     val efecto: String? = null,
     val excepciones: String? = null,
     @SerializedName("coincide_por") val coincidePor: List<String>? = null,
-    @SerializedName("nombre_en_la_norma") val nombreEnLaNorma: String? = null,
     @SerializedName("listado_incompleto") val listadoIncompleto: Boolean? = null,
 )
 
@@ -151,19 +149,10 @@ data class BloqueVeda(
     val detalle: List<Veda>? = null,
 )
 
-data class CoberturaVedas(
-    val completa: Boolean? = null,
-    @SerializedName("listados_incompletos") val listadosIncompletos: List<String>? = null,
-    val advertencia: String? = null,
-    @SerializedName("nota_procedimiento") val notaProcedimiento: String? = null,
-)
-
 /** Fotografía de la especie, sacada de Wikipedia por su nombre científico. */
 data class Foto(
     val url: String? = null,
     val fuente: String? = null,
-    val pagina: String? = null,
-    val titulo: String? = null,
 )
 
 data class Relato(
@@ -192,26 +181,11 @@ data class Ficha(
     /** Forma antigua. Se conserva por si el servidor no manda todavía `veda`. */
     val vedas: List<Veda>? = null,
     val veda: BloqueVeda? = null,
-    @SerializedName("cobertura_vedas") val coberturaVedas: CoberturaVedas? = null,
     val foto: Foto? = null,
     val fuentes: List<String>? = null,
     val relato: Relato? = null,
     @SerializedName("relato_no_disponible") val relatoNoDisponible: String? = null,
-) {
-    /**
-     * Si aparecio en alguna lista colombiana.
-     *
-     * Tiene que mirarlas TODAS. Cuando solo miraba las tres de flora, la app avisaba de
-     * que una lora perfectamente catalogada "no aparece en ninguna lista oficial".
-     */
-    val estaEnAlgunaLista: Boolean
-        get() = enListas?.catalogoFlora == true ||
-            enListas?.amenazadasNacional == true ||
-            enListas?.exoticas == true ||
-            enListas?.faunaColombia == true ||
-            enListas?.avesEndemicas == true ||
-            enListas?.herpetofauna == true
-}
+)
 
 /* ------------------------------------------------------- consulta por nombre */
 

@@ -81,10 +81,6 @@ class BioViewModel(app: Application) : AndroidViewModel(app) {
         get() = ajustes.pedirRelato
         set(valor) { ajustes.pedirRelato = valor }
 
-    var bienvenidaVista: Boolean
-        get() = ajustes.bienvenidaVista
-        set(valor) { ajustes.bienvenidaVista = valor }
-
     fun alEscribir(texto: String) {
         _consulta.value = texto
     }
