@@ -129,7 +129,11 @@ curso de la UNAL. **Nunca recomendar lijar**, error que hubo al principio.
 láminas y el banco de pruebas (POST de cada lámina y comparación con la especie real de su
 página). Cuesta 34 peticiones de las ~160 diarias. Las 8 verificaciones del usuario dan 2
 aciertos y 6 fallos; **chingalé** falló 3 de 3, siempre confundido con leguminosas:
-sospechar de su ficha en la clave. Al medir, contar solo fotos sin verificación previa: una
+sospechar de su ficha en la clave. **Pista concreta:** la ficha de la UNAL dice poros
+«predominantemente solitarios» y Commercial Timbers (Thünen) dice «in multiples, commonly in
+short (2-3 vessels) radial rows». Si el modelo busca poros solitarios y ve filas radiales,
+descarta chingalé y se va a las leguminosas — que es justo lo que pasa. Comprobar contando
+en la lámina antes de cambiar la ficha. Al medir, contar solo fotos sin verificación previa: una
 lámina ya verificada acierta por la huella y no mide nada.
 
 **Banco de imágenes de referencia.** Enviar unas pocas fotos verificadas como ejemplos
