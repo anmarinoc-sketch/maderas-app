@@ -123,6 +123,7 @@ MB de RSS, 170 ms de arranque.
 | `aves-endemicas-colombia.json` | Aves endémicas y casi-endémicas (Humboldt) | 268 |
 | `nombres-comunes.json` | Derivado de las anteriores | 3.216 |
 | `vedas-colombia.json` | **Transcrito a mano.** No hay fuente legible por máquina | 12 normas |
+| `cites-actualizaciones.json` | **Curado a mano.** Apéndices posteriores al Catálogo; manda sobre él | 5 géneros |
 
 **Ojo con la 1912 de 2017: está derogada.** Si alguien la menciona, es la 0126 de 2024.
 
@@ -141,7 +142,11 @@ descartado: para origen mandan las listas colombianas.
 - **Vedas**: nacionales, Corantioquia y Cornare. Las demás corporaciones no están.
 - **El AMVA no expide vedas de especies**: es autoridad urbana y regula el arbolado. Está
   comprobado, no es un hueco.
-- **CITES es de 2023 y envejece**: el cedro figura en el III cuando el género pasó al II.
+- **CITES**: el Catálogo es de 2023 y la CITES se mueve cada dos o tres años. Las
+  inclusiones posteriores van en `cites-actualizaciones.json`, a mano, porque no hay API
+  pública (Species+ pide token, checklist.cites.org no responde). Cargados: *Cedrela* (II
+  desde 2020), y *Handroanthus*, *Tabebuia*, *Roseodendron* y *Dipteryx* (II desde el
+  25-11-2024). **Tras cada CoP hay que revisarlo.**
 
 ## Trampas ya pisadas
 
@@ -168,6 +173,10 @@ Las de XiloScan siguen valiendo todas. Además:
   colombianas se pierden porque vienen al final.
 - **Comparar nombres comunes por substring** hacía que "lora" encontrara "passi**flora**".
   Comparar por palabras.
+- **Amenazada NO es vedada.** La Resolución 0126 de 2024 es un listado de amenaza y dice
+  expresamente que no modifica las vedas. Pero decir solo "sin veda" de una especie en
+  peligro engaña: las autoridades restringen igual su aprovechamiento. Por eso la ficha
+  lleva `nota_amenazada` justo donde se lee "sin veda".
 - **`paths` + `tags` en el mismo `push`** deja el release sin publicar.
 - **`api.github.com` da 504** desde este equipo a ratos. No es que la CI falle.
 
