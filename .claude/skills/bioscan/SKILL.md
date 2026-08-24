@@ -21,7 +21,7 @@ servidor, clave de firma y CI con XiloScan**: invoca también la skill `xiloscan
 | Carpeta local | `C:\Users\amo\Desktop\Claude\maderas-app` |
 | App | `android-bioscan/`, paquete `com.bioscan.app` |
 | Backend | `backend/` — el MISMO servicio de Render que XiloScan |
-| Release | Etiqueta `bio-v*`. Última: **bio-v10** |
+| Release | Etiqueta `bio-v*`. Última: **bio-v11** |
 | Clave de Gemini | `GEMINI_API_KEY_ESPECIES` en Render, proyecto Google `BioScan` |
 
 Creado el 23-08-2026 y desarrollado en una sola sesión larga. **Probado contra Gemini y
@@ -57,7 +57,7 @@ curl.exe -s https://madera-backend.onrender.com/api/listas
 `android-bioscan/app/build.gradle.kts` (la app enseña el número en Más), y etiquetar:
 
 ```bash
-cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v11; git push origin bio-v11
+cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v12; git push origin bio-v12
 ```
 
 ### Los cuatro workflows
@@ -79,9 +79,21 @@ cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v11; git push origin bio
 2. **No encontrado ≠ no aplica.** `veda.aplica` tiene tres valores: `true` (flora),
    `false` (fauna, no le aplica el régimen) y `null` (no se pudo determinar el grupo).
 3. **Cada dato lleva su procedencia.** En pantalla, tarjetas etiquetadas «Lista oficial» y
-   «Redactado por IA», con estilos distintos. No mezclarlas nunca.
+   «Redactado por IA», con estilos distintos. No mezclarlas nunca. Desde bio-v11, la
+   explicación **también cita**, y aquí está el truco que hay que respetar: **el modelo no
+   escribe las citas**. Elige de una lista cerrada de siete palabras (`BLOQUES_OFICIALES`)
+   en qué bloque se apoyó, y `REFERENCIA_DE` en `routes/especies.js` la traduce al nombre
+   real de la norma que el servidor le mandó. Pedirle que cite él produciría números de
+   resolución plausibles y falsos. El reverso vale más aún: `sin_respaldo`, donde declara
+   qué escribió de su conocimiento y no de los datos, y que se enseña tal cual.
 4. **Sin cuota, la app sigue sirviendo.** Lo que está en disco se responde en microsegundos.
-   Solo el relato gasta, y si falla, la ficha oficial se devuelve igual.
+   Solo el relato gasta, y si falla, la ficha oficial se devuelve igual. **Y nunca se
+   queda sin ofrecer algo**: si ni las listas, ni GBIF, ni el modelo reconocen lo tecleado
+   —o si el modelo directamente falla—, `clavesParecidas()` busca nombres parecidos por
+   bigramas de letras y los devuelve como candidatas (`resuelto_por: 'parecido'`). Antes
+   de bio-v11 un fallo del modelo reventaba la consulta entera, así que una errata se
+   quedaba sin respuesta por algo que no tenía nada que ver. Se comprueba arrancando el
+   servidor con una clave inválida.
 5. **Lo que no viene al caso no se pinta.** Una respuesta que describe la lista consultada
    en vez de la especie es un hueco con aspecto de dato, y en esta app eso vale menos que
    el silencio. Tres consecuencias, de bio-v7 y bio-v8:
@@ -175,6 +187,8 @@ dos primeros no gastan cuota:
 3. Nombre común → se unen el índice local y GBIF, **se filtra por Colombia** y se enseñan
    TODAS las opciones. Un nombre común casi nunca designa una sola cosa: «roble» son siete.
 4. Nada lo reconoce → lo propone el modelo y lo verifican las listas.
+5. Ni el modelo, o el modelo falla → **nombres parecidos** de las propias listas, por
+   bigramas de letras. Nunca se contesta «no existe» y punto.
 
 **Por foto**: se recorta y gira primero, luego Gemini identifica, y el backend adjunta la
 ficha oficial de la principal **y de cada alternativa**.
