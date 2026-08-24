@@ -45,6 +45,13 @@ una sola lista destruye esa diferencia y convierte la transcripcion en algo inse
 Devuelve UN GRUPO POR CADA TABLA O LISTADO del documento, en el orden en que aparecen,
 con el titulo o el encabezado literal que lleve cada uno y el articulo al que pertenece.
 Si una misma especie sale en dos tablas, ponla en las dos: no la unifiques.
+
+NUMERA LAS FILAS y no arrastres nombres de una a otra.
+Al leer una tabla escaneada es facil repetir el nombre de la fila de arriba cuando la de
+abajo se ve mal. Si dos filas de la MISMA tabla te salen con el mismo nombre cientifico,
+casi seguro que una esta mal leida: vuelve a mirar esa fila concreta, letra a letra, y si
+de verdad no se lee, escribe "ILEGIBLE" en el nombre en vez de repetir el de al lado. Un
+hueco declarado sirve; un nombre duplicado destruye el recuento.
 `.trim();
 
 export const ESQUEMA = {
@@ -89,10 +96,17 @@ export const ESQUEMA = {
             type: Type.ARRAY,
             items: {
               type: Type.OBJECT,
-              required: ['cientifico', 'comun', 'familia'],
-              propertyOrdering: ['cientifico', 'comun', 'familia'],
+              required: ['fila', 'cientifico', 'comun', 'familia'],
+              propertyOrdering: ['fila', 'cientifico', 'comun', 'familia'],
               properties: {
-                cientifico: { type: Type.STRING, description: 'Binomio latino, sin autoria.' },
+                fila: {
+                  type: Type.INTEGER,
+                  description: 'Numero de fila dentro de su tabla, empezando en 1.',
+                },
+                cientifico: {
+                  type: Type.STRING,
+                  description: 'Binomio latino, sin autoria. "ILEGIBLE" si no se lee.',
+                },
                 comun: { type: Type.STRING, description: 'Nombre comun, "" si no lo da.' },
                 familia: { type: Type.STRING, description: '"" si la norma no la da.' },
               },
