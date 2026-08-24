@@ -103,6 +103,37 @@ curso de la UNAL. **Nunca recomendar lijar**, error que hubo al principio.
 **Lenguaje:** «la cara del corte» o «la punta de la pieza», no «la testa»; «la veta», no
 «la fibra». El usuario es del sector, no de laboratorio.
 
+## Fuentes de anatomía verificadas (24-08-2026)
+
+Todas abiertas y comprobadas, no por el título. Copias descargadas en
+`C:\Users\amo\Desktop\Referencias maderas\`.
+
+| Fuente | Qué trae | Uso |
+| --- | --- | --- |
+| **SERFOR 2022** (Perú) — [PDF](https://repositorio.serfor.gob.pe/bitstream/SERFOR/944/3/SERFOR%202022%20-%20Manual%20Identificacion%20Madera.pdf) | 51 fichas legibles (anuncia 64): porosidad, poros, parénquima, radios, inclusiones, y **láminas transversales a 10x y 20x** | La mejor. Misma estructura que la clave |
+| **Commercial Timbers** — [Delta-Intkey](https://www.delta-intkey.com/wood/en/index.htm) | Descripciones IAWA con medidas (µm, poros/mm²). Una URL por especie | La más precisa. 13 de 14 consultadas |
+| **CITESwoodID** — [app](https://www.citeswoodid.app/es/) | 46 CITES y 34 que se les parecen, en español | Para el ángulo legal |
+| **ID Maderas** — [UNODC](https://www.unodc.org/peruandecuador/es/noticias/2021/aplicativo-movil-forense-de-identificacin-de-maderas-app-id-maderas.html) | 40 peruanas, los tres cortes | Se solapa con SERFOR, que es mejor |
+| **COVIMA** — [MinAmbiente](https://www.minambiente.gov.co/ya-esta-disponible-covima-2-0-app-para-la-conservacion-de-los-bosques-del-pais/) | 55 especies colombianas oficiales | **Lista de objetivos**, no de contenido |
+| **InsideWood** — [NC State](https://insidewood.lib.ncsu.edu/welcome) | Lo más completo que existe | **Solo si XiloScan NO se monetiza** |
+| **Xylorix PocketWood** | Producto comercial | Consultar sí, copiar no |
+
+**Descartadas.** «Maderas de Colombia» (WWF 2013) no trae **ni un corte transversal**: 37
+tangenciales, 8 radiales, 0 transversales. Es un catálogo comercial. **Xylotron** (USDA) es
+abierto de verdad pero es hardware calibrado; sus modelos no sirven con fotos de celular.
+
+**Cruce con las 34 actuales:** 5 coinciden en especie con el SERFOR (cedro, lirio, puerto,
+sande, tornillo), 7 en género, y 22 hay que sacarlas de Delta-Intkey. En sentido contrario,
+el SERFOR aporta 34 especies que faltan, varias comerciales también en Colombia (caoba,
+ceiba, catahua, moral, quinilla).
+
+**El repositorio es público:** las fichas se redactan citando la fuente, no se copian.
+
+**Para leer esos PDFs** no hay Python ni poppler en el equipo. Sirve `pdfjs-dist` por npm.
+El manual del SERFOR trae 2 páginas por hoja y 2 columnas por página: hay que repartir los
+trozos de texto por su coordenada X en 4 bandas, o el texto de dos especies sale
+entrelazado renglón a renglón.
+
 ## Trampas ya pisadas
 
 - **Firma del APK:** cada compilación generaba su clave y Android rechazaba actualizar
