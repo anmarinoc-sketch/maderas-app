@@ -134,6 +134,41 @@ El manual del SERFOR trae 2 páginas por hoja y 2 columnas por página: hay que 
 trozos de texto por su coordenada X en 4 bandas, o el texto de dos especies sale
 entrelazado renglón a renglón.
 
+## El acierto, medido (24-08-2026)
+
+Primera medición real del proyecto. Banco: **29 láminas de la propia guía de la UNAL**,
+una por especie, construido con `herramientas/construir-banco-guia.js` y guardado en
+`C:\Users\amo\Desktop\Referencias maderas\banco de pruebas\`. Se mide con
+`herramientas/evaluar-acierto.js`, que cuenta especie y género por separado.
+
+| | Antes del arreglo del paso 4 |
+| --- | --- |
+| Acierto de especie | **4/29 — 14 %** |
+| Acierto de grupo anatómico | **18/28 — 64 %** |
+| Confianza media que se daba | 0,65 |
+
+**El hallazgo que lo explica todo: sesgo de posición.** De 29 respuestas, 10 fueron
+*Hymenaea courbaril* y 5 *Cariniana pyriformis*. No es casualidad — encabezan el grupo A y
+el grupo C. Contando el ciprés, que encabeza coníferas, **17 de 29 respuestas fueron “la
+primera ficha de un grupo”**. El modelo lee bien el parénquima y elige bien el grupo (64 %,
+la parte difícil); al llegar al paso 4 se quedaba con el primero de la lista porque ese
+paso era una frase, no un procedimiento.
+
+**No era culpa de las fichas ni de la vista del modelo.** Antes de tocar una ficha, mirar
+la distribución de respuestas: si unas pocas especies acaparan, es sesgo, no anatomía.
+
+El arreglo: cada grupo lleva delante una tabla (poros/10mm2 y tamaño, ordenada por
+cantidad), el paso 4 es un procedimiento —estimar, situar, descartar por escrito, y si
+quedan varias responder al nivel que se sostenga— y hay una regla explícita contra elegir
+la primera del grupo.
+
+**La confianza volvió a inflarse.** 0,65 de media con 14 % de acierto real. Ya pasó antes
+y se calibró; hay que revisarla cada vez que se mida.
+
+**`/health` publica `apps.xiloscan.prompt_caracteres`**: es la única forma de saber desde
+fuera si Render ya desplegó un cambio del prompt. Comprobarlo SIEMPRE antes de medir, o se
+mide una versión que ya no es la que se cree.
+
 ## Trampas ya pisadas
 
 - **Firma del APK:** cada compilación generaba su clave y Android rechazaba actualizar
@@ -163,7 +198,7 @@ entrelazado renglón a renglón.
 
 ## Qué queda pendiente
 
-**Medir el acierto.** Es lo importante y sigue sin hacerse. El PDF de la guía está en
+**Medir el acierto.** ~~Sigue sin hacerse~~ — hecho el 24-08-2026, ver la sección de arriba. El PDF de la guía está en
 `C:\Users\amo\Downloads\Anatomia e identificacion de maderas.pdf`: de ahí salen las 34
 láminas y el banco de pruebas (POST de cada lámina y comparación con la especie real de su
 página). Cuesta 34 peticiones de las ~160 diarias. Las 8 verificaciones del usuario dan 2
