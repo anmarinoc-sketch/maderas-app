@@ -141,11 +141,30 @@ una por especie, construido con `herramientas/construir-banco-guia.js` y guardad
 `C:\Users\amo\Desktop\Referencias maderas\banco de pruebas\`. Se mide con
 `herramientas/evaluar-acierto.js`, que cuenta especie y género por separado.
 
-| | Antes del arreglo del paso 4 |
-| --- | --- |
-| Acierto de especie | **4/29 — 14 %** |
-| Acierto de grupo anatómico | **18/28 — 64 %** |
-| Confianza media que se daba | 0,65 |
+| | Antes del paso 4 | Después |
+| --- | --- | --- |
+| Acierto de especie | 4/29 — 14 % | **3/29 — 10 %** |
+| Acierto de grupo | 18/28 — 64 % | — |
+| Confianza media | 0,65 | **0,56** |
+| Respuestas distintas | 13 | **15** |
+| *Hymenaea* (1ª del grupo A) | **10 veces** | **4 veces** |
+
+**Segunda medición: el arreglo hizo lo que buscaba y aun así no subió el acierto.** El
+anclaje se rompió (Hymenaea de 10 a 4, más variedad de respuestas) y la confianza bajó a
+un valor más honesto. Pero el acierto se quedó igual dentro del ruido: el modelo dejó de
+concentrar los errores en una especie y pasó a repartirlos.
+
+**La explicación más probable, y hay que verificarla antes de seguir: la tabla del paso 4
+está en unidades que el modelo no puede medir.** Se le dan poros/10mm2 y micras, pero en
+una foto sin referencia de escala no sabe cuánto abarca el campo, así que no puede situar
+nada en esa tabla. Lo que sí puede usar son caracteres **relativos**: la agrupación, el
+patrón del parénquima, el contraste albura/duramen, el tamaño del poro **comparado con el
+ancho de los radios**. Reescribir la separación en términos relativos es el siguiente
+experimento, no seguir añadiendo datos absolutos.
+
+**Efecto secundario a vigilar:** el ciprés pasó de acertar a responder «desconocido» con
+confianza 0. La regla contra el sesgo puede estar volviéndolo demasiado cauto en grupos de
+dos, donde le quitamos la tabla.
 
 **El hallazgo que lo explica todo: sesgo de posición.** De 29 respuestas, 10 fueron
 *Hymenaea courbaril* y 5 *Cariniana pyriformis*. No es casualidad — encabezan el grupo A y
