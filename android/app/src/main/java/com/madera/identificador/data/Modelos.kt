@@ -59,6 +59,12 @@ data class ResultadoMadera(
     val confianza: Double? = null,
     /** guia_valle_aburra · conocimiento_general · no_identificada · verificada_por_el_usuario */
     @SerializedName("origen_identificacion") val origenIdentificacion: String? = null,
+    /**
+     * Hasta dónde llega la identificación: especie · genero · familia · grupo_comercial ·
+     * ninguno. Quedarse en el género es una respuesta válida, no un resultado incompleto:
+     * la anatomía macroscópica a menudo no separa especies del mismo género.
+     */
+    @SerializedName("nivel_identificacion") val nivelIdentificacion: String? = null,
     val alternativas: List<Alternativa>? = null,
     @SerializedName("usos_habituales") val usos: List<String>? = null,
     val limitaciones: List<String>? = null,

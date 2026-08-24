@@ -187,6 +187,26 @@ const cuerpo = grupos
   )
   .join('\n\n');
 
+/**
+ * Especies que la propia guia NO separa: su ficha se queda en el genero.
+ *
+ * No es un descuido de la ficha. Los anatomistas del laboratorio, con la pieza en la
+ * mano y microscopio, escribieron "Virola spp" porque la anatomia no distingue esas
+ * especies entre si. Pedirle al modelo que afine mas que la fuente es pedirle que
+ * invente: para estas, el genero ES la respuesta correcta.
+ */
+const SIN_SEPARAR = especies.filter((e) => /\b(spp?|sp)\.?$/i.test(e.botanico.trim()));
+
+export const AVISO_NIVEL = SIN_SEPARAR.length
+  ? `
+ESTAS NO SE SEPARAN POR ANATOMIA, Y NO PASA NADA:
+${SIN_SEPARAR.map((e) => `  - ${e.botanico}  (${e.nombres[0].toLowerCase()})`).join('\n')}
+La guia se queda en el genero porque las especies de cada uno de esos generos no se
+distinguen entre si en el corte. Si tu candidata es una de ellas, responde con el
+genero y ya esta: es la respuesta correcta y completa. NO te inventes un epiteto
+especifico para que suene mas preciso.`.trim()
+  : '';
+
 export const REFERENCIA_REGIONAL = `
 === CLAVE DE ${NUMERO_ESPECIES} MADERAS COMERCIALES DEL VALLE DE ABURRA ===
 Fuente: Universidad Nacional de Colombia - Sede Medellin, Laboratorio de Productos
@@ -226,8 +246,11 @@ ${cuerpo}
 
 ${separacionesFinas()}
 
+${AVISO_NIVEL}
+
 === FIN DE LA CLAVE ===
 `.trim();
+
 
 /**
  * Emparejamiento de nombres escritos a mano con las fichas de la guia.

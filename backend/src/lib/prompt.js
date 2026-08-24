@@ -48,6 +48,13 @@ REGLAS DURAS:
   convincente que te parezca el parecido general.
   Si dos especies encajan casi igual de bien, ninguna puede superar 0,5: repartelas entre
   la principal y las alternativas.
+- HASTA DONDE LLEGAR CON EL NOMBRE. Da la especie SOLO si puedes sostenerla con
+  caracteres que de verdad la separen de sus parecidas. Si no, para en el genero y
+  dilo: "Virola sp." es una respuesta profesional y correcta; inventar el epiteto para
+  que suene precisa es un error, y de los caros, porque quien lo lee decide compras con
+  eso. Rellena nivel_identificacion con hasta donde llegaste de verdad, y que el
+  nombre_cientifico concuerde: si el nivel es "genero", escribe "Genero sp." y no un
+  binomio completo. Bajar un escalon con honestidad vale mas que acertar de casualidad.
 - Si la imagen no es madera, o no es un corte transversal, pon identificacion_posible en false,
   explica el motivo en limitaciones y deja los campos de nombre como "desconocido".
 - Distinguir especies del mismo genero, o maderas legalmente sensibles (CITES), suele exigir
@@ -127,6 +134,7 @@ export const RESPONSE_SCHEMA = {
     'nombres_comunes_alternativos',
     'nombre_cientifico',
     'familia',
+    'nivel_identificacion',
     'confianza',
     'origen_identificacion',
     'caracteristicas_anatomicas',
@@ -143,6 +151,7 @@ export const RESPONSE_SCHEMA = {
     'nombres_comunes_alternativos',
     'nombre_cientifico',
     'familia',
+    'nivel_identificacion',
     'confianza',
     'origen_identificacion',
     'alternativas',
@@ -234,6 +243,12 @@ export const RESPONSE_SCHEMA = {
     familia: {
       type: Type.STRING,
       description: 'Familia botanica (p. ej. Fagaceae).',
+    },
+    nivel_identificacion: {
+      type: Type.STRING,
+      enum: ['especie', 'genero', 'familia', 'grupo_comercial', 'ninguno'],
+      description:
+        'Hasta donde llega la identificacion con lo que se ve. "genero" es una respuesta valida y frecuente: la anatomia macroscopica a menudo no separa especies del mismo genero.',
     },
     confianza: {
       type: Type.NUMBER,

@@ -463,8 +463,22 @@ private fun BloqueResultado(
                 )
             ) {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    // El encabezado dice hasta dónde llegó de verdad. Quedarse en el género
+                    // no es un fallo: en 6 de las 34 fichas de la guía, los propios
+                    // anatomistas de la UNAL tampoco pasan de ahí, porque la anatomía no
+                    // separa esas especies. Presentarlo como resultado a medias sería
+                    // engañoso al revés.
                     Text(
-                        if (fiable) "Identificación" else "Candidata más probable · sin confirmar",
+                        when {
+                            !fiable -> "Candidata más probable · sin confirmar"
+                            resultado.nivelIdentificacion == "genero" ->
+                                "Identificada hasta el género"
+                            resultado.nivelIdentificacion == "familia" ->
+                                "Solo se puede llegar a la familia"
+                            resultado.nivelIdentificacion == "grupo_comercial" ->
+                                "Grupo comercial, no especie"
+                            else -> "Identificación"
+                        },
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.Bold,
                     )
