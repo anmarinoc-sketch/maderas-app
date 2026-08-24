@@ -7,6 +7,7 @@ import { manejadorErrores, noEncontrado } from './middleware/errorHandler.js';
 import { estadoModelos } from './lib/gemini.js';
 import { estadoModelos as estadoModelosEspecies } from './lib/gemini-especies.js';
 import { estadoDeListas } from './lib/especies.js';
+import { construirSystemPrompt } from './lib/prompt.js';
 import { router as identificarRouter } from './routes/identificar.js';
 import { router as especiesRouter } from './routes/especies.js';
 
@@ -41,7 +42,14 @@ export function crearApp() {
       modelos_totales: modelos.length,
 
       apps: {
-        xiloscan: { modelos_disponibles: libres.length, modelos_totales: modelos.length },
+        xiloscan: {
+          modelos_disponibles: libres.length,
+          modelos_totales: modelos.length,
+          // Tamano de la instruccion de sistema. No es dato de diagnostico clinico: es
+          // la unica forma de saber DESDE FUERA si Render ya desplego un cambio del
+          // prompt. Sin esto habia que medir a ciegas y esperar a que el numero cuadrara.
+          prompt_caracteres: construirSystemPrompt().length,
+        },
         bioscan: {
           modelos_disponibles: libresEspecies.length,
           modelos_totales: modelosEspecies.length,

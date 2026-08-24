@@ -161,6 +161,52 @@ const GRUPOS = [
   },
 ];
 
+
+/**
+ * Cuantos poros hay y de que tamano, sacados de la prosa de la ficha.
+ *
+ * Son los dos numeros que de verdad separan dentro de un grupo, y los unicos que se
+ * pueden estimar en una foto sin escala: el tamano por comparacion con los radios, y la
+ * cantidad contandolos. Se leen 32 de 34 tamanos y 28 de 34 densidades; lo que falta
+ * queda como "?" en la tabla, que es informacion util: avisa de que ahi no se puede
+ * separar por este camino.
+ */
+function porosDe(e) {
+  const seg =
+    e.macroscopicos.split(/;\s*/).find((x) => /poros en el plano transversal/i.test(x)) ?? '';
+  const um = seg.match(/de (\d+) a (\d+)\s*[μu]m/);
+  const den = seg.match(/de (\d+) a (\d+) en 10\s*mm2/);
+  return {
+    um: um ? `${um[1]}-${um[2]}` : '?',
+    den: den ? `${den[1]}-${den[2]}` : '?',
+    orden: den ? Number(den[1]) : 9999,
+  };
+}
+
+/**
+ * Tabla de separacion de un grupo, ordenada por cuantos poros hay.
+ *
+ * Existe porque la medicion del 24-08-2026 mostro que el modelo acierta el grupo el 64%
+ * de las veces pero la especie solo el 14%: elegia el grupo bien y luego respondia la
+ * PRIMERA ficha de la lista. Diez de veintinueve respuestas fueron Hymenaea courbaril,
+ * que encabeza el grupo A, y cinco Cariniana pyriformis, que encabeza el C. Con la tabla
+ * delante puede situar lo que midio en vez de tirar por la primera.
+ */
+function tablaDe(miembros) {
+  const datos = miembros.map(porosDe);
+  const utiles = datos.filter((d) => d.den !== '?' || d.um !== '?').length;
+  // Sin al menos dos especies con numeros, la tabla no separa nada.
+  if (miembros.length < 2 || utiles < 2) return null;
+
+  const filas = miembros
+    .map((e) => ({ e, ...porosDe(e) }))
+    .sort((a, b) => a.orden - b.orden)
+    .map(
+      ({ e, um, den }) =>
+        `  ${den.padEnd(8)} ${um.padEnd(9)} ${e.botanico.split(/\s+/).slice(0, 2).join(' ')} (${e.nombres[0].toLowerCase()})`
+    );
+  return ['  poros/10mm2  tamano-um  especie', ...filas].join('\n');
+}
 /** Reparte cada especie en el primer grupo cuya prueba encaje. */
 function agrupar() {
   const pendientes = [...especies];
@@ -183,6 +229,9 @@ const cuerpo = grupos
   .map(
     (g) =>
       `----- ${g.titulo} (${g.miembros.length}) -----\n\n` +
+      (tablaDe(g.miembros)
+        ? `SEPARACION DE ESTE GRUPO — situa aqui lo que mediste antes de elegir:\n${tablaDe(g.miembros)}\n\n`
+        : '') +
       g.miembros.map(comoLinea).join('\n\n')
   )
   .join('\n\n');
@@ -228,8 +277,23 @@ PASO 3 — Tipo de parenquima axial. ESTE es el carácter que reparte esta flora
 
 ${indice}
 
-PASO 4 — Ya dentro del grupo, separa por tamano de poros, cuantos hay, si son solitarios
-  o multiples, si tienen tilosis o contenidos, y por la finura y numero de radios.
+PASO 4 — Separar DENTRO del grupo. AQUI ES DONDE SE FALLA.
+  Acertar el grupo es la mitad del trabajo, y la mas facil. Cada grupo trae delante una
+  tabla con cuantos poros tiene cada especie y de que tamano. Usala asi, sin saltarte pasos:
+  a) Estima en la foto cuantos poros hay por cada 10mm2 y como de gruesos son. El tamano
+     se estima comparando con el grosor de los radios, no a ojo absoluto.
+  b) Busca en la tabla del grupo que especies caen en esos dos rangos.
+  c) DESCARTA las que no encajan y di por que las descartas. Escribelo, no lo pienses solo.
+  d) Si aun quedan varias, separalas por los contenidos de los poros, por el color de
+     albura y duramen, y por la finura y numero de radios.
+  e) Si despues de eso siguen quedando varias, NO elijas: responde a nivel de genero o de
+     grupo y dilo en nivel_identificacion. Es una respuesta correcta, no una rendicion.
+
+  REGLA CONTRA EL SESGO DE LA LISTA, y es la mas importante de todas:
+  NUNCA elijas una especie por ser la primera de su grupo. Si tu unica razon para nombrarla
+  es que encabeza la lista, entonces no tienes razon: lo que tienes es el grupo, no la
+  especie, y eso es lo que debes responder. El orden dentro de cada grupo es por cantidad de
+  poros, no por probabilidad: la primera no es la mas comun ni la mas probable.
 
 REGLAS QUE NO PUEDES SALTARTE:
 - Describe primero lo que ves; solo despues mires a que grupo pertenece.
