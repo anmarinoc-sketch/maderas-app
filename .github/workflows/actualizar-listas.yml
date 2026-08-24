@@ -50,7 +50,7 @@ jobs:
         run: node herramientas/comparar-listas.js comparar ../antes.json ../resumen.md
 
       - name: Guardar los cambios
-        working-directory: .
+        working-directory: ${{ github.workspace }}
         run: |
           rm -f antes.json
 

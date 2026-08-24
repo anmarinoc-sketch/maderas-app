@@ -110,7 +110,10 @@ ficha oficial de la principal **y de cada alternativa**.
 
 ## Las listas y de dónde salen
 
-`node herramientas/construir-listas.js` las regenera todas. **Unos 50.500 registros**, 115
+El workflow **«Actualizar las listas oficiales»** las regenera solo el día 1 de cada mes
+y sube el cambio si lo hay, con un freno: si una lista encoge más de un 20 % falla y no
+sube nada. A mano: `node herramientas/construir-listas.js`. **No actualiza las vedas ni
+CITES**, que están curados a mano; el resumen de cada ejecución lo recuerda. **Unos 50.500 registros**, 115
 MB de RSS, 170 ms de arranque.
 
 | Archivo | Fuente | Entradas |
