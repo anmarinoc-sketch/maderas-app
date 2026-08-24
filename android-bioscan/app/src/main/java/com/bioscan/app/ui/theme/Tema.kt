@@ -1,10 +1,8 @@
 package com.bioscan.app.ui.theme
 
 import android.app.Activity
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
@@ -12,72 +10,65 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
-// Paleta de bosque humedo: verde profundo, hoja nueva y tierra. Deliberadamente
-// distinta de la de XiloScan (maderas y ocres) para no confundir las dos apps.
-private val Selva = Color(0xFF0F3D2E)
-private val SelvaClara = Color(0xFF2E6B52)
-private val HojaNueva = Color(0xFFB7E4C7)
-private val Musgo = Color(0xFF52796F)
-private val Humus = Color(0xFF1B2B24)
-private val Niebla = Color(0xFFF6FAF7)
+/*
+ * Paleta de BioScan: bosque húmedo de noche.
+ *
+ * Es un tema OSCURO SIEMPRE, no uno que siga al sistema. Dos razones: la app se usa en
+ * campo, donde el contraste alto con fondo oscuro se lee mejor a pleno sol y gasta menos
+ * batería en pantallas OLED; y mantener dos paletas coherentes con los colores de
+ * gravedad —rojo vedada, naranja amenazada, verde libre— duplicaba el trabajo sin que
+ * nadie lo hubiera pedido.
+ */
 
-private val EsquemaClaro = lightColorScheme(
-    primary = Selva,
-    onPrimary = Color.White,
-    primaryContainer = HojaNueva,
-    onPrimaryContainer = Humus,
-    secondary = Musgo,
-    onSecondary = Color.White,
-    secondaryContainer = Color(0xFFD5E8DE),
-    onSecondaryContainer = Color(0xFF16302A),
-    background = Niebla,
-    onBackground = Humus,
-    surface = Color.White,
-    onSurface = Humus,
-    surfaceVariant = Color(0xFFE7F0EA),
-    onSurfaceVariant = Color(0xFF41564C),
-    error = Color(0xFFA33A2B),
-    onError = Color.White,
-    errorContainer = Color(0xFFFFDAD4),
-    onErrorContainer = Color(0xFF410100),
-)
+val VerdeFondo = Color(0xFF071A13)
+val VerdePanel = Color(0xFF0E2A1F)
+val VerdePanelClaro = Color(0xFF15382A)
+val VerdeBorde = Color(0xFF1F4D39)
 
-private val EsquemaOscuro = darkColorScheme(
-    primary = HojaNueva,
-    onPrimary = Humus,
-    primaryContainer = SelvaClara,
-    onPrimaryContainer = Color(0xFFE8F5EC),
-    secondary = Color(0xFF9CC5B6),
-    onSecondary = Color(0xFF16302A),
-    secondaryContainer = Color(0xFF2F4A41),
-    onSecondaryContainer = Color(0xFFD5E8DE),
-    background = Color(0xFF101815),
-    onBackground = Color(0xFFE3EDE7),
-    surface = Color(0xFF18231E),
-    onSurface = Color(0xFFE3EDE7),
-    surfaceVariant = Color(0xFF2A3831),
-    onSurfaceVariant = Color(0xFFC3D3CA),
-    error = Color(0xFFE59084),
-    onError = Color(0xFF410100),
-    errorContainer = Color(0xFF6B2B22),
+/** El verde vivo de la marca: acentos, iconos activos y el botón principal. */
+val VerdeMarca = Color(0xFF4ADE80)
+val VerdeSuave = Color(0xFF86EFAC)
+
+val TextoClaro = Color(0xFFE8F5EE)
+val TextoTenue = Color(0xFF9CBBA9)
+
+private val Esquema = darkColorScheme(
+    primary = VerdeMarca,
+    onPrimary = Color(0xFF04120C),
+    primaryContainer = VerdePanelClaro,
+    onPrimaryContainer = TextoClaro,
+    secondary = VerdeSuave,
+    onSecondary = Color(0xFF04120C),
+    secondaryContainer = VerdePanel,
+    onSecondaryContainer = TextoClaro,
+    background = VerdeFondo,
+    onBackground = TextoClaro,
+    surface = VerdePanel,
+    onSurface = TextoClaro,
+    surfaceVariant = VerdePanelClaro,
+    onSurfaceVariant = TextoTenue,
+    outline = VerdeBorde,
+    outlineVariant = VerdeBorde,
+    error = Color(0xFFE5766B),
+    onError = Color(0xFF3A0906),
+    errorContainer = Color(0xFF5C1A14),
     onErrorContainer = Color(0xFFFFDAD4),
 )
 
 @Composable
-fun TemaBioScan(
-    oscuro: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit,
-) {
-    val esquema = if (oscuro) EsquemaOscuro else EsquemaClaro
+fun TemaBioScan(content: @Composable () -> Unit) {
     val vista = LocalView.current
 
     if (!vista.isInEditMode) {
         SideEffect {
             val ventana = (vista.context as Activity).window
-            ventana.statusBarColor = Selva.toArgb()
+            // La barra de estado se funde con el fondo: la cabecera ya lleva su propio
+            // color y una franja distinta encima la partiría en dos.
+            ventana.statusBarColor = VerdeFondo.toArgb()
+            ventana.navigationBarColor = VerdeFondo.toArgb()
             WindowCompat.getInsetsController(ventana, vista).isAppearanceLightStatusBars = false
         }
     }
 
-    MaterialTheme(colorScheme = esquema, content = content)
+    MaterialTheme(colorScheme = Esquema, content = content)
 }

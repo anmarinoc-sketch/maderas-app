@@ -13,6 +13,8 @@ import com.bioscan.app.data.Procedencia
 import com.bioscan.app.data.Repositorio
 import com.bioscan.app.data.Resultado
 import com.bioscan.app.util.Ajustes
+import com.bioscan.app.util.Guardada
+import com.bioscan.app.util.Guardados
 import com.bioscan.app.util.Imagenes
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -59,6 +61,13 @@ class BioViewModel(app: Application) : AndroidViewModel(app) {
 
     private val repositorio = Repositorio()
     private val ajustes = Ajustes(app)
+    private val guardados = Guardados(app)
+
+    private val _historial = MutableStateFlow(guardados.historial())
+    val historial: StateFlow<List<Guardada>> = _historial.asStateFlow()
+
+    private val _favoritos = MutableStateFlow(guardados.favoritos())
+    val favoritos: StateFlow<List<Guardada>> = _favoritos.asStateFlow()
 
     private val _estado = MutableStateFlow<Estado>(Estado.Reposo)
     val estado: StateFlow<Estado> = _estado.asStateFlow()
@@ -193,25 +202,69 @@ class BioViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     private fun aEstado(resultado: Resultado, vistaPrevia: Bitmap?): Estado = when (resultado) {
-        is Resultado.Encontrada ->
+        is Resultado.Encontrada -> {
+            anotar(resultado.ficha)
             Estado.FichaLista(resultado.ficha, resultado.resueltoPor, resultado.procedencia)
+        }
 
         is Resultado.Elegir ->
             Estado.HayQueElegir(resultado.aviso, resultado.candidatas, resultado.notaDelModelo)
 
-        is Resultado.PorFoto -> Estado.Identificada(
+        is Resultado.PorFoto -> {
+            resultado.oficial?.let { anotar(it) }
+            Estado.Identificada(
             identificacion = resultado.identificacion,
             oficial = resultado.oficial,
             alternativas = resultado.alternativas,
             modelo = resultado.modelo,
             latenciaMs = resultado.latenciaMs,
             procedencia = resultado.procedencia,
-            vistaPrevia = vistaPrevia,
-        )
+                vistaPrevia = vistaPrevia,
+            )
+        }
 
         is Resultado.NoEncontrada -> Estado.Vacio(resultado.aviso)
 
         is Resultado.Fallo -> Estado.Fallo(resultado.codigo, resultado.mensaje, resultado.detalle)
+    }
+
+    /* --------------------------------------------------- historial y favoritos */
+
+    /** Lo justo de una ficha para pintar una fila y poder volver a abrirla. */
+    private fun resumir(ficha: Ficha) = Guardada(
+        nombreCientifico = ficha.nombreCientifico.orEmpty(),
+        nombreComun = ficha.nombresComunes?.split("|")?.firstOrNull()?.trim(),
+        familia = ficha.familia,
+        fotoUrl = ficha.foto?.url,
+        amenaza = ficha.amenaza?.nacional?.categoria,
+        vedada = !ficha.veda?.detalle.isNullOrEmpty() || !ficha.vedas.isNullOrEmpty(),
+        endemica = ficha.endemica?.valor == true,
+    )
+
+    private fun anotar(ficha: Ficha) {
+        if (ficha.nombreCientifico.isNullOrBlank()) return
+        guardados.anotar(resumir(ficha))
+        _historial.value = guardados.historial()
+    }
+
+    /** @return true si ha quedado marcada como favorita. */
+    fun alternarFavorita(ficha: Ficha): Boolean {
+        val marcada = guardados.alternarFavorita(resumir(ficha))
+        _favoritos.value = guardados.favoritos()
+        return marcada
+    }
+
+    fun esFavorita(nombreCientifico: String?) =
+        !nombreCientifico.isNullOrBlank() && guardados.esFavorita(nombreCientifico)
+
+    fun quitarFavorita(nombreCientifico: String) {
+        guardados.quitarFavorita(nombreCientifico)
+        _favoritos.value = guardados.favoritos()
+    }
+
+    fun borrarHistorial() {
+        guardados.borrarHistorial()
+        _historial.value = emptyList()
     }
 
     /* --------------------------------------------------------------- diagnostico */

@@ -1,6 +1,7 @@
 package com.bioscan.app.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -13,13 +14,23 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -51,7 +62,7 @@ private val VerdeBien = Color(0xFF2E6B52)
 private val GrisNoConsta = Color(0xFF6F7B75)
 
 @Composable
-fun CuerpoDeFicha(ficha: Ficha, modifier: Modifier = Modifier) {
+fun CuerpoDeFicha(ficha: Ficha, vm: BioViewModel? = null, modifier: Modifier = Modifier) {
     // La veda es cosa de flora. Ante un animal no se enseña el apartado, ni la fila del
     // resumen, ni una explicacion de por que no aplica: el usuario ya sabe que es un
     // animal, y un bloque entero diciendo "esto no viene al caso" solo estorba.
@@ -61,7 +72,7 @@ fun CuerpoDeFicha(ficha: Ficha, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        FotoDeLaEspecie(ficha)
+        FotoDeLaEspecie(ficha, vm)
         Encabezado(ficha, tieneFoto = !ficha.foto?.url.isNullOrBlank())
         Etiquetas(ficha, esFauna)
         ResumenRapido(ficha, esFauna)
@@ -87,7 +98,7 @@ fun CuerpoDeFicha(ficha: Ficha, modifier: Modifier = Modifier) {
  * especie. Por eso lleva la fuente encima y no se presenta como prueba de nada.
  */
 @Composable
-private fun FotoDeLaEspecie(ficha: Ficha) {
+private fun FotoDeLaEspecie(ficha: Ficha, vm: BioViewModel?) {
     // En una variable local: el smart-cast sobre una propiedad de otra clase es fragil y
     // aqui no hay forma de compilar para comprobarlo.
     val foto = ficha.foto
@@ -125,6 +136,29 @@ private fun FotoDeLaEspecie(ficha: Ficha) {
                         )
                     ),
             )
+
+            // Corazon de favoritos, sobre la foto. El estado se guarda en el telefono.
+            if (vm != null && !ficha.nombreCientifico.isNullOrBlank()) {
+                var favorita by remember(ficha.nombreCientifico) {
+                    mutableStateOf(vm.esFavorita(ficha.nombreCientifico))
+                }
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(10.dp)
+                        .size(42.dp)
+                        .clip(CircleShape)
+                        .background(Color(0x99000000))
+                        .clickable { favorita = vm.alternarFavorita(ficha) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        if (favorita) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                        contentDescription = if (favorita) "Quitar de favoritos" else "Guardar en favoritos",
+                        tint = if (favorita) Color(0xFFE5766B) else Color.White,
+                    )
+                }
+            }
 
             Column(
                 modifier = Modifier
