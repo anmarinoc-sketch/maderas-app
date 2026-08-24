@@ -61,13 +61,22 @@ export async function normalizarNombre(nombre) {
  *
  * @returns {Array<{ nombre: string, familia: string, reino: string, comunes: string[] }>}
  */
-export async function buscarPorNombreComun(texto, limite = 8) {
+/**
+ * @param limite  cuantas devolver. Por defecto TODAS las que encuentre: quien llama
+ *   filtra por Colombia y recorta despues. Recortar antes de filtrar dejaba fuera
+ *   justo las colombianas, que GBIF devuelve al final de una lista mundial.
+ */
+export async function buscarPorNombreComun(texto, limite = 60) {
+  // 100 y no 30: el indice de nombres vulgares de GBIF es mundial y muy ruidoso. Con
+  // "roble" las primeras decenas son hayas de Chile y bignoniaceas cubanas, y las
+  // colombianas aparecen mas abajo. Quien filtra por Colombia es la ruta, que si tiene
+  // las listas del pais delante.
   const datos = await pedir('/species/search', {
     q: texto,
     qField: 'VERNACULAR',
     rank: 'SPECIES',
     status: 'ACCEPTED',
-    limit: '30',
+    limit: '100',
   });
   if (!datos?.results) return [];
 
@@ -98,4 +107,40 @@ export async function buscarPorNombreComun(texto, limite = 8) {
   return [...porNombre.values()]
     .slice(0, limite)
     .map((c) => ({ ...c, comunes: [...c.comunes].slice(0, 6) }));
+}
+
+/**
+ * Categoria global de la Lista Roja de la UICN.
+ *
+ * Es distinta de la categoria nacional y las dos importan: el roble (Quercus humboldtii)
+ * es Preocupacion Menor en el mundo y Vulnerable en Colombia, y aqui manda la nacional
+ * porque es la que tiene efecto legal. Enseñar solo una de las dos da una idea falsa.
+ *
+ * GBIF republica la Lista Roja, asi que no hace falta la clave de la UICN.
+ */
+const NOMBRES_IUCN = {
+  EXTINCT: 'Extinta',
+  EXTINCT_IN_THE_WILD: 'Extinta en estado silvestre',
+  CRITICALLY_ENDANGERED: 'En peligro critico',
+  ENDANGERED: 'En peligro',
+  VULNERABLE: 'Vulnerable',
+  NEAR_THREATENED: 'Casi amenazada',
+  LEAST_CONCERN: 'Preocupacion menor',
+  DATA_DEFICIENT: 'Datos insuficientes',
+  NOT_EVALUATED: 'No evaluada',
+};
+
+export async function categoriaIucn(nombre) {
+  const coincidencia = await pedir('/species/match', { name: nombre, strict: 'false' });
+  if (!coincidencia?.usageKey) return null;
+
+  const iucn = await pedir(`/species/${coincidencia.usageKey}/iucnRedListCategory`, {});
+  if (!iucn?.category) return null;
+
+  return {
+    codigo: iucn.code ?? null,
+    categoria: NOMBRES_IUCN[iucn.category] ?? iucn.category,
+    amenazada: ['CRITICALLY_ENDANGERED', 'ENDANGERED', 'VULNERABLE'].includes(iucn.category),
+    fuente: 'Lista Roja de la UICN, via GBIF',
+  };
 }

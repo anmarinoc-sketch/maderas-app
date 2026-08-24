@@ -302,8 +302,14 @@ y por que importa.
 
 Los datos oficiales que te pasan son ciertos y ya estan verificados: puedes apoyarte en
 ellos y explicarlos, pero NO los contradigas, NO los amplies con normas que creas
-recordar y NO anadas categorias ni resoluciones que no vengan en ellos. Si un dato no
-aparece, no lo rellenes: di que no consta.
+recordar y NO anadas categorias ni resoluciones que no vengan en ellos.
+
+UNA EXCEPCION, Y SOLO UNA: si en los datos oficiales el origen figura como
+"desconocido", rellena el campo origen_si_no_consta diciendo si la especie es nativa de Colombia
+o introducida. Eso pasa sobre todo con la fauna, porque las listas de origen que tiene el
+sistema cubren flora y aves. Es conocimiento biologico corriente, no normativo, y quedarse
+callado ante "¿es nativa?" de un animal comun no ayuda a nadie. Si de verdad dudas, pon
+"desconocido"; no te lo inventes. Del resto de campos oficiales sigues sin poder opinar.
 `.trim();
 
 export function promptDeRelato(ficha) {
@@ -324,8 +330,16 @@ Escribe, para alguien del sector forestal que no es biologo:
 
 export const ESQUEMA_RELATO = {
   type: Type.OBJECT,
-  required: ['que_es', 'donde_vive', 'como_reconocerla', 'importancia_conservacion', 'en_la_practica'],
+  required: [
+    'origen_si_no_consta',
+    'que_es',
+    'donde_vive',
+    'como_reconocerla',
+    'importancia_conservacion',
+    'en_la_practica',
+  ],
   propertyOrdering: [
+    'origen_si_no_consta',
     'que_es',
     'donde_vive',
     'como_reconocerla',
@@ -333,6 +347,24 @@ export const ESQUEMA_RELATO = {
     'en_la_practica',
   ],
   properties: {
+    origen_si_no_consta: {
+      type: Type.OBJECT,
+      required: ['valor', 'explicacion'],
+      propertyOrdering: ['valor', 'explicacion'],
+      description:
+        'Solo se usa cuando el origen oficial figura como "desconocido". En cualquier ' +
+        'otro caso pon valor "no_aplica".',
+      properties: {
+        valor: {
+          type: Type.STRING,
+          enum: ['nativa', 'exotica', 'desconocido', 'no_aplica'],
+        },
+        explicacion: {
+          type: Type.STRING,
+          description: 'Una frase: de donde es originaria y desde cuando esta en Colombia.',
+        },
+      },
+    },
     que_es: { type: Type.STRING },
     donde_vive: { type: Type.STRING },
     como_reconocerla: { type: Type.STRING },

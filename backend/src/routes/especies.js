@@ -5,9 +5,10 @@ import {
   candidatasPorNombreComun,
   consultarPorNombreCientifico,
   estadoDeListas,
+  estaEnColombia,
   pareceNombreCientifico,
 } from '../lib/especies.js';
-import { buscarPorNombreComun, normalizarNombre } from '../lib/gbif.js';
+import { buscarPorNombreComun, categoriaIucn, normalizarNombre } from '../lib/gbif.js';
 import { identificarPorFoto, redactarRelato, resolverNombre } from '../lib/gemini-especies.js';
 import { bufferDesdeBase64, validarImagen } from '../lib/image.js';
 import { requiereAppKey } from '../middleware/auth.js';
@@ -32,6 +33,18 @@ async function armarFicha(nombreCientifico, { conRelato, reinoSugerido }) {
   if (!oficial) return null;
 
   const ficha = { ...oficial, relato: null, relato_no_disponible: null };
+
+  /*
+   * Categoria global de la UICN, ademas de la nacional.
+   *
+   * Las dos importan y no siempre coinciden: el roble es Preocupacion Menor en el mundo
+   * y Vulnerable en Colombia. Aqui manda la nacional, que es la que tiene efecto legal,
+   * pero enseñar solo una de las dos da una idea falsa de la especie.
+   *
+   * Es una llamada a GBIF, gratuita. Si falla, la ficha sale igual sin ella.
+   */
+  ficha.amenaza = { ...ficha.amenaza, global: await categoriaIucn(oficial.nombre_cientifico) };
+
   if (!conRelato) return ficha;
 
   try {
@@ -48,6 +61,26 @@ async function armarFicha(nombreCientifico, { conRelato, reinoSugerido }) {
       },
     });
     ficha.relato = { ...resultado, generado_por: modelo };
+
+    /*
+     * Si las listas no saben si es nativa o exotica, se usa lo que diga el modelo.
+     *
+     * Pasa sobre todo con la fauna: las listas de origen cubren flora y aves. Dejar un
+     * "no consta" ante "¿es nativa?" de un animal comun no ayuda a nadie, asi que se
+     * responde, pero con la fuente cambiada a "modelo" para que la app lo pinte como lo
+     * que es: una respuesta sin verificar, no un dato oficial.
+     */
+    const propuesto = resultado.origen_si_no_consta;
+    const sirve = propuesto && ['nativa', 'exotica'].includes(propuesto.valor);
+    if (ficha.origen?.valor === 'desconocido' && sirve) {
+      ficha.origen = {
+        valor: propuesto.valor,
+        detalle: propuesto.explicacion,
+        fuente: null,
+        segun_el_modelo: true,
+        nota: 'No figura en las listas oficiales cargadas: lo dice el modelo, sin verificar.',
+      };
+    }
   } catch (error) {
     // Un fallo aqui no invalida la consulta: la parte oficial ya esta resuelta.
     ficha.relato_no_disponible =
@@ -153,12 +186,12 @@ router.post(
 /**
  * GET /api/especie?q=roble&relato=1
  *
- * Resuelve el nombre en cuatro pasos, del mas barato al mas caro, y para en cuanto uno
- * responde. Los tres primeros no gastan ni una consulta de Gemini:
+ * Resuelve el nombre en tres pasos, del mas barato al mas caro, y para en cuanto uno
+ * responde. Los dos primeros no gastan ni una consulta de Gemini:
  *   1. Es un nombre cientifico que esta en las listas -> ficha directa.
- *   2. Esta en el indice local de nombres comunes.
- *   3. GBIF lo reconoce como nombre vulgar (API gratuita, sin clave).
- *   4. Se lo preguntamos al modelo, y lo que diga se verifica contra las listas.
+ *   2. Es un nombre comun -> se unen el indice local y GBIF, se filtra por Colombia y se
+ *      enseñan TODAS las opciones, porque un nombre comun casi nunca designa una sola cosa.
+ *   3. Nada lo reconoce -> se lo preguntamos al modelo y lo verifican las listas.
  */
 router.get(
   '/especie',
@@ -188,40 +221,50 @@ router.get(
       }
     }
 
-    /* 2. Indice local de nombres comunes (cubre las especies amenazadas). */
-    const locales = candidatasPorNombreComun(consulta);
-    if (locales.length === 1) {
-      return responder({
-        resuelto_por: 'indice_local_de_nombres_comunes',
-        ficha: await armarFicha(locales[0], { conRelato }),
-      });
+    /*
+     * 2 y 3. Nombre comun: SIEMPRE se enseñan todas las opciones.
+     *
+     * Antes, si el indice local resolvia el nombre a una sola especie, se saltaba GBIF y
+     * se iba derecho a la ficha. Con "roble" eso daba solo Quercus humboldtii y ocultaba
+     * el flor morado (Tabebuia rosea) y el roble negro, que es justo lo que hay que ver
+     * antes de decidir. Un nombre comun casi nunca designa una sola cosa.
+     *
+     * Las dos fuentes se unen: el indice local cubre las especies amenazadas y las aves,
+     * y GBIF el resto. Lo de GBIF se filtra por Colombia porque su indice es mundial y
+     * con "roble" saca antes hayas de Chile que nada de aqui.
+     */
+    const candidatas = new Map();
+
+    for (const k of candidatasPorNombreComun(consulta)) {
+      const ficha = consultarPorNombreCientifico(k);
+      if (ficha) candidatas.set(ficha.clave, resumirCandidata(ficha));
     }
-    if (locales.length > 1) {
-      return responder({
-        resuelto_por: 'indice_local_de_nombres_comunes',
-        hay_que_elegir: true,
-        aviso: `"${consulta}" designa varias especies. Elige cual quieres consultar.`,
-        candidatas: locales.map((k) => resumirCandidata(consultarPorNombreCientifico(k))),
+
+    for (const c of await buscarPorNombreComun(consulta)) {
+      if (!estaEnColombia(c.nombre)) continue;
+      const ficha = consultarPorNombreCientifico(c.nombre, { reinoSugerido: c.reino });
+      if (!ficha || candidatas.has(ficha.clave)) continue;
+      candidatas.set(ficha.clave, {
+        ...resumirCandidata(ficha),
+        nombres_comunes: c.comunes.join(', ') || undefined,
       });
     }
 
-    /* 3. GBIF, gratis y sin cuota. */
-    const enGbif = await buscarPorNombreComun(consulta);
-    if (enGbif.length === 1) {
+    // Se recorta DESPUES de filtrar, y a un numero que quepa en una pantalla.
+    const opciones = ordenarCandidatas([...candidatas.values()]).slice(0, 12);
+
+    if (opciones.length === 1) {
       return responder({
-        resuelto_por: 'gbif',
-        ficha: await armarFicha(enGbif[0].nombre, { conRelato, reinoSugerido: enGbif[0].reino }),
+        resuelto_por: 'nombre_comun',
+        ficha: await armarFicha(opciones[0].nombre_cientifico, { conRelato }),
       });
     }
-    if (enGbif.length > 1) {
+    if (opciones.length > 1) {
       return responder({
-        resuelto_por: 'gbif',
+        resuelto_por: 'nombre_comun',
         hay_que_elegir: true,
-        aviso: `"${consulta}" designa varias especies. Elige cual quieres consultar.`,
-        candidatas: enGbif.map((c) => ({
-          ...resumirCandidata(consultarPorNombreCientifico(c.nombre)),
-          nombres_comunes: c.comunes.join(', '),
-        })),
+        aviso: `"${consulta}" designa varias especies en Colombia. Elige cuál quieres consultar.`,
+        candidatas: opciones,
       });
     }
 
@@ -287,6 +330,19 @@ function resumirCandidata(ficha) {
     amenaza: ficha.amenaza.nacional?.categoria ?? null,
     vedada: ficha.vedas.length > 0,
   };
+}
+
+/**
+ * Las candidatas que mas importan, primero.
+ *
+ * Quien busca "roble" delante de un arbol necesita ver antes la que esta vedada o
+ * amenazada que la que no tiene ninguna restriccion: si la lista es larga, lo que queda
+ * abajo no se lee.
+ */
+function ordenarCandidatas(lista) {
+  const peso = (c) =>
+    (c.vedada ? 4 : 0) + (c.amenaza ? 2 : 0) + (c.endemica === true ? 1 : 0);
+  return [...lista].sort((a, b) => peso(b) - peso(a));
 }
 
 /* -------------------------------------------------------------------- diagnostico */

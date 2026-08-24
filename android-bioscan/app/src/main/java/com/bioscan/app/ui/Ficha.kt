@@ -424,6 +424,38 @@ private fun BloqueAmenaza(ficha: Ficha) {
             )
         }
 
+        // La categoria global de la UICN y la nacional no siempre coinciden: el roble es
+        // Preocupacion Menor en el mundo y Vulnerable en Colombia. Manda la nacional,
+        // que es la que tiene efecto legal aqui, pero ocultar la otra da una idea falsa.
+        amenaza.global?.categoria?.let { global ->
+            HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text("A nivel mundial", fontWeight = FontWeight.Bold)
+                Text(
+                    global + (amenaza.global.codigo?.let { " ($it)" } ?: ""),
+                    fontWeight = FontWeight.Bold,
+                    color = if (amenaza.global.amenazada == true) RojoGrave else VerdeBien,
+                )
+            }
+            Text(
+                amenaza.global.fuente ?: "Lista Roja de la UICN",
+                style = MaterialTheme.typography.bodySmall,
+                color = GrisNoConsta,
+            )
+            if (nacional?.categoria != null && amenaza.global.amenazada != true) {
+                Text(
+                    "En Colombia está en una categoría más grave que en el resto del mundo. " +
+                        "Aquí manda la nacional.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = NaranjaAviso,
+                    modifier = Modifier.padding(top = 4.dp),
+                )
+            }
+        }
+
         ficha.cites?.let { cites ->
             HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
             Text("CITES · Apéndice ${cites.apendice}", fontWeight = FontWeight.Bold)
@@ -451,6 +483,18 @@ private fun BloqueOrigen(ficha: Ficha) {
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
         )
+
+        // Cuando la respuesta la da el modelo y no una lista, hay que decirlo aquí mismo:
+        // el bloque va etiquetado como "Lista oficial" y sin esta línea el dato pasaría
+        // por verificado sin serlo.
+        if (origen.segunElModelo == true) {
+            Aviso(
+                "Este dato no sale de las listas oficiales: lo propone la IA y no está " +
+                    "verificado.",
+                NaranjaAviso,
+                Modifier.padding(top = 6.dp),
+            )
+        }
 
         origen.detalle?.takeIf { it.isNotBlank() }?.let {
             Text("Estatus: $it", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))

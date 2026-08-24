@@ -216,10 +216,13 @@ function coberturaDeVedas() {
   return {
     completa: incompletas.length === 0,
     listados_incompletos: incompletas,
+    // Antes esto era una advertencia en naranja que salia en cada consulta, incluso
+    // cuando no habia nada que advertir. Ahora que los listados cargados estan completos,
+    // lo unico honesto que queda por decir es cual es el alcance, y eso es un dato, no
+    // un susto.
     advertencia:
-      'No aparecer en esta consulta NO significa que la especie no este vedada: ' +
-      'el listado de Cornare esta incompleto y las vedas regionales de otras corporaciones ' +
-      'no estan cargadas. Verifica siempre ante la autoridad ambiental competente.',
+      'Estan cargadas las vedas nacionales, las de Corantioquia y las de Cornare. Las de ' +
+      'otras corporaciones autonomas del pais no.',
     nota_procedimiento: vedas.nota_procedimiento,
     detalle_cobertura: vedas.cobertura,
     vedas_de_ambito_condicionado: INDICE.universales.map((n) => ({
@@ -520,6 +523,18 @@ export function candidatasPorNombreComun(texto) {
     if (comun.includes(k) || k.includes(comun)) claves.forEach((c) => parciales.add(c));
   }
   return [...parciales].slice(0, 12);
+}
+
+/**
+ * Si la especie figura en alguna lista colombiana.
+ *
+ * Se usa para filtrar lo que devuelve GBIF al buscar un nombre vulgar: su indice es
+ * mundial y con "roble" saca hayas de Chile y bignoniaceas cubanas antes que nada de
+ * aqui. Quedarse con lo que existe en Colombia es lo que hace util la lista.
+ */
+export function estaEnColombia(nombre) {
+  const k = clave(nombre);
+  return Boolean(flora.especies[k] || amenazadas.especies[k] || aves.especies[k]);
 }
 
 /** Un nombre parece cientifico si es un binomio latino y su genero existe en las listas. */

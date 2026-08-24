@@ -37,6 +37,8 @@ data class Origen(
     /** "nativa", "exotica" o "desconocido". */
     val valor: String? = null,
     val detalle: String? = null,
+    /** true si lo dice el modelo porque las listas oficiales no lo tenían. */
+    @SerializedName("segun_el_modelo") val segunElModelo: Boolean? = null,
     @SerializedName("origen_geografico") val origenGeografico: String? = null,
     val invasividad: String? = null,
     val fuente: String? = null,
@@ -78,8 +80,17 @@ data class AmenazaCatalogo(
     val fuente: String? = null,
 )
 
+/** Categoría global de la Lista Roja de la UICN. No siempre coincide con la nacional. */
+data class AmenazaGlobal(
+    val codigo: String? = null,
+    val categoria: String? = null,
+    val amenazada: Boolean? = null,
+    val fuente: String? = null,
+)
+
 data class Amenaza(
     val nacional: AmenazaNacional? = null,
+    val global: AmenazaGlobal? = null,
     val catalogo: AmenazaCatalogo? = null,
     @SerializedName("sin_categoria") val sinCategoria: String? = null,
 )

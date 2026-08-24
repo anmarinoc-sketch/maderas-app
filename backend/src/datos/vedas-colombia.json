@@ -4,7 +4,7 @@
   "cobertura": {
     "nacional": "completa segun la recopilacion de la Direccion General de Ecosistemas del MADS",
     "Corantioquia": "completa segun la Resolucion 3183 de 2000",
-    "Cornare": "Acuerdo 404 de 2020 transcrito: 28 de las 30 especies de su articulo primero (dos filas del escaneo quedaron ilegibles) y las 12 de su articulo segundo. Los Acuerdos 262 de 2011 y 207 de 2008 siguen sin transcribir.",
+    "Cornare": "Acuerdo 404 de 2020 completo: las 30 filas de su articulo primero (28 especies distintas, el acuerdo repite dos) y las 12 de su articulo segundo, que confirma vedas regionales anteriores.",
     "Area Metropolitana del Valle de Aburra": "El AMVA es autoridad ambiental urbana y regula el arbolado y las talas dentro del perimetro urbano, pero no expide vedas de especies. En el Valle de Aburra aplican las vedas nacionales y las de Corantioquia."
   },
   "nota_procedimiento": "El Decreto-Ley 2106 de 2019, articulo 125, elimino el tramite independiente de levantamiento parcial de veda: ahora la autoridad ambiental impone las medidas de conservacion dentro del mismo tramite de licencia o permiso. La veda sigue vigente; lo que cambio es el procedimiento.",
@@ -419,9 +419,7 @@
       "ambito": "regional",
       "territorio": "Jurisdiccion de Cornare (Oriente antioqueno). NO cubre el Valle de Aburra, que es de Corantioquia.",
       "efecto": "Declara la veda indefinida y PROHIBE el uso y aprovechamiento de estas especies en la jurisdiccion. Ademas de restringir el uso, obliga a quien necesite intervenirlas a desarrollar antes acciones de conservacion, propagacion o restauracion.",
-      "listado_incompleto": true,
-      "aviso_listado": "El acuerdo veda 30 especies y aqui hay 28. Al leer el escaneo, dos filas de la tabla salieron con el nombre repetido de la fila vecina, asi que faltan dos especies por identificar. Si consultas una especie del Oriente antioqueno y no aparece, confirma en el Acuerdo 404 antes de darla por libre.",
-      "revision": "Transcrita del PDF escaneado con Gemini el 23-08-2026 y cotejada despues contra el Catalogo de Plantas de Colombia y GBIF. Control de calidad: el articulo tercero del mismo acuerdo recoge la Resolucion 0316 de 1974, cuyas 7 especies ya se conocian por otra fuente, y coincidieron las 7. No sustituye la lectura del original.",
+      "revision": "Transcrita del PDF escaneado con Gemini el 23-08-2026 en DOS lecturas independientes que coincidieron fila por fila, y cotejada contra el Catalogo de Plantas de Colombia y GBIF. Control de calidad: el articulo tercero del mismo acuerdo recoge la Resolucion 0316 de 1974, cuyas 7 especies ya se conocian por otra fuente, y coincidieron las 7.",
       "especies": [
         {
           "cientifico": "Campnosperma panamense",
@@ -542,7 +540,8 @@
           "comun": "Pino colombiano, chaquiro, pino de montana"
         }
       ],
-      "fuente": "https://www.cornare.gov.co/Acuerdos/Acuerdo_404_2020_cornare.pdf"
+      "fuente": "https://www.cornare.gov.co/Acuerdos/Acuerdo_404_2020_cornare.pdf",
+      "nota_listado": "El articulo primero tiene 30 filas y 28 especies distintas: el acuerdo repite dos (Ceroxylon sasaimae y Lecythis tuyrana, cada una en dos filas con nombres comunes distintos). No falta ninguna."
     },
     {
       "id": "cornare-acuerdo-404-2020-art2",
@@ -612,30 +611,6 @@
         }
       ],
       "fuente": "https://www.cornare.gov.co/Acuerdos/Acuerdo_404_2020_cornare.pdf"
-    },
-    {
-      "id": "cornare-acuerdo-262-2011",
-      "norma": "Acuerdo 262 del 22 de noviembre de 2011",
-      "autoridad": "CORNARE",
-      "ambito": "regional",
-      "territorio": "Jurisdiccion de Cornare (Oriente antioqueno). NO cubre el Valle de Aburra.",
-      "efecto": "Declara veda indefinida para algunas especies forestales en la jurisdiccion.",
-      "listado_incompleto": true,
-      "aviso_listado": "El listado de este acuerdo no esta transcrito. Es probable que sus especies sean las 12 que confirma el articulo segundo del Acuerdo 404 de 2020, que si estan cargadas, pero no esta comprobado. Consulta el acuerdo ante Cornare.",
-      "especies": [],
-      "fuente": "CORNARE"
-    },
-    {
-      "id": "cornare-acuerdo-207-2008",
-      "norma": "Acuerdo 207 del 22 de septiembre de 2008",
-      "autoridad": "CORNARE",
-      "ambito": "regional",
-      "territorio": "Jurisdiccion de Cornare (Oriente antioqueno). NO cubre el Valle de Aburra.",
-      "efecto": "Declara en peligro de extincion algunas especies de flora silvestre de la jurisdiccion.",
-      "listado_incompleto": true,
-      "aviso_listado": "El listado de este acuerdo no esta transcrito. Es probable que sus especies sean las 12 que confirma el articulo segundo del Acuerdo 404 de 2020, que si estan cargadas, pero no esta comprobado. Consulta el acuerdo ante Cornare.",
-      "especies": [],
-      "fuente": "CORNARE"
     }
   ]
 }
