@@ -381,6 +381,10 @@ private fun BloqueVedas(ficha: Ficha) {
 
         veda?.motivo?.let { Aviso(it, NaranjaAviso, Modifier.padding(top = 10.dp)) }
 
+        // Justo debajo del cuadro de autoridades: es ahi donde alguien lee "sin veda" y
+        // se va tranquilo de una especie que en realidad esta en peligro.
+        veda?.notaAmenazada?.let { Aviso(it, NaranjaAviso, Modifier.padding(top = 10.dp)) }
+
         if (detalle.isNotEmpty()) {
             Column(
                 modifier = Modifier.padding(top = 12.dp),
@@ -628,9 +632,32 @@ private fun BloqueAmenaza(ficha: Ficha) {
 
         ficha.cites?.let { cites ->
             HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
-            Text("CITES · Apéndice ${cites.apendice}", fontWeight = FontWeight.Bold)
+            Text(
+                "CITES · Apéndice ${cites.apendice}",
+                fontWeight = FontWeight.Bold,
+                color = NaranjaAviso,
+            )
             cites.significado?.let {
                 Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
+            }
+            // El alcance y la anotacion deciden si te aplica de verdad: la inclusion suele
+            // ser de genero entero y cubrir solo unos productos concretos.
+            cites.alcance?.let {
+                Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
+            }
+            cites.anotacion?.let {
+                Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
+            }
+            listOfNotNull(
+                cites.desde?.let { "En vigor desde el $it" },
+                cites.reunion,
+            ).takeIf { it.isNotEmpty() }?.let {
+                Text(
+                    it.joinToString(" · "),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = GrisNoConsta,
+                    modifier = Modifier.padding(top = 6.dp),
+                )
             }
             cites.advertencia?.let { Aviso(it, NaranjaAviso, Modifier.padding(top = 8.dp)) }
         }

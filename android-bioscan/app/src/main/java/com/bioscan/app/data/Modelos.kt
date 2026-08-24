@@ -101,6 +101,12 @@ data class Amenaza(
 data class Cites(
     val apendice: String? = null,
     val significado: String? = null,
+    /** "Todo el género Cedrela", cuando la inclusión es de género entero. */
+    val alcance: String? = null,
+    val desde: String? = null,
+    val reunion: String? = null,
+    /** Qué productos cubre: trozas, aserrada, chapas… Es lo que decide si te aplica. */
+    val anotacion: String? = null,
     val fuente: String? = null,
     val advertencia: String? = null,
 )
@@ -145,6 +151,8 @@ data class VedaPorAutoridad(
 data class BloqueVeda(
     val aplica: Boolean? = null,
     val motivo: String? = null,
+    /** "Sin veda" no es "sin restricciones" si la especie está amenazada. */
+    @SerializedName("nota_amenazada") val notaAmenazada: String? = null,
     @SerializedName("por_autoridad") val porAutoridad: List<VedaPorAutoridad>? = null,
     val detalle: List<Veda>? = null,
 )

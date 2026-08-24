@@ -29,6 +29,22 @@ const fauna = leer('fauna-colombia.json');
 const herpeto = leer('herpetofauna-colombia.json');
 const comunes = leer('nombres-comunes.json');
 const vedas = leer('vedas-colombia.json');
+const citesNuevo = leer('cites-actualizaciones.json');
+
+/**
+ * Apendices CITES que han cambiado despues del Catalogo, indexados por genero.
+ *
+ * El Catalogo es de 2023 y la CITES se mueve cada dos o tres anos, asi que sus datos
+ * envejecen y lo hacen en silencio. Costo un aviso del usuario: el cedro figuraba en el
+ * Apendice III cuando el genero Cedrela entero esta en el II desde 2020, y los guayacanes
+ * (Handroanthus, Tabebuia) no figuraban en absoluto pese a haber entrado en el II en
+ * noviembre de 2024. Eran 58 especies maderables mal marcadas o sin marcar.
+ *
+ * Esto MANDA sobre el Catalogo.
+ */
+const CITES_POR_GENERO = new Map(
+  citesNuevo.generos.map((g) => [sinTildes(g.genero), g])
+);
 
 /** Igual que en herramientas/construir-listas.js: las claves tienen que coincidir. */
 export function sinTildes(texto) {
@@ -324,20 +340,7 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
           : undefined,
     },
 
-    // Los apendices CITES cambian en cada conferencia de las partes y el Catalogo es de
-    // 2023: el cedro (Cedrela odorata) figura aqui en el III cuando el genero entero paso
-    // al II. Por eso el dato va con la advertencia pegada y nunca se presenta como ultima
-    // palabra. Para un tramite de exportacion hay que mirar speciesplus.net.
-    cites: enFlora?.cites
-      ? {
-          apendice: enFlora.cites,
-          significado: CITES[enFlora.cites],
-          fuente: `${flora.fuente} (datos de 2023)`,
-          advertencia:
-            'Los apendices CITES se actualizan cada dos o tres anos. Antes de exportar, ' +
-            'confirma el apendice vigente en speciesplus.net.',
-        }
-      : null,
+    cites: cites(k, enFlora),
 
     distribucion: {
       departamentos: enFlora?.departamentos ?? enFauna?.departamentos,
@@ -372,6 +375,22 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
               'flora: si lo que consultas es un animal, esta consulta no viene al caso.',
           por_autoridad: porAutoridad(lasVedas),
           detalle: lasVedas,
+
+          /*
+           * Estar amenazada NO es estar vedada, pero tampoco deja la especie libre.
+           *
+           * La Resolucion 0126 de 2024 es un listado de amenaza y ella misma dice que no
+           * modifica las vedas existentes. Aun asi, quien ve "sin veda" en una especie
+           * en peligro se lleva una idea equivocada: las autoridades ambientales
+           * restringen el aprovechamiento de las amenazadas por otras vias. Decir solo
+           * "no" seria tecnicamente cierto y practicamente enganoso.
+           */
+          nota_amenazada: enAmenazadas
+            ? `Sin veda no significa sin restricciones: esta especie figura como ` +
+              `${enAmenazadas.categoria} en la ${amenazadas.norma}, y las autoridades ` +
+              `ambientales restringen el aprovechamiento de las especies amenazadas. ` +
+              `Consulta antes de intervenirla.`
+            : undefined,
         },
 
     fuentes: [
@@ -380,6 +399,42 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
       enExoticas && exoticas.fuente,
       lasVedas.length > 0 && 'Recopilacion de vedas de flora, MADS, y acuerdos corporativos',
     ].filter(Boolean),
+  };
+}
+
+/**
+ * Apendice CITES, con la correccion por delante del Catalogo.
+ *
+ * El orden importa: primero lo curado a mano, que esta al dia, y solo si no hay nada
+ * ahi se recurre al Catalogo. Al reves, el cedro seguiria saliendo como Apendice III.
+ */
+function cites(k, enFlora) {
+  const actualizado = CITES_POR_GENERO.get(genero(k));
+
+  if (actualizado) {
+    return {
+      apendice: actualizado.apendice,
+      significado: CITES[actualizado.apendice],
+      alcance: `Todo el genero ${actualizado.genero}`,
+      desde: actualizado.desde,
+      reunion: actualizado.reunion,
+      anotacion: actualizado.anotacion,
+      fuente: 'CITES',
+      advertencia:
+        'Los apendices CITES cambian cada dos o tres anos. Antes de exportar, confirma ' +
+        'el apendice vigente en speciesplus.net.',
+    };
+  }
+
+  if (!enFlora?.cites) return null;
+
+  return {
+    apendice: enFlora.cites,
+    significado: CITES[enFlora.cites],
+    fuente: `${flora.fuente} (datos de 2023)`,
+    advertencia:
+      'Dato de 2023. Los apendices CITES cambian cada dos o tres anos: antes de exportar, ' +
+      'confirma el apendice vigente en speciesplus.net.',
   };
 }
 

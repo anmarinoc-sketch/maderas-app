@@ -1,0 +1,63 @@
+{
+  "actualizado": "2026-08-24",
+  "porque_existe": "Los apendices CITES del Catalogo de Plantas de Colombia son de 2023 y se quedan atras en cuanto la CITES cambia algo, que es cada dos o tres anos. Este archivo corrige y completa esos datos, y MANDA sobre el Catalogo. No hay API publica de CITES: Species+ pide token y checklist.cites.org no responde, asi que esto se mantiene a mano.",
+  "como_actualizarlo": "Tras cada Conferencia de las Partes (CoP), revisar las especies maderables nuevas en cites.org y anadir el genero aqui con su fecha de entrada en vigor. Ojo: casi siempre la entrada en vigor se aplaza entre 12 y 24 meses respecto a la decision.",
+  "significado_apendices": {
+    "I": "Comercio internacional prohibido salvo casos excepcionales.",
+    "II": "El comercio internacional exige permiso de exportacion del pais de origen.",
+    "III": "Especie protegida en al menos un pais, que pide cooperacion para controlar su comercio."
+  },
+
+  "generos": [
+    {
+      "genero": "Cedrela",
+      "comun": "Cedro",
+      "apendice": "II",
+      "desde": "2020-08-28",
+      "reunion": "CoP18 (2019), con entrada en vigor aplazada 12 meses",
+      "anotacion": "Anotacion #6: trozas, madera aserrada, chapas y contrachapado.",
+      "nota": "Todo el genero. El Catalogo de 2023 sigue dando Cedrela odorata como Apendice III, que es lo que era antes de 2020.",
+      "fuente": "https://cites.org/eng/teatfish_cedrela_listing_AppendixII_CITES_28082020"
+    },
+    {
+      "genero": "Handroanthus",
+      "comun": "Guayacan, ipe, flor amarillo",
+      "apendice": "II",
+      "desde": "2024-11-25",
+      "reunion": "CoP19 (2022), con entrada en vigor aplazada 24 meses",
+      "anotacion": "Anotacion #17: trozas, madera aserrada, chapas, madera laminada y madera trabajada.",
+      "nota": "Todo el genero. Es posterior al Catalogo, que no marca ninguna especie de Handroanthus.",
+      "fuente": "https://cites.org/sites/default/files/documents/E-CoP19-Prop-48.pdf"
+    },
+    {
+      "genero": "Tabebuia",
+      "comun": "Guayacan, roble, flor morado",
+      "apendice": "II",
+      "desde": "2024-11-25",
+      "reunion": "CoP19 (2022), con entrada en vigor aplazada 24 meses",
+      "anotacion": "Anotacion #17: trozas, madera aserrada, chapas, madera laminada y madera trabajada.",
+      "nota": "Todo el genero. Incluye Tabebuia rosea, el flor morado.",
+      "fuente": "https://cites.org/sites/default/files/documents/E-CoP19-Prop-48.pdf"
+    },
+    {
+      "genero": "Roseodendron",
+      "comun": "Guayacan",
+      "apendice": "II",
+      "desde": "2024-11-25",
+      "reunion": "CoP19 (2022), con entrada en vigor aplazada 24 meses",
+      "anotacion": "Anotacion #17: trozas, madera aserrada, chapas, madera laminada y madera trabajada.",
+      "nota": "Entro junto a Handroanthus y Tabebuia, por el parecido de la madera.",
+      "fuente": "https://cites.org/sites/default/files/documents/E-CoP19-Prop-48.pdf"
+    },
+    {
+      "genero": "Dipteryx",
+      "comun": "Choiba, cumaru, sarrapia",
+      "apendice": "II",
+      "desde": "2024-11-25",
+      "reunion": "CoP19 (2022), con entrada en vigor aplazada 24 meses",
+      "anotacion": "Anotacion #17: trozas, madera aserrada, chapas, madera laminada y madera trabajada.",
+      "nota": "Todo el genero. El Catalogo solo marcaba Dipteryx oleifera, y como Apendice III.",
+      "fuente": "https://cites.org/sites/default/files/documents/E-CoP19-Prop-48.pdf"
+    }
+  ]
+}
