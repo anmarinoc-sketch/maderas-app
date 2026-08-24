@@ -103,6 +103,8 @@ cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v7; git push origin bio-
 | `herramientas/comparar-listas.js` | Cuenta y compara; lo usa el workflow mensual |
 | `herramientas/transcribir-acuerdo.js` | Línea de comandos para una norma escaneada |
 | `herramientas/zip.js` | Lector mínimo de ZIP y TSV para los Darwin Core |
+| `herramientas/auditar-cobertura.js` | Qué cubren las listas, grupo por grupo. Pasarlo tras cada actualización |
+| `herramientas/medir-fotos.js` | Mide el acierto de la identificación por foto |
 
 Lo de XiloScan (`lib/gemini.js`, `prompt.js`, `referencia.js`, `aprendizaje.js`,
 `huella.js`, `routes/identificar.js`) **no se toca desde aquí**.
@@ -235,8 +237,11 @@ El Acuerdo 404 de Cornare costó tres pasadas:
 
 ## Qué queda pendiente
 
-1. **Medir la identificación por foto con fotos de campo.** Con seis de Wikipedia salieron
-   5 especies exactas y 1 género, sin fallos, pero esas fotos son fáciles.
+1. **Medir la identificación por foto CON FOTOS DE CAMPO.** Ya existe el banco automático
+   (`node herramientas/medir-fotos.js`), pero usa fotos de Wikipedia, que son fáciles:
+   bien encuadradas y tomadas por alguien que sabía qué fotografiaba. Salieron 5 especies
+   exactas y 1 género de 6, sin fallos, y eso es el techo, no lo que se ve en campo.
+   Para medir de verdad hay que cambiar el banco por fotos del usuario.
 2. **`APP_API_KEY` sin configurar**: el backend es público. El límite por IP protege de
    ráfagas, pero quien descubra la URL puede gastar cuota. Ponerlo obliga a recompilar y
    reinstalar las dos apps.
