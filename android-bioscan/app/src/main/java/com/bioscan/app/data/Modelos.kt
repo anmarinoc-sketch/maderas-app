@@ -31,6 +31,9 @@ data class EnListas(
     @SerializedName("catalogo_flora") val catalogoFlora: Boolean? = null,
     @SerializedName("amenazadas_nacional") val amenazadasNacional: Boolean? = null,
     val exoticas: Boolean? = null,
+    @SerializedName("fauna_colombia") val faunaColombia: Boolean? = null,
+    @SerializedName("aves_endemicas") val avesEndemicas: Boolean? = null,
+    val herpetofauna: Boolean? = null,
 )
 
 data class Origen(
@@ -195,11 +198,19 @@ data class Ficha(
     val relato: Relato? = null,
     @SerializedName("relato_no_disponible") val relatoNoDisponible: String? = null,
 ) {
-    /** Si no aparecio en ninguna lista, lo unico que hay es lo que diga el modelo. */
+    /**
+     * Si aparecio en alguna lista colombiana.
+     *
+     * Tiene que mirarlas TODAS. Cuando solo miraba las tres de flora, la app avisaba de
+     * que una lora perfectamente catalogada "no aparece en ninguna lista oficial".
+     */
     val estaEnAlgunaLista: Boolean
         get() = enListas?.catalogoFlora == true ||
             enListas?.amenazadasNacional == true ||
-            enListas?.exoticas == true
+            enListas?.exoticas == true ||
+            enListas?.faunaColombia == true ||
+            enListas?.avesEndemicas == true ||
+            enListas?.herpetofauna == true
 }
 
 /* ------------------------------------------------------- consulta por nombre */

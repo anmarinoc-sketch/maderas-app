@@ -45,17 +45,22 @@ private val GrisNoConsta = Color(0xFF6F7B75)
 
 @Composable
 fun CuerpoDeFicha(ficha: Ficha, modifier: Modifier = Modifier) {
+    // La veda es cosa de flora. Ante un animal no se enseña el apartado, ni la fila del
+    // resumen, ni una explicacion de por que no aplica: el usuario ya sabe que es un
+    // animal, y un bloque entero diciendo "esto no viene al caso" solo estorba.
+    val esFauna = ficha.veda?.aplica == false
+
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         FotoDeLaEspecie(ficha)
         Encabezado(ficha)
-        Etiquetas(ficha)
-        ResumenRapido(ficha)
+        Etiquetas(ficha, esFauna)
+        ResumenRapido(ficha, esFauna)
 
-        // La veda va lo primero porque es lo que puede meter en un lio a quien consulta.
-        BloqueVedas(ficha)
+        // Lo primero de todo cuando aplica: es lo que puede meter en un lio a quien consulta.
+        if (!esFauna) BloqueVedas(ficha)
 
         BloqueAmenaza(ficha)
         BloqueOrigen(ficha)
@@ -113,7 +118,7 @@ private fun FotoDeLaEspecie(ficha: Ficha) {
  * si está vedada y se sigue trabajando. Todo lo de abajo desarrolla estas cuatro líneas.
  */
 @Composable
-private fun ResumenRapido(ficha: Ficha) {
+private fun ResumenRapido(ficha: Ficha, esFauna: Boolean) {
     val vedaAplica = ficha.veda?.aplica
     val vedada = ficha.veda?.detalle?.isNotEmpty() == true || !ficha.vedas.isNullOrEmpty()
 
@@ -152,20 +157,21 @@ private fun ResumenRapido(ficha: Ficha) {
                     if (it == "VU") NaranjaAviso else RojoGrave
                 } ?: VerdeBien,
             )
-            Pregunta(
-                "¿Está vedada?",
-                when {
-                    vedaAplica == false -> "No aplica (fauna)"
-                    vedada -> "Sí"
-                    vedaAplica == null -> "Sin determinar"
-                    else -> "No"
-                },
-                when {
-                    vedada -> RojoGrave
-                    vedaAplica == false || vedaAplica == null -> GrisNoConsta
-                    else -> VerdeBien
-                },
-            )
+            if (!esFauna) {
+                Pregunta(
+                    "¿Está vedada?",
+                    when {
+                        vedada -> "Sí"
+                        vedaAplica == null -> "Sin determinar"
+                        else -> "No"
+                    },
+                    when {
+                        vedada -> RojoGrave
+                        vedaAplica == null -> GrisNoConsta
+                        else -> VerdeBien
+                    },
+                )
+            }
         }
     }
 }
@@ -221,22 +227,13 @@ private fun Encabezado(ficha: Ficha) {
                 modifier = Modifier.padding(top = 4.dp),
             )
         }
-
-        if (!ficha.estaEnAlgunaLista) {
-            Aviso(
-                "Esta especie no aparece en ninguna de las listas oficiales cargadas. " +
-                    "Todo lo que sigue viene del modelo y no está verificado.",
-                NaranjaAviso,
-                Modifier.padding(top = 8.dp),
-            )
-        }
     }
 }
 
 /* -------------------------------------------------------------------- etiquetas */
 
 @Composable
-private fun Etiquetas(ficha: Ficha) {
+private fun Etiquetas(ficha: Ficha, esFauna: Boolean) {
     val etiquetas = buildList {
         when (ficha.origen?.valor) {
             "nativa" -> add(Etiqueta("Nativa", VerdeBien))
@@ -254,7 +251,7 @@ private fun Etiquetas(ficha: Ficha) {
             add(Etiqueta(nombreDeCategoria(it), if (it == "VU") NaranjaAviso else RojoGrave))
         }
 
-        if (!ficha.vedas.isNullOrEmpty()) add(Etiqueta("Vedada", RojoGrave))
+        if (!esFauna && !ficha.vedas.isNullOrEmpty()) add(Etiqueta("Vedada", RojoGrave))
 
         ficha.cites?.apendice?.let { add(Etiqueta("CITES $it", NaranjaAviso)) }
 
