@@ -130,6 +130,55 @@ const NOMBRES_IUCN = {
   NOT_EVALUATED: 'No evaluada',
 };
 
+/**
+ * Red de seguridad: todo lo que las listas colombianas no cubren.
+ *
+ * Las listas cargadas son flora, aves, mamiferos y peces de agua dulce. Reptiles,
+ * anfibios, insectos y cualquier especie de fuera se quedaban sin ficha, y el usuario
+ * veia "no encontrada" ante nombres perfectamente validos. Aqui GBIF resuelve la
+ * taxonomia, los nombres comunes y si la especie tiene registros EN COLOMBIA, que es lo
+ * que de verdad se pregunta.
+ *
+ * Es informacion de GBIF, no de una lista oficial colombiana, y se devuelve marcada como
+ * tal para que la app no la pinte con el mismo peso.
+ */
+export async function fichaDeRespaldo(nombre) {
+  const coincidencia = await pedir('/species/match', { name: nombre, strict: 'false' });
+  if (!coincidencia?.usageKey || coincidencia.matchType === 'NONE') return null;
+
+  const aceptado = coincidencia.species ?? coincidencia.canonicalName;
+
+  const [enColombia, vernaculos] = await Promise.all([
+    pedir('/occurrence/search', {
+      scientificName: aceptado,
+      country: 'CO',
+      limit: '0',
+    }),
+    pedir(`/species/${coincidencia.usageKey}/vernacularNames`, { limit: '60' }),
+  ]);
+
+  const comunes = [
+    ...new Set(
+      (vernaculos?.results ?? [])
+        .filter((v) => !v.language || v.language === 'spa' || v.language === 'es')
+        .map((v) => v.vernacularName)
+        .filter(Boolean)
+    ),
+  ].slice(0, 8);
+
+  return {
+    nombre: aceptado,
+    nombre_completo: coincidencia.scientificName,
+    reino: coincidencia.kingdom,
+    clase: coincidencia.class,
+    orden: coincidencia.order,
+    familia: coincidencia.family,
+    comunes,
+    registros_en_colombia: enColombia?.count ?? 0,
+    fuente: 'GBIF',
+  };
+}
+
 export async function categoriaIucn(nombre) {
   const coincidencia = await pedir('/species/match', { name: nombre, strict: 'false' });
   if (!coincidencia?.usageKey) return null;

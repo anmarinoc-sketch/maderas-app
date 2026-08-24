@@ -6,9 +6,15 @@ import {
   consultarPorNombreCientifico,
   estadoDeListas,
   estaEnColombia,
+  pareceBinomio,
   pareceNombreCientifico,
 } from '../lib/especies.js';
-import { buscarPorNombreComun, categoriaIucn, normalizarNombre } from '../lib/gbif.js';
+import {
+  buscarPorNombreComun,
+  categoriaIucn,
+  fichaDeRespaldo,
+  normalizarNombre,
+} from '../lib/gbif.js';
 import { identificarPorFoto, redactarRelato, resolverNombre } from '../lib/gemini-especies.js';
 import { bufferDesdeBase64, validarImagen } from '../lib/image.js';
 import { requiereAppKey } from '../middleware/auth.js';
@@ -28,8 +34,8 @@ const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, ne
  * verdad importan estan en disco, asi que la app tiene que seguir sirviendo el dia que
  * se agoten las consultas.
  */
-async function armarFicha(nombreCientifico, { conRelato, reinoSugerido }) {
-  const oficial = consultarPorNombreCientifico(nombreCientifico, { reinoSugerido });
+async function armarFicha(nombreCientifico, { conRelato, reinoSugerido, respaldo }) {
+  const oficial = consultarPorNombreCientifico(nombreCientifico, { reinoSugerido, respaldo });
   if (!oficial) return null;
 
   const ficha = { ...oficial, relato: null, relato_no_disponible: null };
@@ -213,11 +219,27 @@ router.get(
     const responder = (extra) =>
       res.json({ ok: true, request_id: req.requestId, consulta, procedencia: PROCEDENCIA, ...extra });
 
-    /* 1. Nombre cientifico conocido. */
+    /* 1. Nombre cientifico conocido, en cualquiera de las listas. */
     if (pareceNombreCientifico(consulta)) {
       const ficha = await armarFicha(consulta, { conRelato });
-      if (ficha?.en_listas.catalogo_flora || ficha?.en_listas.amenazadas_nacional) {
-        return responder({ resuelto_por: 'listas_oficiales', ficha });
+      const enAlguna = Object.values(ficha?.en_listas ?? {}).some(Boolean);
+      if (enAlguna) return responder({ resuelto_por: 'listas_oficiales', ficha });
+    }
+
+    /*
+     * 1b. Tiene forma de nombre cientifico pero no esta en ninguna lista colombiana.
+     *
+     * Aqui caen reptiles, anfibios, insectos y cualquier especie de fuera. GBIF los
+     * resuelve gratis, asi que se pregunta ANTES que al modelo: gastar una consulta de
+     * cuota en algo que una API publica contesta seria tirarla.
+     */
+    if (pareceBinomio(consulta)) {
+      const respaldo = await fichaDeRespaldo(consulta);
+      if (respaldo) {
+        return responder({
+          resuelto_por: 'gbif',
+          ficha: await armarFicha(respaldo.nombre, { conRelato, respaldo }),
+        });
       }
     }
 

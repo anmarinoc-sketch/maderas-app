@@ -34,6 +34,12 @@ const FUENTES = {
   catalogo: 'https://ipt.biodiversidad.co/sib/archive.do?r=catalogo_plantas_liquenes',
   exoticas: 'https://ipt.biodiversidad.co/iavh/archive.do?r=ls_colombia_plantaeexoticas_2021',
   avesEndemicas: 'http://ipt.biodiversidad.co/iavh/archive.do?r=biota_v14_n2_09',
+
+  // Fauna de Colombia, por grupos. Sin esto la app conocia 407 aves de las casi 2.000
+  // del pais: buscar una lora comun no devolvia nada.
+  aves: 'https://ipt.biodiversidad.co/sib/archive.do?r=aco_listaavescolombia2017',
+  mamiferos: 'https://ipt.biodiversidad.co/sib/archive.do?r=mamiferos_col',
+  peces: 'https://ipt.biodiversidad.co/sib/archive.do?r=ictiofauna_colombiana_dulceacuicola',
 };
 
 /**
@@ -92,7 +98,7 @@ function claveDeRegistro(t) {
  */
 function calidad(t) {
   let puntos = 0;
-  if (/^Aceptado$/i.test(t.taxonomicStatus ?? '')) puntos += 4;
+  if (/^(Aceptado|V.lido|Accepted)$/i.test(t.taxonomicStatus ?? '')) puntos += 4;
   if (/^Especie$/i.test(t.taxonRank ?? '')) puntos += 2;
   if (!t.infraspecificEpithet) puntos += 1;
   return puntos;
@@ -375,6 +381,90 @@ async function construirAvesEndemicas() {
   };
 }
 
+/* ----------------------------------------------------------------------- fauna */
+
+/**
+ * Fauna de Colombia: aves, mamiferos y peces de agua dulce.
+ *
+ * Hasta que existio este archivo, la app conocia 407 aves de las casi 2.000 del pais
+ * -solo las amenazadas y las endemicas- y ni un mamifero que no estuviera amenazado.
+ * Buscar "lora" no devolvia el ave sino unas cuantas Passiflora, porque el filtro de
+ * "esto existe en Colombia" no reconocia a Amazona ochrocephala y la descartaba.
+ *
+ * Los tres archivos tienen forma distinta: las aves traen el nombre comun dentro de
+ * taxon.txt y en ingles, los mamiferos lo traen aparte y en espanol, y los peces no lo
+ * traen. Por eso la lectura es generica y todo lo que falte se omite.
+ */
+async function construirFauna() {
+  const grupos = [
+    { clave: 'aves', nombre: 'Aves', url: FUENTES.aves },
+    { clave: 'mamiferos', nombre: 'Mamiferos', url: FUENTES.mamiferos },
+    { clave: 'peces', nombre: 'Peces de agua dulce', url: FUENTES.peces },
+  ];
+
+  const especies = {};
+
+  for (const grupo of grupos) {
+    const archivos = await descargar(`${grupo.nombre} de Colombia`, grupo.url);
+    const taxones = leerTsv(archivos.get('taxon.txt'));
+
+    const dist = archivos.has('distribution.txt')
+      ? new Map(leerTsv(archivos.get('distribution.txt')).map((d) => [d.id, d]))
+      : new Map();
+
+    // Los mamiferos traen los nombres comunes en su propio archivo, y varios por especie.
+    const comunesPorId = new Map();
+    if (archivos.has('vernacularname.txt')) {
+      for (const v of leerTsv(archivos.get('vernacularname.txt'))) {
+        if (v.language && !/^es/i.test(v.language)) continue;
+        const lista = comunesPorId.get(v.id) ?? [];
+        if (v.vernacularName) lista.push(v.vernacularName);
+        comunesPorId.set(v.id, lista);
+      }
+    }
+
+    for (const t of taxones) {
+      const k = claveDeRegistro(t);
+      if (!k) continue;
+
+      const d = dist.get(t.id) ?? {};
+      const origen = d.establishmentMeans ?? '';
+
+      const entrada = limpio({
+        nombre: t.scientificName,
+        grupo: grupo.clave,
+        clase: t.class,
+        orden: t.order,
+        familia: t.family,
+        comunes: unir([...(comunesPorId.get(t.id) ?? []), t.vernacularName]),
+        // En una lista nacional, lo que no esta marcado como exotico es de aqui.
+        origen: origen || 'Nativa',
+        endemica: /End[eé]mica/i.test(origen) || undefined,
+        departamentos: d.locality || undefined,
+        amenaza_lista: d.threatStatus || undefined,
+        cites: d.appendixCITES || undefined,
+      });
+
+      // Si ya estaba por otro grupo, gana el registro con mas datos.
+      const previa = especies[k];
+      if (!previa || Object.keys(entrada).length > Object.keys(previa).length) {
+        especies[k] = entrada;
+      }
+    }
+  }
+
+  return {
+    fuente:
+      'Lista de referencia de especies de aves de Colombia (ACO), Mamiferos de Colombia y ' +
+      'Lista de peces de agua dulce de Colombia, publicadas por SiB Colombia',
+    licencia: 'CC BY 4.0',
+    nota:
+      'Aves, mamiferos y peces de agua dulce. Reptiles, anfibios e invertebrados NO estan ' +
+      'cubiertos: para esos, la app recurre a GBIF en caliente.',
+    especies,
+  };
+}
+
 /* ------------------------------------------------------------- nombres comunes */
 
 /**
@@ -412,13 +502,15 @@ async function principal() {
   const catalogo = await construirCatalogo();
   const exoticas = await construirExoticas();
   const aves = await construirAvesEndemicas();
-  const comunes = construirNombresComunes(amenazadas, aves);
+  const fauna = await construirFauna();
+  const comunes = construirNombresComunes(amenazadas, aves, fauna);
 
   console.log('');
   escribir('amenazadas-colombia.json', amenazadas, 'Res. 0126 de 2024');
   escribir('flora-colombia.json', catalogo, 'origen, endemismo, distribucion, CITES');
   escribir('exoticas-colombia.json', exoticas, 'plantas no nativas');
   escribir('aves-endemicas-colombia.json', aves, 'endemismo de aves');
+  escribir('fauna-colombia.json', fauna, 'aves, mamiferos y peces');
   escribir('nombres-comunes.json', comunes, 'nombre comun -> cientifico');
 
   const endemicas = Object.values(catalogo.especies).filter((e) => e.endemica).length;

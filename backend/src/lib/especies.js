@@ -24,6 +24,7 @@ const amenazadas = leer('amenazadas-colombia.json');
 const flora = leer('flora-colombia.json');
 const exoticas = leer('exoticas-colombia.json');
 const aves = leer('aves-endemicas-colombia.json');
+const fauna = leer('fauna-colombia.json');
 const comunes = leer('nombres-comunes.json');
 const vedas = leer('vedas-colombia.json');
 
@@ -56,6 +57,11 @@ const genero = (k) => String(k).split(' ')[0];
  * 44.000 claves del Catalogo, y eso son varios milisegundos regalados por peticion.
  */
 const GENEROS = new Set(Object.keys(flora.especies).map(genero));
+
+/** Lo mismo para la fauna, que tambien tiene que reconocerse como nombre cientifico. */
+const GENEROS_FAUNA = new Set(
+  [...Object.keys(fauna.especies), ...Object.keys(aves.especies)].map(genero)
+);
 
 /* ------------------------------------------------------------------------ vedas */
 
@@ -247,7 +253,7 @@ function coberturaDeVedas() {
  *   Sin esta pista, un perezoso —que no esta en ninguna lista— acabaria recibiendo el
  *   cuadro de vedas de flora, que no le aplica.
  */
-export function consultarPorNombreCientifico(nombre, { reinoSugerido } = {}) {
+export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo } = {}) {
   const k = clave(nombre);
   if (!k) return null;
 
@@ -255,13 +261,20 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido } = {}) {
   const enAmenazadas = amenazadas.especies[k];
   const enExoticas = exoticas.especies[k];
   const enAves = aves.especies[k];
+  const enFauna = fauna.especies[k];
 
   const ficha = {
-    familia: enFlora?.familia ?? enAmenazadas?.familia ?? enAves?.familia,
+    familia:
+      enFlora?.familia ??
+      enAmenazadas?.familia ??
+      enAves?.familia ??
+      enFauna?.familia ??
+      respaldo?.familia,
     reino:
       enFlora?.reino ??
       enAmenazadas?.reino ??
-      (enAves ? 'Animalia' : undefined) ??
+      (enAves || enFauna ? 'Animalia' : undefined) ??
+      respaldo?.reino ??
       reinoSugerido,
     phylum: enFlora?.phylum,
   };
@@ -283,18 +296,23 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido } = {}) {
     autoria: enFlora?.autoria,
     familia: ficha.familia,
     reino: ficha.reino,
-    clase: enAmenazadas?.clase,
-    nombres_comunes: enAmenazadas?.comunes,
+    clase: enAmenazadas?.clase ?? enFauna?.clase ?? respaldo?.clase,
+    nombres_comunes:
+      [enAmenazadas?.comunes, enFauna?.comunes, enAves?.comunes, (respaldo?.comunes ?? []).join(' | ')]
+        .filter(Boolean)
+        .join(' | ') || undefined,
 
     en_listas: {
       catalogo_flora: Boolean(enFlora),
       amenazadas_nacional: Boolean(enAmenazadas),
       exoticas: Boolean(enExoticas),
+      fauna_colombia: Boolean(enFauna),
+      aves_endemicas: Boolean(enAves),
     },
 
-    origen: determinarOrigen(enFlora, enExoticas, enAves, esFauna),
+    origen: determinarOrigen(enFlora, enExoticas, enAves, enFauna, esFauna, respaldo),
 
-    endemica: endemismo(enFlora, enAves, esFauna),
+    endemica: endemismo(enFlora, enAves, enFauna, esFauna),
 
     amenaza: {
       nacional: enAmenazadas
@@ -339,11 +357,11 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido } = {}) {
       : null,
 
     distribucion: {
-      departamentos: enFlora?.departamentos,
+      departamentos: enFlora?.departamentos ?? enFauna?.departamentos,
       altitud: enFlora?.altitud,
       regiones_biogeograficas: enFlora?.regiones,
       global: enFlora?.global,
-      fuente: enFlora ? flora.fuente : null,
+      fuente: enFlora ? flora.fuente : enFauna ? fauna.fuente : null,
     },
 
     vedas: lasVedas,
@@ -394,7 +412,7 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido } = {}) {
  * De mamiferos, reptiles, anfibios, peces e insectos NO hay fuente cargada, y eso se
  * dice tal cual en vez de dejar un "no consta" que parece un no.
  */
-function endemismo(enFlora, enAves, esFauna) {
+function endemismo(enFlora, enAves, enFauna, esFauna) {
   if (enAves) {
     const esEndemica = sinTildes(enAves.categoria) === 'endemica';
     return {
@@ -418,14 +436,25 @@ function endemismo(enFlora, enAves, esFauna) {
     };
   }
 
+  // Aves, mamiferos y peces de agua dulce: las listas nacionales marcan el endemismo.
+  if (enFauna) {
+    return {
+      valor: Boolean(enFauna.endemica),
+      fuente: fauna.fuente,
+      nota: enFauna.endemica
+        ? 'Endemica de Colombia: no vive de forma natural en ningun otro pais.'
+        : undefined,
+    };
+  }
+
   if (esFauna) {
     return {
       valor: null,
       fuente: null,
       nota:
-        'No hay lista de endemismo cargada para este grupo. Solo estan las aves ' +
-        '(Instituto Humboldt) y la flora (Catalogo de Plantas). De mamiferos, reptiles, ' +
-        'anfibios, peces e insectos no se puede afirmar nada desde una fuente oficial.',
+        'No hay lista de endemismo cargada para este grupo. Estan las aves, los mamiferos ' +
+        'y los peces de agua dulce, ademas de la flora. De reptiles, anfibios e ' +
+        'invertebrados no se puede afirmar nada desde una fuente oficial colombiana.',
     };
   }
 
@@ -445,7 +474,7 @@ function endemismo(enFlora, enAves, esFauna) {
  * "Naturalizada". La lista de exoticas del Humboldt sirve de refuerzo y aporta el
  * continente de origen. Cuando ninguna la tiene, se dice que no se sabe y ya.
  */
-function determinarOrigen(enFlora, enExoticas, enAves, esFauna) {
+function determinarOrigen(enFlora, enExoticas, enAves, enFauna, esFauna, respaldo) {
   // Un ave endemica o casi endemica de Colombia es nativa por definicion. Dejarlo en
   // "no consta" era absurdo teniendo el dato delante.
   if (enAves) {
@@ -453,6 +482,20 @@ function determinarOrigen(enFlora, enExoticas, enAves, esFauna) {
       valor: 'nativa',
       detalle: `Nativa de Colombia (${enAves.categoria.toLowerCase()})`,
       fuente: aves.fuente,
+    };
+  }
+
+  /*
+   * Aves, mamiferos y peces: la lista nacional marca las exoticas y las endemicas, y
+   * deja el campo vacio en las demas. En un inventario de la fauna DE Colombia, lo que
+   * no esta marcado como exotico es de aqui, asi que el vacio se lee como nativa.
+   */
+  if (enFauna) {
+    const exotica = /Ex[oó]tica|Introducida/i.test(enFauna.origen ?? '');
+    return {
+      valor: exotica ? 'exotica' : 'nativa',
+      detalle: enFauna.origen,
+      fuente: fauna.fuente,
     };
   }
 
@@ -475,6 +518,17 @@ function determinarOrigen(enFlora, enExoticas, enAves, esFauna) {
       origen_geografico: enExoticas.origen,
       invasividad: enExoticas.invasividad,
       fuente: exoticas.fuente,
+    };
+  }
+
+  // GBIF no dice si es nativa, pero si cuantos registros hay en Colombia: presente en el
+  // pais es la mitad de la respuesta, y es mejor que un silencio.
+  if (respaldo?.registros_en_colombia > 0) {
+    return {
+      valor: 'desconocido',
+      detalle: `Con ${respaldo.registros_en_colombia.toLocaleString('es-CO')} registros en Colombia (GBIF)`,
+      fuente: 'GBIF',
+      nota: 'Presente en Colombia, pero ninguna lista oficial cargada dice si es nativa o introducida.',
     };
   }
 
@@ -517,10 +571,21 @@ export function candidatasPorNombreComun(texto) {
   const exactas = comunes[k] ?? [];
   if (exactas.length > 0) return exactas;
 
-  // Coincidencia parcial: "roble negro" tambien debe encontrar "roble".
+  /*
+   * Coincidencia parcial POR PALABRAS, no por trozos de palabra.
+   *
+   * "roble negro" tiene que encontrar "roble", pero "lora" no puede encontrar
+   * "passiflora": buscando la lora salian seis pasifloras y ni un solo loro. Comparar
+   * substrings sueltos en nombres castellanos produce coincidencias absurdas.
+   */
+  const palabras = k.split(' ').filter((p) => p.length >= 3);
+  if (palabras.length === 0) return [];
+
   const parciales = new Set();
   for (const [comun, claves] of Object.entries(comunes)) {
-    if (comun.includes(k) || k.includes(comun)) claves.forEach((c) => parciales.add(c));
+    const suyas = comun.split(' ');
+    const encaja = palabras.every((p) => suyas.some((s) => s === p || s.startsWith(p)));
+    if (encaja) claves.forEach((c) => parciales.add(c));
   }
   return [...parciales].slice(0, 12);
 }
@@ -534,7 +599,20 @@ export function candidatasPorNombreComun(texto) {
  */
 export function estaEnColombia(nombre) {
   const k = clave(nombre);
-  return Boolean(flora.especies[k] || amenazadas.especies[k] || aves.especies[k]);
+  return Boolean(
+    flora.especies[k] || amenazadas.especies[k] || aves.especies[k] || fauna.especies[k]
+  );
+}
+
+/**
+ * Tiene forma de nombre cientifico: dos palabras latinas.
+ *
+ * No comprueba que exista, solo la forma. Sirve para decidir si vale la pena preguntar a
+ * GBIF antes que al modelo: "Bothrops asper" merece una consulta gratuita a GBIF, y
+ * "lora" no.
+ */
+export function pareceBinomio(texto) {
+  return /^[a-z]+ [a-z]+$/.test(clave(texto));
 }
 
 /** Un nombre parece cientifico si es un binomio latino y su genero existe en las listas. */
@@ -543,11 +621,11 @@ export function pareceNombreCientifico(texto) {
   if (!/^[a-z]+ [a-z]+$/.test(k)) return false;
   const g = genero(k);
   return (
-    Boolean(flora.especies[k]) ||
-    Boolean(amenazadas.especies[k]) ||
+    estaEnColombia(texto) ||
     Boolean(exoticas.especies[k]) ||
     INDICE.porGenero.has(g) ||
-    GENEROS.has(g)
+    GENEROS.has(g) ||
+    GENEROS_FAUNA.has(g)
   );
 }
 
