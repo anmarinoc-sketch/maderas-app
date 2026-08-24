@@ -20,7 +20,7 @@ tocar `backend/` o los workflows.
 | Carpeta local | `C:\Users\amo\Desktop\Claude\maderas-app` |
 | App | `android-bioscan/`, paquete `com.bioscan.app` |
 | Backend | `backend/` — el MISMO servicio de Render que XiloScan |
-| Release | Etiqueta `bio-v*`. Última: **bio-v3** (23-08-2026) |
+| Release | Etiqueta `bio-v*`. Última: **bio-v5** (24-08-2026) |
 | Clave de Gemini | `GEMINI_API_KEY_ESPECIES` en Render, proyecto Google `BioScan` |
 
 Creado el 23-08-2026 y probado contra Gemini y contra producción ese mismo día. Lo único
