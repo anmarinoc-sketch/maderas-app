@@ -206,6 +206,24 @@ mide una versión que ya no es la que se cree.
   quedó como bytes literales dentro de un regex. Funcionaba, pero era intocable. Escribir el
   fuente en ASCII (`\p{Diacritic}`, `\uXXXX`) y comprobarlo con `od -c` si hay dudas.
 - **La caché de la web de GitHub** engaña: comprobar el estado por la API.
+- **El bloque de aprendizaje funcionaba como cebo de anclaje.** Se inyectaba como «Era X y
+  se dijo Y», o sea, una lista de especies marcadas como la respuesta correcta, en todas
+  las consultas. El usuario corregía una foto y en la siguiente le salía esa misma especie.
+  Ahora se listan **parejas en orden alfabético, sin decir cuál era la correcta**. Regla
+  general: con este modelo, cualquier nombre de especie que se meta en el prompt con
+  prominencia acaba saliendo como respuesta. Nombrar menos, y siempre en pareja.
+- **Desplegar el backend borra las verificaciones del usuario.** El disco de Render es
+  efímero; el 24-08-2026 se subieron cuatro cambios en una jornada y se perdió todo lo que
+  él había corregido ese día. El respaldo pasó de diario a **cada 3 horas**, pero la red no
+  sustituye al método: **lanzar `respaldo-verificaciones.yml` a mano ANTES de desplegar**.
+- **Medir consume la cuota del usuario.** Las dos mediciones del 24-08 gastaron ~60 de las
+  ~160 peticiones del día y lo dejaron sin servicio cuando fue a usar la app. **Avisarle
+  antes de correr una medición**, o hacerlo a una hora en que no vaya a usarla.
+- **El umbral de la huella está validado con datos, no con intuición.** Se probó con las 29
+  láminas del banco: 406 parejas de especies distintas, **cero falsos positivos** con
+  umbral 8, y la pareja más parecida a 19 bits. La primera prueba, con ruido aleatorio, no
+  valía: el ruido no se parece a nada y dos cortes de madera sí se parecen entre sí. Si
+  vuelve a sospecharse de la huella, repetir con `scratchpad/probar-umbral.mjs`, no razonar.
 - **Fabricar el banco de pruebas desde el PDF de la guía sale mal por orden de
   aparición.** Las páginas referencian 99 imágenes y del archivo salen 81 JPEG de 400x400
   o más: el desfase corre la asignación y las láminas quedan con la especie equivocada. Se
