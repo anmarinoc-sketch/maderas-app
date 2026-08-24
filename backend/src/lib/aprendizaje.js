@@ -18,6 +18,12 @@ import { nombreCanonico } from './referencia.js';
  * de saber que la imagen que estaba mirando era justo la que el usuario ya habia
  * corregido: podia cargar la misma foto diez veces y fallar las diez.
  *
+ * OJO CON COMO SE INYECTA. Al principio este registro se volcaba como "era X y se dijo
+ * Y", es decir, una lista de especies etiquetadas como la respuesta correcta. Con un
+ * modelo que tiene sesgo de anclaje demostrado, eso funciona de cebo: el usuario corregia
+ * una foto y en la siguiente le salia esa misma especie. Ahora se listan solo parejas, en
+ * orden alfabetico, sin decir cual era la correcta.
+ *
  * El disco de Render es efimero: al redesplegar se pierde. Por eso existe
  * GET /api/aprendizaje, que devuelve todo el registro para poder guardarlo en el
  * repositorio y que sobreviva.
@@ -122,32 +128,29 @@ export function notasDeCorreccion() {
   const fallos = registro.filter((r) => !r.acierto && r.dicho && r.real);
   if (fallos.length === 0) return '';
 
-  const cuenta = new Map();
+  // Se listan PAREJAS, no respuestas. El orden dentro de cada pareja se fija alfabetico
+  // a proposito, para que no se pueda leer cual era la correcta y cual el error.
+  const pares = new Set();
   for (const f of fallos) {
-    const clave = `${nombreCanonico(f.real)}|${nombreCanonico(f.dicho)}`;
-    cuenta.set(clave, (cuenta.get(clave) ?? 0) + 1);
+    const a = nombreCanonico(f.real);
+    const b = nombreCanonico(f.dicho);
+    if (a && b && a !== b) pares.add([a, b].sort().join('  <->  '));
   }
+  if (pares.size === 0) return '';
 
-  const lineas = [...cuenta.entries()]
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 15)
-    .map(([clave, veces]) => {
-      const [real, dicho] = clave.split('|');
-      return `- Era ${real} y se dijo ${dicho}${veces > 1 ? ` (${veces} veces)` : ''}.`;
-    });
-
-  const aciertos = registro.filter((r) => r.acierto && r.real).length;
+  const lineas = [...pares].slice(0, 12).map((p) => `- ${p}`);
 
   return `
-=== ERRORES YA CONFIRMADOS POR EL USUARIO ===
-Un profesional del sector verifico estas identificaciones sobre piezas reales de esta
-misma zona. Son fallos comprobados, no hipotesis. Antes de decidir, comprueba si el caso
-que tienes delante se parece a alguno y, si es asi, contrasta con especial cuidado los
-caracteres que separan a esas dos especies.
+=== PAREJAS QUE SE HAN CONFUNDIDO EN CAMPO ===
+Estas parejas de especies se han confundido de verdad, sobre piezas reales de esta zona.
+No se dice cual era la correcta en cada caso, y es deliberado: lo util aqui es saber que
+esas dos se parecen lo bastante como para equivocarse, no cual salio en un caso concreto.
+
+Si tu candidata aparece en alguna pareja, ve al PASO 5 de la clave y comprueba el caracter
+que las separa antes de decidir. Si no puedes comprobarlo en esta foto, baja el nivel de
+la respuesta en vez de elegir una de las dos.
 
 ${lineas.join('\n')}
-
-(Verificaciones acumuladas: ${aciertos} aciertos y ${fallos.length} fallos.)
-=== FIN DE LOS ERRORES CONFIRMADOS ===
+=== FIN DE LAS PAREJAS ===
 `.trim();
 }

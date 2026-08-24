@@ -4,12 +4,20 @@ name: Respaldar verificaciones
 # redespliegue lo borra. Este respaldo las trae al repositorio, donde perduran y desde
 # donde el servidor las vuelve a cargar al arrancar.
 #
-# Una vez al dia basta: no se pierden mas que las verificaciones hechas entre el ultimo
-# respaldo y un redespliegue, y siempre se puede lanzar a mano antes de tocar el backend.
+# Cada tres horas, no una vez al dia. El 24-08-2026 se perdieron las correcciones que el
+# usuario hizo durante la jornada: se desplegaron cuatro cambios del backend y cada uno
+# borra el disco. Con un respaldo diario, la ventana de perdida era de 24 horas justo
+# cuando mas se estaba tocando el servidor.
+#
+# Ocho ejecuciones al dia es un termino medio deliberado: el cron horario que hubo antes
+# generaba tantas ejecuciones que enterraba las compilaciones del APK en la lista.
+#
+# LA REGLA QUE DE VERDAD PROTEGE: lanzar este workflow a mano ANTES de desplegar el
+# backend. El cron es la red, no el metodo.
 
 on:
   schedule:
-    - cron: '0 5 * * *'   # 00:00 en Colombia
+    - cron: '0 */3 * * *'   # cada 3 horas
   workflow_dispatch:
 
 permissions:
