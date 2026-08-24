@@ -1,0 +1,79 @@
+name: Actualizar las listas oficiales
+
+# Las listas de BioScan se descargan de SiB Colombia y GBIF y se destilan a JSON. Si nadie
+# las regenera, envejecen en silencio: asi es como los apendices CITES del cedro se
+# quedaron cuatro anos atrasados sin que nada avisara.
+#
+# Esto las regenera una vez al mes y sube el cambio si lo hay. Lo que NO puede actualizar
+# solo son las vedas y los apendices CITES, que estan curados a mano; para esos deja un
+# recordatorio en el resumen de la ejecucion.
+
+on:
+  schedule:
+    - cron: '0 6 1 * *'   # el dia 1 de cada mes, 01:00 en Colombia
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  actualizar:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Instalar dependencias
+        run: npm ci --omit=dev
+
+      # La cuenta previa se guarda para poder comparar despues. El script vive en un
+      # archivo y no incrustado aqui: los `node -e` dentro de YAML pasan por dos capas de
+      # escapado y en este proyecto eso ya se ha comido comillas mas de una vez.
+      - name: Contar lo que hay antes
+        run: node herramientas/comparar-listas.js contar > ../antes.json
+
+      - name: Regenerar las listas
+        run: node herramientas/construir-listas.js
+
+      # Sale con codigo 1 si alguna lista encogio mas de un 20 %, que no es una revision
+      # sino una descarga a medias. Subirla dejaria la app negando especies reales.
+      - name: Comparar, y frenar si algo encogio de golpe
+        run: node herramientas/comparar-listas.js comparar ../antes.json ../resumen.md
+
+      - name: Guardar los cambios
+        working-directory: .
+        run: |
+          rm -f antes.json
+
+          if git diff --quiet -- backend/src/datos/; then
+            echo "Sin cambios: las fuentes siguen igual." >> "$GITHUB_STEP_SUMMARY"
+            rm -f resumen.md
+            exit 0
+          fi
+
+          {
+            echo "### Listas actualizadas"
+            echo ""
+            cat resumen.md
+            echo ""
+            echo "> **Esto NO actualiza las vedas ni los apéndices CITES**, que están"
+            echo "> curados a mano en \`vedas-colombia.json\` y \`cites-actualizaciones.json\`."
+            echo "> Si ha habido una CoP de CITES o una norma nueva, hay que añadirlos."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          rm -f resumen.md
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add backend/src/datos/
+          git commit -m "Actualiza las listas oficiales desde SiB Colombia y GBIF"
+          git push
