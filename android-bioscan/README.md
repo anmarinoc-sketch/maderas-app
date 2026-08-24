@@ -62,17 +62,14 @@ peligro) y *Jacaranda copaia* (ninguna de las dos cosas).
 
 ## Lo que la app NO puede decirte
 
-- **Faltan 2 especies de Cornare.** El Acuerdo 404 de 2020 está transcrito: 28 de las 30
-  de su artículo primero y las 12 de su artículo segundo. Dos filas del escaneo salieron
-  con el nombre repetido de la fila vecina. Los Acuerdos 262 de 2011 y 207 de 2008 siguen
-  sin transcribir. La app lo avisa en cada consulta.
-- **Solo hay vedas nacionales y de Corantioquia.** Las demás corporaciones no están
-  cargadas.
+- **Solo hay vedas de Colombia continental para tres autoridades.** Nacionales,
+  Corantioquia y Cornare. Las demás corporaciones del país no están cargadas.
 - **El AMVA no expide vedas de especies**: es autoridad urbana y regula el arbolado. En el
   Valle de Aburrá aplican las nacionales y las de Corantioquia.
-- **De fauna solo hay categoría de amenaza.** El Catálogo de Plantas cubre únicamente
-  flora, así que de un animal no habrá origen, endemismo ni distribución oficiales; eso lo
-  redacta el modelo y va marcado como tal.
+- **A la fauna no se le habla de vedas**, porque las cargadas son de flora. El régimen de
+  fauna son vedas de caza y no está cargado.
+- **De fauna hay amenaza —nacional y UICN— y, en aves, endemismo.** De mamíferos, reptiles
+  y anfibios el origen lo responde el modelo, marcado como no verificado.
 - **Los apéndices CITES son de 2023** y cambian cada dos o tres años. Para exportar hay
   que confirmarlos en speciesplus.net.
 

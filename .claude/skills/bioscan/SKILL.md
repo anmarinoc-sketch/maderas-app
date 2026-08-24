@@ -68,7 +68,7 @@ cd C:\Users\amo\Desktop\Claude\maderas-app\backend; node herramientas/construir-
 | `amenazadas-colombia.json` | **Resolución 0126 de 2024** (MADS), que derogó la 1912 de 2017 | 2.087 |
 | `flora-colombia.json` | Catálogo de Plantas y Líquenes de Colombia (UNAL) | 44.477, de ellas 6.408 endémicas |
 | `exoticas-colombia.json` | Lista de plantas exóticas del Humboldt | 1.292 |
-| `nombres-comunes.json` | Derivado de la lista de amenazadas | 878 |
+| `nombres-comunes.json` | Derivado de amenazadas + aves endemicas | 1.069 |
 | `vedas-colombia.json` | **Transcrito a mano.** No hay fuente legible por máquina | 14 normas, 77 especies |
 
 Todo cabe: 107 MB de RSS, 221 ms de arranque, 9 µs por consulta. Render da 512 MB.
@@ -77,19 +77,22 @@ Todo cabe: 107 MB de RSS, 221 ms de arranque, 9 µs por consulta. Render da 512 
 
 ## Huecos conocidos, que la app declara
 
-- **Cornare: faltan 2 de 30.** El Acuerdo 404 de 2020 se transcribio el 23-08-2026 con
-  Gemini (el acta es un **PDF escaneado en JBIG2**, ilegible para todo lo demas: `pdftotext`
-  no esta, poppler no esta, el extractor por zlib no sirve). Estan las 28 del articulo
-  primero que se pudieron leer y las 12 del segundo. Dos filas salieron con el nombre
-  repetido de la vecina.
-  **La leccion que costo dos pasadas:** una norma de veda trae VARIAS tablas con efectos
-  juridicos distintos. La primera transcripcion las aplano en una lista de 49 y colaba
-  como veda de Cornare siete especies que son de la Resolucion 0316 de 1974. El esquema
-  de `lib/transcribir.js` ahora exige un grupo por tabla. **Nunca aceptar una
-  transcripcion plana.**
-  El control de calidad que hizo fiable el resto: el articulo tercero recopila esa
+- **Cornare esta completo.** El Acuerdo 404 de 2020 se transcribio con Gemini el
+  23-08-2026 (el acta es un **PDF escaneado en JBIG2**, ilegible para todo lo demas:
+  `pdftotext` no esta, poppler no esta, el extractor por zlib no sirve). Estan las 30
+  filas del articulo primero -28 especies distintas, porque **el acuerdo repite dos**- y
+  las 12 del segundo. Los Acuerdos 262 de 2011 y 207 de 2008 se retiraron del archivo:
+  tenian cero especies y solo producian ruido.
+  **Dos lecciones que costaron tres pasadas:**
+  1. Una norma de veda trae VARIAS tablas con efectos juridicos distintos. La primera
+     transcripcion las aplano en una lista de 49 y colaba como veda de Cornare siete
+     especies de la Resolucion 0316 de 1974. **Nunca aceptar una transcripcion plana.**
+  2. Ante nombres repetidos en un escaneo, la tentacion es darlos por error de lectura.
+     Se releyo el PDF DOS veces y las dos coincidieron fila por fila, y cada fila
+     repetida traia un nombre comun distinto: la norma repite de verdad. **Dos lecturas
+     independientes antes de declarar un hueco.**
+  El control de calidad que hizo fiable el resto: el articulo tercero recopila la
   resolucion de 1974, cuyas 7 especies ya teniamos por otra fuente, y coincidieron las 7.
-  Buscar siempre un grupo de control asi.
 - **Corantioquia sí está completa** (Resolución 3183 de 2000). Es la autoridad de la zona
   rural del Valle de Aburrá.
 - **El AMVA no expide vedas de especies**: es autoridad urbana y regula el arbolado. Está
