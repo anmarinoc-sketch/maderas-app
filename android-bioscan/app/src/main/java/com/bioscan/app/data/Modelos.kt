@@ -53,6 +53,8 @@ data class Endemica(
     val valor: Boolean? = null,
     /** "Endémica" o "Casi endémica". Solo lo trae la lista de aves. */
     val categoria: String? = null,
+    /** true en la fauna exótica: no es que no conste, es que la pregunta no viene al caso. */
+    @SerializedName("no_aplica") val noAplica: Boolean? = null,
     val fuente: String? = null,
     val donde: String? = null,
     val nota: String? = null,
@@ -167,6 +169,8 @@ data class Relato(
     @SerializedName("que_es") val queEs: String? = null,
     @SerializedName("donde_vive") val dondeVive: String? = null,
     @SerializedName("como_reconocerla") val comoReconocerla: String? = null,
+    /** Solo en fauna: de qué come y qué papel cumple al hacerlo. En flora viene vacío. */
+    @SerializedName("habitos_alimenticios") val habitosAlimenticios: String? = null,
     @SerializedName("importancia_conservacion") val importanciaConservacion: String? = null,
     @SerializedName("en_la_practica") val enLaPractica: String? = null,
     @SerializedName("generado_por") val generadoPor: String? = null,
@@ -181,6 +185,12 @@ data class Ficha(
     val clase: String? = null,
     @SerializedName("nombres_comunes") val nombresComunes: String? = null,
     @SerializedName("en_listas") val enListas: EnListas? = null,
+    @SerializedName("es_fauna") val esFauna: Boolean? = null,
+    /**
+     * Animal que no es de aquí. De él solo se dice eso: ni endemismo ni categoría de
+     * amenaza, porque no le aplican. CITES y potencial invasor sí se siguen enseñando.
+     */
+    @SerializedName("fauna_exotica") val faunaExotica: Boolean? = null,
     val origen: Origen? = null,
     val endemica: Endemica? = null,
     val amenaza: Amenaza? = null,

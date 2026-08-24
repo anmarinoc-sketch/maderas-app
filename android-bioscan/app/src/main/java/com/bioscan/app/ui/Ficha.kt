@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.bioscan.app.data.Cites
 import com.bioscan.app.data.Ficha
 import com.bioscan.app.data.Veda
 import com.bioscan.app.data.VedaPorAutoridad
@@ -68,22 +69,38 @@ fun CuerpoDeFicha(ficha: Ficha, vm: BioViewModel? = null, modifier: Modifier = M
     // animal, y un bloque entero diciendo "esto no viene al caso" solo estorba.
     val esFauna = ficha.veda?.aplica == false
 
+    /*
+     * De un animal exótico, la ficha dice solo que es exótico.
+     *
+     * Ni endemismo ni categoría de amenaza: a una especie que no es de aquí no le aplica
+     * ninguna de las dos, y enseñar "no es endémica" y "no figura entre las amenazadas" es
+     * llenar la pantalla de huecos con aspecto de dato. CITES y el potencial invasor sí se
+     * quedan, que es lo que de verdad importa de una exótica.
+     *
+     * El `||` es para los servidores que aún no manden la bandera: se deduce de lo que ya
+     * venía, y así la app no depende de que Render haya desplegado.
+     */
+    val faunaExotica = ficha.faunaExotica == true ||
+        (esFauna &&
+            ficha.origen?.valor == "exotica" &&
+            ficha.amenaza?.nacional?.categoria == null)
+
     Column(
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         FotoDeLaEspecie(ficha, vm)
         Encabezado(ficha, tieneFoto = !ficha.foto?.url.isNullOrBlank())
-        Etiquetas(ficha, esFauna)
-        ResumenRapido(ficha, esFauna)
+        Etiquetas(ficha, esFauna, faunaExotica)
+        ResumenRapido(ficha, esFauna, faunaExotica)
 
         // Lo primero de todo cuando aplica: es lo que puede meter en un lio a quien consulta.
         if (!esFauna) BloqueVedas(ficha)
 
-        BloqueAmenaza(ficha)
-        BloqueOrigen(ficha)
+        BloqueAmenaza(ficha, faunaExotica)
+        BloqueOrigen(ficha, faunaExotica)
         BloqueDistribucion(ficha)
-        BloqueRelato(ficha)
+        BloqueRelato(ficha, faunaExotica)
         BloqueFuentes(ficha)
     }
 }
@@ -201,7 +218,7 @@ private fun FotoDeLaEspecie(ficha: Ficha, vm: BioViewModel?) {
  * si está vedada y se sigue trabajando. Todo lo de abajo desarrolla estas cuatro líneas.
  */
 @Composable
-private fun ResumenRapido(ficha: Ficha, esFauna: Boolean) {
+private fun ResumenRapido(ficha: Ficha, esFauna: Boolean, faunaExotica: Boolean) {
     val vedaAplica = ficha.veda?.aplica
     val vedada = ficha.veda?.detalle?.isNotEmpty() == true || !ficha.vedas.isNullOrEmpty()
 
@@ -224,25 +241,29 @@ private fun ResumenRapido(ficha: Ficha, esFauna: Boolean) {
                     else -> GrisNoConsta
                 },
             )
-            Pregunta(
-                "¿Es endémica?",
-                ficha.endemica?.categoria ?: when (ficha.endemica?.valor) {
-                    true -> "Sí"
-                    false -> "No"
-                    null -> "No consta"
-                },
-                if (ficha.endemica?.valor == true) VerdeBien else GrisNoConsta,
-            )
-            // "¿Está amenazada?" y no "¿en qué categoría?": la mayoría de las especies no
-            // figuran en ninguna, y eso es una respuesta, no un hueco.
-            Pregunta(
-                "¿Está amenazada?",
-                ficha.amenaza?.nacional?.categoria?.let { "Sí · ${nombreDeCategoria(it)}" }
-                    ?: "No figura",
-                ficha.amenaza?.nacional?.categoria?.let {
-                    if (it == "VU") NaranjaAviso else RojoGrave
-                } ?: VerdeBien,
-            )
+            // Endemismo y amenaza no se le preguntan a un animal de fuera: la respuesta
+            // sería que no en los dos casos, y por un motivo que no dice nada de él.
+            if (!faunaExotica) {
+                Pregunta(
+                    "¿Es endémica?",
+                    ficha.endemica?.categoria ?: when (ficha.endemica?.valor) {
+                        true -> "Sí"
+                        false -> "No"
+                        null -> "No consta"
+                    },
+                    if (ficha.endemica?.valor == true) VerdeBien else GrisNoConsta,
+                )
+                // "¿Está amenazada?" y no "¿en qué categoría?": la mayoría de las especies
+                // no figuran en ninguna, y eso es una respuesta, no un hueco.
+                Pregunta(
+                    "¿Está amenazada?",
+                    ficha.amenaza?.nacional?.categoria?.let { "Sí · ${nombreDeCategoria(it)}" }
+                        ?: "No figura",
+                    ficha.amenaza?.nacional?.categoria?.let {
+                        if (it == "VU") NaranjaAviso else RojoGrave
+                    } ?: VerdeBien,
+                )
+            }
             Pregunta(
                 "¿Está en CITES?",
                 ficha.cites?.apendice?.let { "Sí · Apéndice $it" } ?: "No figura",
@@ -327,7 +348,7 @@ private fun Encabezado(ficha: Ficha, tieneFoto: Boolean) {
 /* -------------------------------------------------------------------- etiquetas */
 
 @Composable
-private fun Etiquetas(ficha: Ficha, esFauna: Boolean) {
+private fun Etiquetas(ficha: Ficha, esFauna: Boolean, faunaExotica: Boolean) {
     val etiquetas = buildList {
         when (ficha.origen?.valor) {
             "nativa" -> add(Etiqueta("Nativa", VerdeBien))
@@ -341,8 +362,10 @@ private fun Etiquetas(ficha: Ficha, esFauna: Boolean) {
             null -> Unit
         }
 
-        ficha.amenaza?.nacional?.categoria?.let {
-            add(Etiqueta(nombreDeCategoria(it), if (it == "VU") NaranjaAviso else RojoGrave))
+        if (!faunaExotica) {
+            ficha.amenaza?.nacional?.categoria?.let {
+                add(Etiqueta(nombreDeCategoria(it), if (it == "VU") NaranjaAviso else RojoGrave))
+            }
         }
 
         if (!esFauna && !ficha.vedas.isNullOrEmpty()) add(Etiqueta("Vedada", RojoGrave))
@@ -401,7 +424,27 @@ private fun BloqueVedas(ficha: Ficha) {
     val porAutoridad = veda?.porAutoridad.orEmpty()
     val detalle = veda?.detalle ?: ficha.vedas.orEmpty()
 
-    Seccion("Veda", oficial = true, acento = if (detalle.isNotEmpty()) RojoGrave else VerdeBien) {
+    val categoria = ficha.amenaza?.nacional?.categoria
+
+    val acento = when {
+        detalle.isNotEmpty() -> RojoGrave
+        categoria != null -> NaranjaAviso
+        else -> VerdeBien
+    }
+
+    Seccion("Veda y amenaza", oficial = true, acento = acento) {
+        /*
+         * Donde antes iba la fila de veda nacional.
+         *
+         * Las vedas nacionales de flora alcanzan a pocas especies y casi siempre a las
+         * mismas —helechos arbóreos, musgos, líquenes, quiches, orquídeas, Juglans—, así
+         * que esa fila repetía "sin veda" consulta tras consulta. La condición de amenaza
+         * sí cambia de una especie a otra, y es lo que hay que mirar a nivel nacional
+         * antes de tocar un árbol. Si la especie tiene veda nacional de verdad, su fila
+         * vuelve a salir con las regionales: eso no se esconde.
+         */
+        FilaDeAmenaza(categoria)
+
         if (porAutoridad.isEmpty()) {
             // Servidor antiguo: se pinta como antes.
             Text(
@@ -427,6 +470,51 @@ private fun BloqueVedas(ficha: Ficha) {
                 detalle.forEach { TarjetaDeVeda(it) }
             }
         }
+    }
+}
+
+/**
+ * La condición de amenaza, en el mismo cuadro que las vedas.
+ *
+ * Ahí es donde se mira antes de intervenir un árbol. Va con el mismo formato que las
+ * autoridades, pero NO es una veda y por eso lleva su norma escrita al lado: la
+ * Resolución 0126 de 2024 dice ella misma que no modifica las vedas existentes. Lo que
+ * hace es lo contrario de tranquilizar, que es justo el problema de leer solo "sin veda"
+ * en una especie en peligro.
+ */
+@Composable
+private fun FilaDeAmenaza(categoria: String?) {
+    val texto = categoria ?: "No figura"
+    val color = when (categoria) {
+        null -> VerdeBien
+        "VU" -> NaranjaAviso
+        else -> RojoGrave
+    }
+
+    Column(modifier = Modifier.padding(vertical = 5.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                "Amenaza en Colombia",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                texto,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = color,
+            )
+        }
+        Text(
+            categoria?.let { "${nombreDeCategoria(it)} · Resolución 0126 de 2024" }
+                ?: "Resolución 0126 de 2024",
+            style = MaterialTheme.typography.bodySmall,
+            color = GrisNoConsta,
+        )
     }
 }
 
@@ -558,7 +646,23 @@ private fun TarjetaDeVeda(veda: Veda) {
 /* ---------------------------------------------------------------------- amenaza */
 
 @Composable
-private fun BloqueAmenaza(ficha: Ficha) {
+private fun BloqueAmenaza(ficha: Ficha, faunaExotica: Boolean) {
+    /*
+     * A un animal exótico no se le pone categoría de amenaza.
+     *
+     * La Resolución 0126 de 2024 lista fauna silvestre colombiana, así que decir de una
+     * tilapia que "no figura entre las amenazadas" describe la resolución, no la especie.
+     * CITES es otra cosa y sí se queda: no depende de que la especie sea de aquí, y hay
+     * exóticas del Apéndice II sueltas en Colombia.
+     */
+    if (faunaExotica) {
+        val cites = ficha.cites ?: return
+        Seccion("Comercio internacional", oficial = true, acento = NaranjaAviso) {
+            ContenidoCites(cites)
+        }
+        return
+    }
+
     val amenaza = ficha.amenaza ?: return
 
     val grave = amenaza.nacional?.categoria != null
@@ -666,45 +770,60 @@ private fun BloqueAmenaza(ficha: Ficha) {
 
         ficha.cites?.let { cites ->
             HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
-            Text(
-                "CITES · Apéndice ${cites.apendice}",
-                fontWeight = FontWeight.Bold,
-                color = NaranjaAviso,
-            )
-            cites.significado?.let {
-                Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
-            }
-            // El alcance y la anotacion deciden si te aplica de verdad: la inclusion suele
-            // ser de genero entero y cubrir solo unos productos concretos.
-            cites.alcance?.let {
-                Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
-            }
-            cites.anotacion?.let {
-                Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
-            }
-            listOfNotNull(
-                cites.desde?.let { "En vigor desde el $it" },
-                cites.reunion,
-            ).takeIf { it.isNotEmpty() }?.let {
-                Text(
-                    it.joinToString(" · "),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = GrisNoConsta,
-                    modifier = Modifier.padding(top = 6.dp),
-                )
-            }
-            cites.advertencia?.let { Aviso(it, NaranjaAviso, Modifier.padding(top = 8.dp)) }
+            ContenidoCites(cites)
         }
     }
+}
+
+/**
+ * El apartado CITES.
+ *
+ * Va aparte porque se pinta en dos sitios: al final de la categoría de amenaza, y solo
+ * él cuando la especie es fauna exótica y no hay categoría que enseñar.
+ */
+@Composable
+private fun ContenidoCites(cites: Cites) {
+    Text(
+        "CITES · Apéndice ${cites.apendice}",
+        fontWeight = FontWeight.Bold,
+        color = NaranjaAviso,
+    )
+    cites.significado?.let {
+        Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
+    }
+    // El alcance y la anotacion deciden si te aplica de verdad: la inclusion suele
+    // ser de genero entero y cubrir solo unos productos concretos.
+    cites.alcance?.let {
+        Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
+    }
+    cites.anotacion?.let {
+        Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
+    }
+    listOfNotNull(
+        cites.desde?.let { "En vigor desde el $it" },
+        cites.reunion,
+    ).takeIf { it.isNotEmpty() }?.let {
+        Text(
+            it.joinToString(" · "),
+            style = MaterialTheme.typography.bodySmall,
+            color = GrisNoConsta,
+            modifier = Modifier.padding(top = 6.dp),
+        )
+    }
+    cites.advertencia?.let { Aviso(it, NaranjaAviso, Modifier.padding(top = 8.dp)) }
 }
 
 /* ----------------------------------------------------------------------- origen */
 
 @Composable
-private fun BloqueOrigen(ficha: Ficha) {
+private fun BloqueOrigen(ficha: Ficha, faunaExotica: Boolean) {
     val origen = ficha.origen ?: return
 
-    Seccion("Origen y endemismo", oficial = true, acento = Color(0xFF2E7D9A)) {
+    Seccion(
+        if (faunaExotica) "Origen" else "Origen y endemismo",
+        oficial = true,
+        acento = Color(0xFF2E7D9A),
+    ) {
         Text(
             when (origen.valor) {
                 "nativa" -> "Nativa de Colombia"
@@ -739,6 +858,10 @@ private fun BloqueOrigen(ficha: Ficha) {
         origen.nota?.let {
             Text(it, style = MaterialTheme.typography.bodySmall, color = GrisNoConsta, modifier = Modifier.padding(top = 6.dp))
         }
+
+        // Una especie exótica no es endémica de Colombia por definición: la mitad de abajo
+        // sobra entera, y decir "no es endémica" sonaría a que se comprobó algo.
+        if (faunaExotica) return@Seccion
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
 
@@ -794,7 +917,7 @@ private fun Dato(titulo: String, valor: String) {
 /* ----------------------------------------------------------------------- relato */
 
 @Composable
-private fun BloqueRelato(ficha: Ficha) {
+private fun BloqueRelato(ficha: Ficha, faunaExotica: Boolean) {
     val relato = ficha.relato
 
     if (relato == null) {
@@ -819,7 +942,16 @@ private fun BloqueRelato(ficha: Ficha) {
         relato.queEs?.let { Parrafo("Qué es", it) }
         relato.dondeVive?.let { Parrafo("Dónde vive", it) }
         relato.comoReconocerla?.let { Parrafo("Cómo reconocerla", it) }
-        relato.importanciaConservacion?.let { Parrafo("Por qué importa conservarla", it) }
+        // Solo viene en fauna. En una planta el servidor lo manda vacío, y un párrafo
+        // titulado "De qué se alimenta" sobre un árbol no lo quiere leer nadie.
+        relato.habitosAlimenticios?.takeIf { it.isNotBlank() }?.let {
+            Parrafo("De qué se alimenta", it)
+        }
+        relato.importanciaConservacion?.let {
+            // Ante una exótica, "por qué importa conservarla" es la pregunta equivocada:
+            // lo que hay que contar es qué hace aquí.
+            Parrafo(if (faunaExotica) "Qué papel cumple aquí" else "Por qué importa conservarla", it)
+        }
         relato.enLaPractica?.let { Parrafo("En la práctica", it) }
     }
 }

@@ -313,6 +313,29 @@ callado ante "¿es nativa?" de un animal comun no ayuda a nadie. Si de verdad du
 `.trim();
 
 export function promptDeRelato(ficha) {
+  /*
+   * De un animal, de que come. Es lo primero que pregunta cualquiera que se topa con uno
+   * y no sabe que es: si le entra a la huerta, si caza gallinas, si dispersa semillas.
+   * En una planta el campo sobra, y pedirlo igual solo invitaria a rellenarlo con algo.
+   */
+  const alimentacion = ficha.es_fauna
+    ? '\n5. De que se alimenta y como consigue el alimento: si es frugivoro, insectivoro, ' +
+      'carnivoro, nectarivoro, granivoro u omnivoro, que come en concreto, a que hora del ' +
+      'dia se alimenta y que papel cumple con ello (dispersar semillas, polinizar, ' +
+      'controlar plagas o roedores). Escribelo en habitos_alimenticios.'
+    : '\nDeja habitos_alimenticios vacio: esto es una planta, no un animal.';
+
+  /*
+   * Ante una exotica, "por que importa conservarla" es una pregunta mal hecha: lo que hay
+   * que contar es que hace aqui y si esta causando problemas.
+   */
+  const conservacion = ficha.fauna_exotica
+    ? '3. En importancia_conservacion NO escribas sobre conservarla en Colombia: es una ' +
+      'especie introducida. Cuenta que hace aqui, desde cuando esta, si esta asilvestrada ' +
+      'y si desplaza o afecta a la fauna nativa. Sin categorias ni normas.'
+    : '3. Por que importa conservarla, explicando lo que digan los datos oficiales de arriba\n' +
+      '   sin anadir ninguna norma ni categoria que no venga en ellos.';
+
   return `
 Especie: ${ficha.nombre_cientifico}${ficha.familia ? ` (familia ${ficha.familia})` : ''}
 
@@ -322,9 +345,8 @@ ${JSON.stringify(ficha.oficial, null, 2)}
 Escribe, para alguien del sector forestal que no es biologo:
 1. Que es esta especie, en dos o tres frases.
 2. Donde vive y como se reconoce en campo.
-3. Por que importa conservarla, explicando lo que digan los datos oficiales de arriba
-   sin anadir ninguna norma ni categoria que no venga en ellos.
-4. Que deberia tener en cuenta quien se la encuentre trabajando.
+${conservacion}
+4. Que deberia tener en cuenta quien se la encuentre trabajando.${alimentacion}
 `.trim();
 }
 
@@ -335,6 +357,7 @@ export const ESQUEMA_RELATO = {
     'que_es',
     'donde_vive',
     'como_reconocerla',
+    'habitos_alimenticios',
     'importancia_conservacion',
     'en_la_practica',
   ],
@@ -343,6 +366,7 @@ export const ESQUEMA_RELATO = {
     'que_es',
     'donde_vive',
     'como_reconocerla',
+    'habitos_alimenticios',
     'importancia_conservacion',
     'en_la_practica',
   ],
@@ -368,6 +392,13 @@ export const ESQUEMA_RELATO = {
     que_es: { type: Type.STRING },
     donde_vive: { type: Type.STRING },
     como_reconocerla: { type: Type.STRING },
+    habitos_alimenticios: {
+      type: Type.STRING,
+      description:
+        'SOLO PARA FAUNA. De que se alimenta, como lo consigue, a que hora del dia come y ' +
+        'que papel ecologico cumple al hacerlo (dispersar semillas, polinizar, controlar ' +
+        'plagas). En una planta, cadena vacia.',
+    },
     importancia_conservacion: { type: Type.STRING },
     en_la_practica: {
       type: Type.STRING,

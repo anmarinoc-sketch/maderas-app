@@ -212,9 +212,18 @@ const ETIQUETAS = {
  * el permiso nacional, el regional o ninguno. Esto responde la pregunta tal como se
  * hace, autoridad por autoridad, y pone el aviso de listado incompleto SOLO donde
  * corresponde en vez de como un miedo general.
+ *
+ * LA FILA NACIONAL SOLO SALE CUANDO HAY VEDA NACIONAL DE VERDAD. Las vedas nacionales de
+ * flora son pocas y casi todas por grupo —helechos arboreos, musgos, liquenes, quiches,
+ * orquideas, Juglans, Quercus—, asi que en la inmensa mayoria de las consultas esa fila
+ * repetia "sin veda" sin aportar nada, y encima empujaba abajo las dos regionales, que
+ * son las que de verdad cambian de una especie a otra por aqui. En su lugar la app pinta
+ * la condicion de amenaza de la Resolucion 0126 de 2024. Cuando la veda nacional SI
+ * alcanza a la especie la fila vuelve, porque callar una prohibicion vigente es
+ * exactamente el error que esta app no se puede permitir.
  */
 function porAutoridad(encontradas) {
-  return Object.entries(ETIQUETAS).map(([id, etiqueta]) => {
+  const filas = Object.entries(ETIQUETAS).map(([id, etiqueta]) => {
     const suyas = vedas.normas.filter((n) => autoridadDe(n) === id);
     const acertadas = encontradas.filter((v) =>
       suyas.some((n) => n.norma === v.norma && n.autoridad === v.autoridad)
@@ -223,6 +232,7 @@ function porAutoridad(encontradas) {
     const incompletas = suyas.filter((n) => n.listado_incompleto);
 
     return {
+      id,
       autoridad: etiqueta,
       vedada: acertadas.length > 0,
       normas: acertadas.map((v) => v.norma),
@@ -233,6 +243,8 @@ function porAutoridad(encontradas) {
         : undefined,
     };
   });
+
+  return filas.filter((f) => f.id !== 'NACIONAL' || f.vedada);
 }
 
 /* ------------------------------------------------------------------- la consulta */
@@ -288,6 +300,26 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
   const esFauna = sinTildes(ficha.reino) === 'animalia';
   const lasVedas = esFauna ? [] : vedasDe(k, ficha);
 
+  const elOrigen = determinarOrigen(enFlora, enExoticas, enAves, enFauna, esFauna, respaldo);
+
+  /**
+   * De un animal exotico, la ficha dice solo que es exotico.
+   *
+   * Un animal que no es de aqui no puede ser endemico de Colombia, y la Resolucion 0126
+   * de 2024 lista fauna silvestre COLOMBIANA: enseñar "no es endemica" y "no figura entre
+   * las amenazadas" de una tilapia o de un caballo son dos huecos con aspecto de dato,
+   * que es justo lo que esta app no debe producir.
+   *
+   * Lo que NO se calla: CITES, que aplica aunque la especie sea introducida —el hipopotamo
+   * del Magdalena esta en el Apendice II—, y el potencial invasor, que en una exotica es
+   * precisamente lo que hay que mirar.
+   *
+   * La condicion `!enAmenazadas` no es un adorno: si por lo que fuera la especie apareciese
+   * en la resolucion, manda la resolucion y la ficha se enseña entera. Subestimar el riesgo
+   * es el peor error que puede cometer esta app.
+   */
+  const faunaExotica = esFauna && elOrigen.valor === 'exotica' && !enAmenazadas;
+
   return {
     clave: k,
     nombre_cientifico: enFlora?.nombre ?? enAmenazadas?.nombre ?? enExoticas?.nombre ?? nombre,
@@ -309,9 +341,17 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
       aves_endemicas: Boolean(enAves),
     },
 
-    origen: determinarOrigen(enFlora, enExoticas, enAves, enFauna, esFauna, respaldo),
+    // Que sea un animal, y que ademas sea un animal de fuera. La app lo usa para decidir
+    // que apartados tiene sentido pintar; el relato, para no hablar de conservarla aqui.
+    es_fauna: esFauna,
+    fauna_exotica: faunaExotica,
 
-    endemica: endemismo(enFlora, enAves, enFauna, esFauna),
+    origen: elOrigen,
+
+    // Se devuelve el objeto, nunca null: quien consume esto lee `endemica.valor` directo.
+    endemica: faunaExotica
+      ? { valor: null, no_aplica: true, fuente: null }
+      : endemismo(enFlora, enAves, enFauna, esFauna),
 
     amenaza: {
       nacional: enAmenazadas
@@ -334,8 +374,11 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
       catalogo: enFlora?.amenaza_catalogo
         ? { categoria: enFlora.amenaza_catalogo, fuente: flora.fuente }
         : null,
+      // A una exotica no se le dice que "no figura en la Resolucion 0126": la resolucion
+      // no la mira siquiera, asi que la frase daria a entender una comprobacion que no
+      // significa nada.
       sin_categoria:
-        !enAmenazadas && !enFlora?.amenaza_catalogo
+        !enAmenazadas && !enFlora?.amenaza_catalogo && !faunaExotica
           ? 'No figura en la Resolucion 0126 de 2024. Eso la deja fuera de las categorias CR, EN y VU; no quiere decir que este bien conservada.'
           : undefined,
     },

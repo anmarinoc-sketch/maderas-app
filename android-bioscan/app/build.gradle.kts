@@ -52,8 +52,8 @@ android {
         applicationId = "com.bioscan.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 6
-        versionName = "6"
+        versionCode = 7
+        versionName = "7"
 
         buildConfigField("String", "BASE_URL", "\"$baseUrlPorDefecto\"")
         buildConfigField("String", "APP_API_KEY", "\"$appKeyPorDefecto\"")

@@ -71,8 +71,12 @@ async function armarFicha(nombreCientifico, { conRelato, reinoSugerido, respaldo
    */
   // La categoria mundial y la foto se piden a la vez: son dos servicios distintos y
   // encadenarlas solo sumaria esperas.
+  //
+  // De la fauna exotica no se pide: su ficha no habla de amenaza. La categoria mundial de
+  // un animal introducido ademas confunde mas que informa —el hipopotamo es Vulnerable en
+  // Africa y una plaga en el Magdalena—, porque describe otra poblacion, no la de aqui.
   const [global, foto] = await Promise.all([
-    categoriaIucn(oficial.nombre_cientifico),
+    oficial.fauna_exotica ? null : categoriaIucn(oficial.nombre_cientifico),
     fotoDeEspecie(oficial.nombre_cientifico),
   ]);
   ficha.amenaza = { ...ficha.amenaza, global };
@@ -84,6 +88,10 @@ async function armarFicha(nombreCientifico, { conRelato, reinoSugerido, respaldo
     const { resultado, modelo } = await redactarRelato({
       nombre_cientifico: oficial.nombre_cientifico,
       familia: oficial.familia,
+      // De un animal se pide ademas que cuente de que se alimenta, y de uno exotico que
+      // no escriba sobre conservarlo en Colombia, que no viene al caso.
+      es_fauna: oficial.es_fauna,
+      fauna_exotica: oficial.fauna_exotica,
       oficial: {
         origen: oficial.origen,
         endemica: oficial.endemica,
@@ -113,6 +121,24 @@ async function armarFicha(nombreCientifico, { conRelato, reinoSugerido, respaldo
         segun_el_modelo: true,
         nota: 'No figura en las listas oficiales cargadas: lo dice el modelo, sin verificar.',
       };
+
+      /*
+       * Si el animal resulta ser de fuera, la ficha pasa a ser la de una exotica.
+       *
+       * Aqui es donde se decide de verdad para la mayoria de los casos: el hipopotamo, la
+       * tilapia, el caballo o la rata no estan en ninguna lista colombiana, asi que llegan
+       * como origen "desconocido" y solo al volver el relato se sabe que son introducidos.
+       * Sin este paso, el unico animal exotico que se libraba del endemismo y de la
+       * amenaza era el gorrion, que si esta en la lista de fauna.
+       *
+       * Se exige que no haya categoria nacional: si la Resolucion 0126 tiene algo que
+       * decir de esta especie, manda ella y no una frase sin verificar del modelo.
+       */
+      if (ficha.es_fauna && propuesto.valor === 'exotica' && !ficha.amenaza?.nacional) {
+        ficha.fauna_exotica = true;
+        ficha.endemica = { valor: null, no_aplica: true, fuente: null };
+        ficha.amenaza = { ...ficha.amenaza, global: null, sin_categoria: undefined };
+      }
     }
   } catch (error) {
     // Un fallo aqui no invalida la consulta: la parte oficial ya esta resuelta.
