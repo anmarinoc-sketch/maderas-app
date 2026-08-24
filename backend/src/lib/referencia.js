@@ -1,5 +1,7 @@
 import { readFileSync } from 'node:fs';
 
+import { separacionesFinas } from './confusiones.js';
+
 /**
  * Clave de determinacion de las maderas comerciales del Valle de Aburra.
  *
@@ -221,6 +223,8 @@ REGLAS QUE NO PUEDES SALTARTE:
   sobre corte hecho con bisturi y humedecido. En una foto de movil sin escala son orden de magnitud, no medida.
 
 ${cuerpo}
+
+${separacionesFinas()}
 
 === FIN DE LA CLAVE ===
 `.trim();
