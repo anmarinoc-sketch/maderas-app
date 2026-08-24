@@ -187,9 +187,13 @@ data class Ficha(
     @SerializedName("en_listas") val enListas: EnListas? = null,
     @SerializedName("es_fauna") val esFauna: Boolean? = null,
     /**
-     * Animal que no es de aquí. De él solo se dice eso: ni endemismo ni categoría de
-     * amenaza, porque no le aplican. CITES y potencial invasor sí se siguen enseñando.
+     * Especie que no es de aquí, flora o fauna. De ella solo se dice eso: ni endemismo ni
+     * categoría de amenaza, porque no le aplican. Sí se siguen enseñando CITES, el
+     * potencial invasor y, en flora, la veda: alcanza por familia y una orquídea traída
+     * de fuera cae dentro igual.
      */
+    @SerializedName("es_exotica") val esExotica: Boolean? = null,
+    /** Forma antigua, la que entiende bio-v7. `esExotica` la sustituye. */
     @SerializedName("fauna_exotica") val faunaExotica: Boolean? = null,
     val origen: Origen? = null,
     val endemica: Endemica? = null,

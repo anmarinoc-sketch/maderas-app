@@ -329,10 +329,11 @@ export function promptDeRelato(ficha) {
    * Ante una exotica, "por que importa conservarla" es una pregunta mal hecha: lo que hay
    * que contar es que hace aqui y si esta causando problemas.
    */
-  const conservacion = ficha.fauna_exotica
+  const conservacion = ficha.es_exotica
     ? '3. En importancia_conservacion NO escribas sobre conservarla en Colombia: es una ' +
-      'especie introducida. Cuenta que hace aqui, desde cuando esta, si esta asilvestrada ' +
-      'y si desplaza o afecta a la fauna nativa. Sin categorias ni normas.'
+      'especie introducida. Cuenta que hace aqui, desde cuando esta, para que se trajo, si ' +
+      'esta asilvestrada o cultivada y si desplaza o afecta a lo nativo. Sin categorias ni ' +
+      'normas.'
     : '3. Por que importa conservarla, explicando lo que digan los datos oficiales de arriba\n' +
       '   sin anadir ninguna norma ni categoria que no venga en ellos.';
 

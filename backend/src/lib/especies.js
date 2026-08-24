@@ -303,22 +303,25 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
   const elOrigen = determinarOrigen(enFlora, enExoticas, enAves, enFauna, esFauna, respaldo);
 
   /**
-   * De un animal exotico, la ficha dice solo que es exotico.
+   * De una especie exotica, la ficha dice solo que es exotica.
    *
-   * Un animal que no es de aqui no puede ser endemico de Colombia, y la Resolucion 0126
-   * de 2024 lista fauna silvestre COLOMBIANA: enseñar "no es endemica" y "no figura entre
-   * las amenazadas" de una tilapia o de un caballo son dos huecos con aspecto de dato,
-   * que es justo lo que esta app no debe producir.
+   * Lo que no es de aqui no puede ser endemico de Colombia, y la Resolucion 0126 de 2024
+   * lista especies silvestres COLOMBIANAS: enseñar "no es endemica" y "no figura entre las
+   * amenazadas" de un eucalipto o de una tilapia son dos huecos con aspecto de dato, que
+   * es justo lo que esta app no debe producir. Vale igual para flora y para fauna.
    *
    * Lo que NO se calla: CITES, que aplica aunque la especie sea introducida —el hipopotamo
-   * del Magdalena esta en el Apendice II—, y el potencial invasor, que en una exotica es
-   * precisamente lo que hay que mirar.
+   * del Magdalena esta en el Apendice II, y media familia de las orquideas ornamentales
+   * esta en el II—, el potencial invasor, que en una exotica es precisamente lo que hay
+   * que mirar, y en flora LA VEDA, porque las vedas alcanzan por familia y una orquidea o
+   * un helecho traidos de fuera caen dentro igual.
    *
-   * La condicion `!enAmenazadas` no es un adorno: si por lo que fuera la especie apareciese
-   * en la resolucion, manda la resolucion y la ficha se enseña entera. Subestimar el riesgo
-   * es el peor error que puede cometer esta app.
+   * Las dos condiciones de amenaza no son un adorno: si la resolucion o el Catalogo tienen
+   * algo que decir de esta especie, manda lo que digan y la ficha se enseña entera.
+   * Subestimar el riesgo es el peor error que puede cometer esta app.
    */
-  const faunaExotica = esFauna && elOrigen.valor === 'exotica' && !enAmenazadas;
+  const esExotica =
+    elOrigen.valor === 'exotica' && !enAmenazadas && !enFlora?.amenaza_catalogo;
 
   return {
     clave: k,
@@ -341,15 +344,18 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
       aves_endemicas: Boolean(enAves),
     },
 
-    // Que sea un animal, y que ademas sea un animal de fuera. La app lo usa para decidir
-    // que apartados tiene sentido pintar; el relato, para no hablar de conservarla aqui.
+    // Que sea un animal, y que ademas sea de fuera. La app lo usa para decidir que
+    // apartados tiene sentido pintar; el relato, para no hablar de conservarla aqui.
     es_fauna: esFauna,
-    fauna_exotica: faunaExotica,
+    es_exotica: esExotica,
+    // Forma antigua, la que entiende bio-v7. Se conserva por las mismas razones que
+    // `vedas`: hay telefonos instalados que solo saben leer esta.
+    fauna_exotica: esFauna && esExotica,
 
     origen: elOrigen,
 
     // Se devuelve el objeto, nunca null: quien consume esto lee `endemica.valor` directo.
-    endemica: faunaExotica
+    endemica: esExotica
       ? { valor: null, no_aplica: true, fuente: null }
       : endemismo(enFlora, enAves, enFauna, esFauna),
 
@@ -378,7 +384,7 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
       // no la mira siquiera, asi que la frase daria a entender una comprobacion que no
       // significa nada.
       sin_categoria:
-        !enAmenazadas && !enFlora?.amenaza_catalogo && !faunaExotica
+        !enAmenazadas && !enFlora?.amenaza_catalogo && !esExotica
           ? 'No figura en la Resolucion 0126 de 2024. Eso la deja fuera de las categorias CR, EN y VU; no quiere decir que este bien conservada.'
           : undefined,
     },
