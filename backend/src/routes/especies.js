@@ -36,8 +36,27 @@ const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, ne
  * se agoten las consultas.
  */
 async function armarFicha(nombreCientifico, { conRelato, reinoSugerido, respaldo }) {
-  const oficial = consultarPorNombreCientifico(nombreCientifico, { reinoSugerido, respaldo });
+  let oficial = consultarPorNombreCientifico(nombreCientifico, { reinoSugerido, respaldo });
   if (!oficial) return null;
+
+  /*
+   * Si las listas locales dan poco, se completa con GBIF antes de seguir.
+   *
+   * Pasa con los reptiles y los anfibios: su indice se deduce de los registros de GBIF y
+   * solo trae taxonomia, sin nombres comunes ni origen. Sin este paso, reconocerlos en la
+   * lista los dejaba PEOR que cuando no se reconocian, porque entonces caian en el
+   * respaldo de GBIF y volvian con nombres comunes.
+   */
+  const escasa = !oficial.nombres_comunes || oficial.origen.valor === 'desconocido';
+  if (escasa && !respaldo) {
+    const extra = await fichaDeRespaldo(oficial.nombre_cientifico);
+    if (extra) {
+      oficial = consultarPorNombreCientifico(nombreCientifico, {
+        reinoSugerido,
+        respaldo: extra,
+      });
+    }
+  }
 
   const ficha = { ...oficial, relato: null, relato_no_disponible: null };
 

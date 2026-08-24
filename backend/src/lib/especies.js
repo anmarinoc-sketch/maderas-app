@@ -25,6 +25,7 @@ const flora = leer('flora-colombia.json');
 const exoticas = leer('exoticas-colombia.json');
 const aves = leer('aves-endemicas-colombia.json');
 const fauna = leer('fauna-colombia.json');
+const herpeto = leer('herpetofauna-colombia.json');
 const comunes = leer('nombres-comunes.json');
 const vedas = leer('vedas-colombia.json');
 
@@ -60,7 +61,11 @@ const GENEROS = new Set(Object.keys(flora.especies).map(genero));
 
 /** Lo mismo para la fauna, que tambien tiene que reconocerse como nombre cientifico. */
 const GENEROS_FAUNA = new Set(
-  [...Object.keys(fauna.especies), ...Object.keys(aves.especies)].map(genero)
+  [
+    ...Object.keys(fauna.especies),
+    ...Object.keys(aves.especies),
+    ...Object.keys(herpeto.especies),
+  ].map(genero)
 );
 
 /* ------------------------------------------------------------------------ vedas */
@@ -262,6 +267,7 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
   const enExoticas = exoticas.especies[k];
   const enAves = aves.especies[k];
   const enFauna = fauna.especies[k];
+  const enHerpeto = herpeto.especies[k];
 
   const ficha = {
     familia:
@@ -269,11 +275,12 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
       enAmenazadas?.familia ??
       enAves?.familia ??
       enFauna?.familia ??
+      enHerpeto?.familia ??
       respaldo?.familia,
     reino:
       enFlora?.reino ??
       enAmenazadas?.reino ??
-      (enAves || enFauna ? 'Animalia' : undefined) ??
+      (enAves || enFauna || enHerpeto ? 'Animalia' : undefined) ??
       respaldo?.reino ??
       reinoSugerido,
     phylum: enFlora?.phylum,
@@ -296,7 +303,7 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
     autoria: enFlora?.autoria,
     familia: ficha.familia,
     reino: ficha.reino,
-    clase: enAmenazadas?.clase ?? enFauna?.clase ?? respaldo?.clase,
+    clase: enAmenazadas?.clase ?? enFauna?.clase ?? enHerpeto?.clase ?? respaldo?.clase,
     nombres_comunes:
       [enAmenazadas?.comunes, enFauna?.comunes, enAves?.comunes, (respaldo?.comunes ?? []).join(' | ')]
         .filter(Boolean)
@@ -307,6 +314,7 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
       amenazadas_nacional: Boolean(enAmenazadas),
       exoticas: Boolean(enExoticas),
       fauna_colombia: Boolean(enFauna),
+      herpetofauna: Boolean(enHerpeto),
       aves_endemicas: Boolean(enAves),
     },
 
@@ -600,7 +608,11 @@ export function candidatasPorNombreComun(texto) {
 export function estaEnColombia(nombre) {
   const k = clave(nombre);
   return Boolean(
-    flora.especies[k] || amenazadas.especies[k] || aves.especies[k] || fauna.especies[k]
+    flora.especies[k] ||
+      amenazadas.especies[k] ||
+      aves.especies[k] ||
+      fauna.especies[k] ||
+      herpeto.especies[k]
   );
 }
 

@@ -465,6 +465,90 @@ async function construirFauna() {
   };
 }
 
+/* --------------------------------------------------------------- herpetofauna */
+
+/**
+ * Reptiles y anfibios de Colombia, deducidos de los registros de GBIF.
+ *
+ * No hay lista nacional publicada de estos dos grupos: en GBIF solo existen listados
+ * departamentales y de reservas. Y el hueco importaba, porque Colombia es el segundo
+ * pais del mundo en anfibios y la app no reconocia ni la iguana ni la mapana ni las
+ * ranas venenosas: sin estar en ninguna lista, el filtro de "esto existe en Colombia"
+ * las descartaba y ni siquiera aparecian al buscar por nombre comun.
+ *
+ * Asi que la lista se arma con lo que hay: las especies con registros verificados EN
+ * Colombia. NO es un catalogo oficial y no se presenta como tal; es un indice de "esto
+ * se ha encontrado aqui", que es justo lo que hace falta para no descartar una especie
+ * real. Los datos de conservacion siguen saliendo de la Resolucion 0126 de 2024.
+ *
+ * GBIF ya no agrupa los reptiles bajo una sola clase: Squamata, Testudines y Crocodylia
+ * van por separado, y buscar por "Reptilia" devuelve cero.
+ */
+const CLASES_HERPETO = [
+  { clave: 131, nombre: 'Amphibia' },
+  { clave: 11592253, nombre: 'Squamata' },
+  { clave: 11418114, nombre: 'Testudines' },
+  { clave: 11493978, nombre: 'Crocodylia' },
+];
+
+/** Lanza las peticiones de a poco: GBIF es generoso, pero no hay que abusar. */
+async function enTandas(elementos, tanda, tarea) {
+  const salida = [];
+  for (let i = 0; i < elementos.length; i += tanda) {
+    salida.push(...(await Promise.all(elementos.slice(i, i + tanda).map(tarea))));
+    process.stdout.write(`\r  resolviendo nombres... ${Math.min(i + tanda, elementos.length)}/${elementos.length}`);
+  }
+  console.log('');
+  return salida;
+}
+
+async function construirHerpetofauna() {
+  const claves = new Set();
+
+  for (const clase of CLASES_HERPETO) {
+    const url =
+      'https://api.gbif.org/v1/occurrence/search?country=CO&limit=0&facetMincount=1' +
+      `&taxonKey=${clase.clave}&facet=speciesKey&facetLimit=2000`;
+    const respuesta = await fetch(url);
+    const datos = await respuesta.json();
+    const cuentas = datos?.facets?.[0]?.counts ?? [];
+    cuentas.forEach((c) => claves.add(c.name));
+    console.log(`  ${clase.nombre.padEnd(12)} ${cuentas.length} especies con registros en Colombia`);
+  }
+
+  const fichas = await enTandas([...claves], 12, async (clave) => {
+    try {
+      const r = await fetch(`https://api.gbif.org/v1/species/${clave}`);
+      return r.ok ? await r.json() : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const especies = {};
+  for (const t of fichas) {
+    if (!t?.species || t.rank !== 'SPECIES') continue;
+    const k = clave(t.species);
+    if (!k) continue;
+    especies[k] = limpio({
+      nombre: t.species,
+      grupo: 'herpetofauna',
+      clase: t.class,
+      orden: t.order,
+      familia: t.family,
+    });
+  }
+
+  return {
+    fuente: 'GBIF: especies de anfibios y reptiles con registros verificados en Colombia',
+    nota:
+      'NO es un catalogo oficial: no existe lista nacional publicada de estos grupos. Es un ' +
+      'indice de especies registradas en el pais, para no descartar una especie real. Los ' +
+      'datos de amenaza siguen saliendo de la Resolucion 0126 de 2024.',
+    especies,
+  };
+}
+
 /* ------------------------------------------------------------- nombres comunes */
 
 /**
@@ -503,6 +587,7 @@ async function principal() {
   const exoticas = await construirExoticas();
   const aves = await construirAvesEndemicas();
   const fauna = await construirFauna();
+  const herpeto = await construirHerpetofauna();
   const comunes = construirNombresComunes(amenazadas, aves, fauna);
 
   console.log('');
@@ -511,6 +596,7 @@ async function principal() {
   escribir('exoticas-colombia.json', exoticas, 'plantas no nativas');
   escribir('aves-endemicas-colombia.json', aves, 'endemismo de aves');
   escribir('fauna-colombia.json', fauna, 'aves, mamiferos y peces');
+  escribir('herpetofauna-colombia.json', herpeto, 'reptiles y anfibios, via GBIF');
   escribir('nombres-comunes.json', comunes, 'nombre comun -> cientifico');
 
   const endemicas = Object.values(catalogo.especies).filter((e) => e.endemica).length;
