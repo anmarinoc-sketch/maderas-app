@@ -647,7 +647,22 @@ export function estadoDeListas() {
     amenazadas: { norma: amenazadas.norma, especies: Object.keys(amenazadas.especies).length },
     flora: { fuente: flora.url, especies: Object.keys(flora.especies).length },
     exoticas: { especies: Object.keys(exoticas.especies).length },
+    fauna: {
+      fuente: 'Aves (ACO), mamiferos y peces de agua dulce, SiB Colombia',
+      especies: Object.keys(fauna.especies).length,
+    },
+    aves_endemicas: { especies: Object.keys(aves.especies).length },
+    herpetofauna: {
+      fuente: herpeto.fuente,
+      especies: Object.keys(herpeto.especies).length,
+    },
     nombres_comunes: Object.keys(comunes).length,
     vedas: { normas: vedas.normas.length, actualizado: vedas.actualizado },
+    // Lo que NO esta en disco y se resuelve preguntando fuera, en este orden.
+    en_caliente: [
+      'GBIF: especies fuera de las listas, nombres vulgares y categoria mundial de la UICN',
+      'Wikipedia: fotografia de la especie',
+      'Gemini: identificacion por foto y textos explicativos',
+    ],
   };
 }
