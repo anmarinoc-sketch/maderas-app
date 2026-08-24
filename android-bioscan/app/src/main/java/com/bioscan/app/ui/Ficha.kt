@@ -46,6 +46,7 @@ import com.bioscan.app.data.Cites
 import com.bioscan.app.data.Ficha
 import com.bioscan.app.data.Veda
 import com.bioscan.app.data.VedaPorAutoridad
+import com.bioscan.app.data.Vigencia
 
 /*
  * Como se pinta una ficha.
@@ -649,6 +650,8 @@ private fun TarjetaDeVeda(veda: Veda) {
                 Modifier.padding(top = 8.dp),
             )
         }
+
+        LineaDeVigencia(veda.vigencia, Modifier.padding(top = 8.dp))
     }
 }
 
@@ -698,6 +701,7 @@ private fun BloqueAmenaza(ficha: Ficha, esExotica: Boolean) {
                 color = GrisNoConsta,
                 modifier = Modifier.padding(top = 6.dp),
             )
+            LineaDeVigencia(nacional.vigencia, Modifier.padding(top = 4.dp))
 
             // Cuando la resolucion categoriza cada subespecie por separado, arriba se
             // enseña la PEOR. Sin este desglose, alguien con la subespecie menos
@@ -820,6 +824,7 @@ private fun ContenidoCites(cites: Cites) {
             modifier = Modifier.padding(top = 6.dp),
         )
     }
+    LineaDeVigencia(cites.vigencia, Modifier.padding(top = 8.dp))
     cites.advertencia?.let { Aviso(it, NaranjaAviso, Modifier.padding(top = 8.dp)) }
 }
 
@@ -1060,6 +1065,31 @@ private fun Seccion(
                 }
                 Column(modifier = Modifier.padding(top = 10.dp)) { contenido() }
             }
+        }
+    }
+}
+
+/**
+ * Cuándo se comprobó por última vez que esta norma sigue en pie.
+ *
+ * Lo que hay que enseñar no es la antigüedad de la norma —una veda de 1977 manda igual
+ * que una de 2020 si nadie la derogó— sino la antigüedad de la comprobación. El aviso
+ * naranja lo decide el servidor cuando esa comprobación caduca, así que aparece solo, sin
+ * reinstalar nada.
+ */
+@Composable
+private fun LineaDeVigencia(vigencia: Vigencia?, modifier: Modifier = Modifier) {
+    val v = vigencia ?: return
+
+    Column(modifier = modifier) {
+        v.texto?.takeIf { it.isNotBlank() }?.let {
+            Text(it, style = MaterialTheme.typography.bodySmall, color = GrisNoConsta)
+        }
+        v.nota?.takeIf { it.isNotBlank() }?.let {
+            Text(it, style = MaterialTheme.typography.bodySmall, color = GrisNoConsta)
+        }
+        v.aviso?.takeIf { it.isNotBlank() }?.let {
+            Aviso(it, NaranjaAviso, Modifier.padding(top = 6.dp))
         }
     }
 }

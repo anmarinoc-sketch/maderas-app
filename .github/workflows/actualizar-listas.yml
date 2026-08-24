@@ -77,3 +77,12 @@ jobs:
           git add backend/src/datos/
           git commit -m "Actualiza las listas oficiales desde SiB Colombia y GBIF"
           git push
+
+      # Va al final y con `always()` a proposito: si esto se pone en rojo, las listas ya
+      # se guardaron. Y corre HAYA O NO cambios, que es justo lo que fallaba antes: el
+      # recordatorio de las vedas y la CITES vivia dentro del bloque que solo se ejecuta
+      # cuando algo cambio, asi que en un mes tranquilo no lo veia nadie. La CoP20 de
+      # CITES paso entera sin que esta ejecucion dijera una palabra.
+      - name: ¿Siguen vigentes las normas que cita la app?
+        if: always()
+        run: node herramientas/revisar-vigencia.js

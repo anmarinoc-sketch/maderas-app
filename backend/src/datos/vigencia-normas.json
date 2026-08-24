@@ -1,0 +1,71 @@
+{
+  "_que_es_esto": "Cuando se comprobo por ultima vez que cada norma citada por la app sigue vigente, y que se encontro al comprobarlo. Se mantiene A MANO, igual que vedas-colombia.json: no hay ninguna fuente legible por maquina que diga si una resolucion colombiana sigue en pie. Vive aparte de las listas porque el workflow mensual las regenera y se llevaria por delante cualquier campo escrito aqui.",
+  "comprobado": "2026-08-24",
+  "meses_para_revisar": 12,
+  "como": "Busqueda de derogatorias posteriores a cada norma y cotejo con las recopilaciones de vedas vigentes del MADS y de las CAR. NO es una consulta a la autoridad ambiental: dice que no se encontro norma que derogue, que no es lo mismo que certificar que sigue vigente.",
+  "normas": {
+    "res-0316-1974": {
+      "estado": "vigente",
+      "nota": "No se encontro norma que la derogue. Sigue figurando en las recopilaciones de vedas vigentes, y el Acuerdo 404 de 2020 de Cornare la recoge en su articulo tercero, veinte anos despues, lo que confirma que se seguia aplicando."
+    },
+    "res-0213-1977": {
+      "estado": "vigente",
+      "nota": "No se encontro norma que la derogue. Ha habido levantamientos PARCIALES de veda para proyectos concretos, que no tocan la norma general: el levantamiento parcial es un tramite caso por caso, no una derogatoria."
+    },
+    "res-0801-1977": {
+      "estado": "vigente",
+      "nota": "No se encontro norma que la derogue. Es la veda de los helechos arboreos, que sigue citandose como vigente en las guias de tramites de las CAR."
+    },
+    "res-0463-1982": {
+      "estado": "vigente",
+      "nota": "No se encontro norma que la derogue. Es la veda por diametro de la Costa Pacifica; la app no la puede resolver por especie porque depende del DAP del arbol, no de cual sea."
+    },
+    "ley-61-1985": {
+      "estado": "vigente",
+      "nota": "Ley de la Republica, no resolucion: solo otra ley podria derogarla, y no se encontro ninguna. Declara arbol nacional a la palma de cera y prohibe aprovecharla."
+    },
+    "res-1602-1995-020-1996": {
+      "estado": "vigente",
+      "nota": "No se encontro norma que las derogue. Son las de manglares, que han tenido zonificaciones y planes de manejo posteriores; esos desarrollan la veda, no la levantan."
+    },
+    "corantioquia-res-3183-2000-prohibicion": {
+      "estado": "vigente",
+      "nota": "No se encontro norma que la derogue. La propia Corantioquia la sigue citando en sus documentos tecnicos y en sus tramites de aprovechamiento."
+    },
+    "corantioquia-res-3183-2000-restriccion": {
+      "estado": "vigente",
+      "nota": "Mismo acto administrativo que la anterior: la Resolucion 3183 del 26 de enero de 2000, que en la app va partida por el efecto de cada listado."
+    },
+    "corantioquia-res-3183-2000-ramos": {
+      "estado": "vigente",
+      "nota": "Mismo acto administrativo que la anterior."
+    },
+    "corantioquia-res-3183-2000-epifitas": {
+      "estado": "vigente",
+      "nota": "Mismo acto administrativo que la anterior."
+    },
+    "cornare-acuerdo-404-2020-art1": {
+      "estado": "vigente",
+      "nota": "Es la mas reciente de todas las vedas cargadas. Transcrita del PDF publicado por la propia Cornare."
+    },
+    "cornare-acuerdo-404-2020-art2": {
+      "estado": "vigente",
+      "nota": "Mismo acuerdo que el anterior."
+    },
+    "res-0126-2024": {
+      "norma": "Resolucion 0126 de 2024",
+      "estado": "vigente",
+      "nota": "Es la vigente y la mas reciente: derogo la Resolucion 1912 de 2017 el 6 de febrero de 2024. No se encontro resolucion posterior que la sustituya. Si alguien te menciona la 1912, esta derogada."
+    }
+  },
+  "cites": {
+    "ultima_reunion_revisada": "CoP20 (Samarcanda, 24 de noviembre a 5 de diciembre de 2025)",
+    "en_vigor_desde": "2026-03-05",
+    "estado": "al dia",
+    "nota": "Revisados los cambios de flora adoptados en la CoP20, en vigor desde el 5 de marzo de 2026: NINGUNO toca a las maderas colombianas. Lo adoptado fue la palma chilena (Jubaea chilensis) al Apendice I, dos Beaucarnea mexicanas y cuatro Aloe africanas al II —el genero Aloe ya estaba— y una enmienda a la anotacion #10 del palo de Pernambuco (Paubrasilia echinata). La propuesta del padouk africano (Pterocarpus) fue RECHAZADA. Cedrela, Dipteryx, Handroanthus, Tabebuia y Roseodendron siguen como estaban.",
+    "fuentes": [
+      "https://cites.org/eng/app/appendices.php",
+      "https://cites.org/sites/default/files/notifications/E-Notif-2026-005_0.pdf"
+    ]
+  }
+}

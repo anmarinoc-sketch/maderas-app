@@ -60,6 +60,22 @@ data class Endemica(
     val nota: String? = null,
 )
 
+/**
+ * Cuándo se comprobó por última vez que la norma sigue en pie.
+ *
+ * Lo que importa de una veda de 1977 no es su antigüedad, es la antigüedad de la
+ * comprobación: sirve igual que una de 2020 si sigue vigente, y no sirve de nada si la
+ * derogaron. `aviso` lo calcula el servidor cuando la comprobación caduca, así que una
+ * app ya instalada empieza a avisar sola sin reinstalar nada.
+ */
+data class Vigencia(
+    val estado: String? = null,
+    val comprobado: String? = null,
+    val texto: String? = null,
+    val nota: String? = null,
+    val aviso: String? = null,
+)
+
 /** Una subespecie con su propia categoría, cuando la resolución las separa. */
 data class Subcategoria(
     val nombre: String? = null,
@@ -78,6 +94,7 @@ data class AmenazaNacional(
      */
     val desglose: List<Subcategoria>? = null,
     @SerializedName("nota_desglose") val notaDesglose: String? = null,
+    val vigencia: Vigencia? = null,
 )
 
 data class AmenazaCatalogo(
@@ -111,6 +128,8 @@ data class Cites(
     val anotacion: String? = null,
     val fuente: String? = null,
     val advertencia: String? = null,
+    /** Hasta qué reunión de la CITES están revisados los apéndices. */
+    val vigencia: Vigencia? = null,
 )
 
 data class Distribucion(
@@ -129,6 +148,7 @@ data class Veda(
     val excepciones: String? = null,
     @SerializedName("coincide_por") val coincidePor: List<String>? = null,
     @SerializedName("listado_incompleto") val listadoIncompleto: Boolean? = null,
+    val vigencia: Vigencia? = null,
 )
 
 /** Estado frente a UNA autoridad. Es la forma en que se hace la pregunta de verdad. */

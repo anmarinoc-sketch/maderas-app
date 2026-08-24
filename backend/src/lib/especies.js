@@ -30,6 +30,61 @@ const herpeto = leer('herpetofauna-colombia.json');
 const comunes = leer('nombres-comunes.json');
 const vedas = leer('vedas-colombia.json');
 const citesNuevo = leer('cites-actualizaciones.json');
+const vigencia = leer('vigencia-normas.json');
+
+/* -------------------------------------------------------------------- vigencia */
+
+/**
+ * Cuando se comprobo por ultima vez que la norma sigue en pie.
+ *
+ * Una veda de 1977 sirve igual que una de 2020 SI sigue vigente, y no sirve de nada si
+ * la derogaron: lo que importa no es la antiguedad de la norma, es la antiguedad de la
+ * comprobacion. Eso es lo que se enseña, con su fecha, en vez de dejar que el usuario
+ * suponga que alguien lo miro hace poco.
+ *
+ * El aviso se calcula en el servidor y no en el telefono a proposito: asi el dia que la
+ * comprobacion caduque, la app instalada empieza a avisar sola, sin reinstalar nada.
+ */
+const MES = 30 * 24 * 60 * 60 * 1000;
+
+const FECHA_LARGA = new Intl.DateTimeFormat('es-CO', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+function mesesDesde(fecha) {
+  const cuando = Date.parse(`${fecha}T00:00:00Z`);
+  if (Number.isNaN(cuando)) return null;
+  return Math.floor((Date.now() - cuando) / MES);
+}
+
+/** Bloque de vigencia listo para pintar: la app no hace cuentas con fechas. */
+function vigenciaDe(id) {
+  const suya = vigencia.normas?.[id];
+  if (!suya) return undefined;
+
+  const comprobado = suya.comprobado ?? vigencia.comprobado;
+  const meses = mesesDesde(comprobado);
+  const limite = vigencia.meses_para_revisar ?? 12;
+  const caducada = meses !== null && meses >= limite;
+
+  return {
+    estado: suya.estado,
+    comprobado,
+    texto:
+      `Vigente hasta donde se pudo comprobar el ` +
+      `${FECHA_LARGA.format(new Date(`${comprobado}T00:00:00Z`))}.`,
+    nota: suya.nota,
+    // Cuando la comprobacion envejece, el aviso aparece solo. Es la unica forma de que
+    // esto no se pudra en silencio: nadie se acuerda de revisar lo que no protesta.
+    aviso: caducada
+      ? `Esta comprobacion tiene ya ${meses} meses. Antes de cualquier tramite, ` +
+        `confirma la norma vigente con la autoridad ambiental.`
+      : undefined,
+  };
+}
 
 /**
  * Apendices CITES que han cambiado despues del Catalogo, indexados por genero.
@@ -165,6 +220,7 @@ export function vedasDe(k, ficha = {}) {
       coincide_por: [comoCoincide],
       nombre_en_la_norma: comun,
       listado_incompleto: norma.listado_incompleto,
+      vigencia: vigenciaDe(norma.id),
     });
   };
 
@@ -369,6 +425,7 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
             // La resolucion a veces categoriza cada subespecie por separado y con
             // categorias distintas. `categoria` es la PEOR del grupo, y aqui va el
             // desglose: la danta figura como VU, pero la subespecie colombiana es CR.
+            vigencia: vigenciaDe('res-0126-2024'),
             desglose: enAmenazadas.desglose,
             nota_desglose: enAmenazadas.desglose
               ? 'La resolucion categoriza por separado las subespecies. Se muestra la ' +
@@ -457,11 +514,41 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
  * El orden importa: primero lo curado a mano, que esta al dia, y solo si no hay nada
  * ahi se recurre al Catalogo. Al reves, el cedro seguiria saliendo como Apendice III.
  */
+/**
+ * Hasta que reunion de la CITES estan revisados los apendices.
+ *
+ * Es la unica de las tres fuentes normativas de la app que cambia sola cada dos o tres
+ * anos, y lo hace en silencio: el cedro figuro cuatro anos en el Apendice equivocado
+ * porque nadie miro despues de la CoP18. Decir hasta donde se ha mirado es lo que
+ * convierte ese riesgo en algo visible.
+ */
+function vigenciaCites() {
+  const c = vigencia.cites;
+  if (!c) return undefined;
+
+  const comprobado = c.comprobado ?? vigencia.comprobado;
+  const meses = mesesDesde(comprobado);
+  const limite = vigencia.meses_para_revisar ?? 12;
+
+  return {
+    estado: c.estado,
+    comprobado,
+    texto: `Apendices revisados hasta la ${c.ultima_reunion_revisada}, en vigor desde el 5 de marzo de 2026.`,
+    nota: c.nota,
+    aviso:
+      meses !== null && meses >= limite
+        ? `Esa revision tiene ya ${meses} meses y puede haber habido otra reunion. ` +
+          `Antes de exportar, confirma el apendice vigente en speciesplus.net.`
+        : undefined,
+  };
+}
+
 function cites(k, enFlora) {
   const actualizado = CITES_POR_GENERO.get(genero(k));
 
   if (actualizado) {
     return {
+      vigencia: vigenciaCites(),
       apendice: actualizado.apendice,
       significado: CITES[actualizado.apendice],
       alcance: `Todo el genero ${actualizado.genero}`,
@@ -478,6 +565,7 @@ function cites(k, enFlora) {
   if (!enFlora?.cites) return null;
 
   return {
+    vigencia: vigenciaCites(),
     apendice: enFlora.cites,
     significado: CITES[enFlora.cites],
     fuente: `${flora.fuente} (datos de 2023)`,
@@ -736,6 +824,16 @@ export function estadoDeListas() {
     },
     nombres_comunes: Object.keys(comunes).length,
     vedas: { normas: vedas.normas.length, actualizado: vedas.actualizado },
+    // Cuando se comprobo por ultima vez que lo que cita la app sigue en pie, y cuando
+    // toca volver a mirarlo. Se expone en /api/listas para poder revisarlo sin abrir la app.
+    vigencia: {
+      comprobado: vigencia.comprobado,
+      meses_desde_la_comprobacion: mesesDesde(vigencia.comprobado),
+      revisar_cada_meses: vigencia.meses_para_revisar,
+      como: vigencia.como,
+      normas_comprobadas: Object.keys(vigencia.normas ?? {}).length,
+      cites: vigenciaCites(),
+    },
     // Lo que NO esta en disco y se resuelve preguntando fuera, en este orden.
     en_caliente: [
       'GBIF: especies fuera de las listas, nombres vulgares y categoria mundial de la UICN',
