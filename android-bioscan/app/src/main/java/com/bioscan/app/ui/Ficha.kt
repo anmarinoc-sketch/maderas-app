@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -16,10 +17,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.bioscan.app.data.Ficha
 import com.bioscan.app.data.Veda
 import com.bioscan.app.data.VedaPorAutoridad
@@ -45,8 +49,10 @@ fun CuerpoDeFicha(ficha: Ficha, modifier: Modifier = Modifier) {
         modifier = modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
+        FotoDeLaEspecie(ficha)
         Encabezado(ficha)
         Etiquetas(ficha)
+        ResumenRapido(ficha)
 
         // La veda va lo primero porque es lo que puede meter en un lio a quien consulta.
         BloqueVedas(ficha)
@@ -56,6 +62,128 @@ fun CuerpoDeFicha(ficha: Ficha, modifier: Modifier = Modifier) {
         BloqueDistribucion(ficha)
         BloqueRelato(ficha)
         BloqueFuentes(ficha)
+    }
+}
+
+/* ------------------------------------------------------------------------ foto */
+
+/**
+ * Fotografía de la especie, de Wikipedia.
+ *
+ * No es un dato oficial y no pretende serlo: sirve para que quien tiene la planta o el
+ * animal delante compare de un vistazo y se dé cuenta enseguida si la app se equivocó de
+ * especie. Por eso lleva la fuente encima y no se presenta como prueba de nada.
+ */
+@Composable
+private fun FotoDeLaEspecie(ficha: Ficha) {
+    // En una variable local: el smart-cast sobre una propiedad de otra clase es fragil y
+    // aqui no hay forma de compilar para comprobarlo.
+    val foto = ficha.foto
+    val url = foto?.url
+    if (url.isNullOrBlank()) return
+
+    val credito = foto.fuente ?: "Wikipedia"
+
+    Column {
+        AsyncImage(
+            model = url,
+            contentDescription = "Fotografía de ${ficha.nombreCientifico}",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(210.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+        )
+        Text(
+            "Foto de referencia · $credito",
+            style = MaterialTheme.typography.labelSmall,
+            color = GrisNoConsta,
+            modifier = Modifier.padding(top = 4.dp),
+        )
+    }
+}
+
+/* -------------------------------------------------------------- resumen rapido */
+
+/**
+ * Las cuatro preguntas, con su sí o su no.
+ *
+ * Es la forma en que se consulta de verdad en campo: no se lee la ficha entera, se mira
+ * si está vedada y se sigue trabajando. Todo lo de abajo desarrolla estas cuatro líneas.
+ */
+@Composable
+private fun ResumenRapido(ficha: Ficha) {
+    val vedaAplica = ficha.veda?.aplica
+    val vedada = ficha.veda?.detalle?.isNotEmpty() == true || !ficha.vedas.isNullOrEmpty()
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Column(modifier = Modifier.padding(14.dp)) {
+            Pregunta(
+                "¿Es nativa o exótica?",
+                when (ficha.origen?.valor) {
+                    "nativa" -> "Nativa"
+                    "exotica" -> "Exótica"
+                    else -> "No consta"
+                },
+                when (ficha.origen?.valor) {
+                    "nativa" -> VerdeBien
+                    "exotica" -> NaranjaAviso
+                    else -> GrisNoConsta
+                },
+            )
+            Pregunta(
+                "¿Es endémica?",
+                ficha.endemica?.categoria ?: when (ficha.endemica?.valor) {
+                    true -> "Sí"
+                    false -> "No"
+                    null -> "No consta"
+                },
+                if (ficha.endemica?.valor == true) VerdeBien else GrisNoConsta,
+            )
+            Pregunta(
+                "¿Está amenazada?",
+                ficha.amenaza?.nacional?.categoria?.let { "Sí · $it" } ?: "No figura",
+                ficha.amenaza?.nacional?.categoria?.let {
+                    if (it == "VU") NaranjaAviso else RojoGrave
+                } ?: VerdeBien,
+            )
+            Pregunta(
+                "¿Está vedada?",
+                when {
+                    vedaAplica == false -> "No aplica (fauna)"
+                    vedada -> "Sí"
+                    vedaAplica == null -> "Sin determinar"
+                    else -> "No"
+                },
+                when {
+                    vedada -> RojoGrave
+                    vedaAplica == false || vedaAplica == null -> GrisNoConsta
+                    else -> VerdeBien
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun Pregunta(pregunta: String, respuesta: String, color: Color) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(pregunta, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+        Text(
+            respuesta,
+            style = MaterialTheme.typography.bodyMedium,
+            fontWeight = FontWeight.Bold,
+            color = color,
+        )
     }
 }
 

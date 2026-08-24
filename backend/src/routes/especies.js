@@ -16,6 +16,7 @@ import {
   normalizarNombre,
 } from '../lib/gbif.js';
 import { identificarPorFoto, redactarRelato, resolverNombre } from '../lib/gemini-especies.js';
+import { fotoDeEspecie } from '../lib/foto.js';
 import { bufferDesdeBase64, validarImagen } from '../lib/image.js';
 import { requiereAppKey } from '../middleware/auth.js';
 import { rateLimit } from '../middleware/rateLimit.js';
@@ -49,7 +50,14 @@ async function armarFicha(nombreCientifico, { conRelato, reinoSugerido, respaldo
    *
    * Es una llamada a GBIF, gratuita. Si falla, la ficha sale igual sin ella.
    */
-  ficha.amenaza = { ...ficha.amenaza, global: await categoriaIucn(oficial.nombre_cientifico) };
+  // La categoria mundial y la foto se piden a la vez: son dos servicios distintos y
+  // encadenarlas solo sumaria esperas.
+  const [global, foto] = await Promise.all([
+    categoriaIucn(oficial.nombre_cientifico),
+    fotoDeEspecie(oficial.nombre_cientifico),
+  ]);
+  ficha.amenaza = { ...ficha.amenaza, global };
+  ficha.foto = foto;
 
   if (!conRelato) return ficha;
 

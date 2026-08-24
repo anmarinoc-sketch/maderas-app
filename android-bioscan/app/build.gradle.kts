@@ -112,6 +112,10 @@ dependencies {
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
+    // Carga la fotografia de la especie desde Wikipedia. Coil 2 va sobre OkHttp, que ya
+    // esta, y trae cache en disco: la segunda consulta a la misma especie no descarga.
+    implementation("io.coil-kt:coil-compose:2.7.0")
+
     debugImplementation(composeBom)
     debugImplementation("androidx.compose.ui:ui-tooling")
 }

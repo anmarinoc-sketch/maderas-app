@@ -7,7 +7,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import com.bioscan.app.ui.PantallaBienvenida
 import com.bioscan.app.ui.PantallaPrincipal
 import com.bioscan.app.ui.theme.TemaBioScan
 
@@ -28,13 +33,14 @@ class MainActivity : ComponentActivity() {
 }
 
 /**
- * La app entra directa a la pantalla de trabajo.
+ * Bienvenida y luego trabajo.
  *
- * No hay pantalla de bienvenida: en XiloScan la de arranque acabo estorbando y se movio
- * a la ayuda. Aqui la explicacion vive en la propia pantalla principal, visible mientras
- * no haya ninguna consulta hecha, que es cuando de verdad hace falta.
+ * La bienvenida espera al boton Comenzar, no se quita sola: quien abre la app con el
+ * telefono en una mano y una rama en la otra no tiene tiempo de leer algo que se va solo.
  */
 @Composable
 private fun App() {
-    PantallaPrincipal()
+    var empezado by remember { mutableStateOf(false) }
+
+    if (empezado) PantallaPrincipal() else PantallaBienvenida(onComenzar = { empezado = true })
 }

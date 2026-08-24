@@ -155,6 +155,14 @@ data class CoberturaVedas(
     @SerializedName("nota_procedimiento") val notaProcedimiento: String? = null,
 )
 
+/** Fotografía de la especie, sacada de Wikipedia por su nombre científico. */
+data class Foto(
+    val url: String? = null,
+    val fuente: String? = null,
+    val pagina: String? = null,
+    val titulo: String? = null,
+)
+
 data class Relato(
     @SerializedName("que_es") val queEs: String? = null,
     @SerializedName("donde_vive") val dondeVive: String? = null,
@@ -182,6 +190,7 @@ data class Ficha(
     val vedas: List<Veda>? = null,
     val veda: BloqueVeda? = null,
     @SerializedName("cobertura_vedas") val coberturaVedas: CoberturaVedas? = null,
+    val foto: Foto? = null,
     val fuentes: List<String>? = null,
     val relato: Relato? = null,
     @SerializedName("relato_no_disponible") val relatoNoDisponible: String? = null,
