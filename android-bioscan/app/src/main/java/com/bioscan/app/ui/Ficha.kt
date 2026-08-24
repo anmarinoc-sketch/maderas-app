@@ -8,8 +8,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -819,14 +820,13 @@ private fun Seccion(
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = if (oficial) 3.dp else 0.dp),
     ) {
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
             // Banda de color a la izquierda: da relieve sin recargar, y de paso codifica
             // la gravedad del apartado. Sin ella todas las tarjetas se veian iguales y la
             // ficha quedaba plana.
             Box(
                 modifier = Modifier
                     .width(5.dp)
-                    .heightIn(min = 56.dp)
                     .fillMaxHeight()
                     .background(acento),
             )
