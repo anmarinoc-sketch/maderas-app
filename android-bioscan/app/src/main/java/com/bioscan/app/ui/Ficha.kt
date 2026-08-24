@@ -22,6 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.bioscan.app.data.Ficha
 import com.bioscan.app.data.Veda
+import com.bioscan.app.data.VedaPorAutoridad
 
 /*
  * Como se pinta una ficha.
@@ -175,34 +176,109 @@ private fun nombreDeCategoria(codigo: String) = when (codigo) {
 
 @Composable
 private fun BloqueVedas(ficha: Ficha) {
-    val vedas = ficha.vedas.orEmpty()
-    val cobertura = ficha.coberturaVedas
+    val veda = ficha.veda
+
+    // La fauna no lleva apartado de veda: las normas cargadas son de flora y a un animal
+    // no le aplican. Antes se le decia "no figura en ninguna norma de veda", que daba a
+    // entender que se habia comprobado algo. Ahora se dice que no se comprobo, y por que.
+    if (veda?.aplica == false) {
+        Seccion("Veda", oficial = true) {
+            Text(
+                "No aplica: esta especie es fauna.",
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Bold,
+            )
+            veda.motivo?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(top = 6.dp),
+                )
+            }
+        }
+        return
+    }
+
+    val porAutoridad = veda?.porAutoridad.orEmpty()
+    val detalle = veda?.detalle ?: ficha.vedas.orEmpty()
 
     Seccion("Veda", oficial = true) {
-        if (vedas.isEmpty()) {
+        if (porAutoridad.isEmpty()) {
+            // Servidor antiguo: se pinta como antes.
             Text(
-                "No figura en ninguna de las normas de veda cargadas.",
+                if (detalle.isEmpty()) "No figura en ninguna de las normas de veda cargadas."
+                else "Figura en las normas de abajo.",
                 style = MaterialTheme.typography.bodyMedium,
             )
         } else {
-            Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                vedas.forEach { TarjetaDeVeda(it) }
+            porAutoridad.forEach { FilaDeAutoridad(it) }
+        }
+
+        veda?.motivo?.let { Aviso(it, NaranjaAviso, Modifier.padding(top = 10.dp)) }
+
+        if (detalle.isNotEmpty()) {
+            Column(
+                modifier = Modifier.padding(top = 12.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
+                detalle.forEach { TarjetaDeVeda(it) }
             }
         }
+    }
+}
 
-        // Este aviso va SIEMPRE, haya veda o no. Es la diferencia entre "no esta vedada"
-        // y "no me consta que lo este", y es justo donde una app puede hacer daño.
-        cobertura?.advertencia?.let {
-            Aviso(it, NaranjaAviso, Modifier.padding(top = 10.dp))
+/**
+ * Una línea por autoridad, con su veredicto a la derecha.
+ *
+ * Responde la pregunta tal como se hace delante del árbol: ¿tengo veda nacional?
+ * ¿y regional, de quién? El aviso de listado incompleto va pegado a la autoridad que
+ * lo tiene, no como un miedo general sobre todo el apartado.
+ */
+@Composable
+private fun FilaDeAutoridad(a: VedaPorAutoridad) {
+    val vedada = a.vedada == true
+    val incompleto = a.listadoCompleto == false
+
+    val (texto, color) = when {
+        vedada -> "VEDADA" to RojoGrave
+        incompleto -> "Sin veda registrada" to NaranjaAviso
+        else -> "Sin veda" to VerdeBien
+    }
+
+    Column(modifier = Modifier.padding(vertical = 5.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                a.autoridad ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f),
+            )
+            Text(
+                texto,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = color,
+            )
         }
 
-        cobertura?.listadosIncompletos?.takeIf { it.isNotEmpty() }?.let { incompletos ->
+        a.normas?.takeIf { it.isNotEmpty() }?.let {
             Text(
-                "Listados incompletos en la app: " + incompletos.joinToString("; "),
+                it.joinToString("; "),
                 style = MaterialTheme.typography.bodySmall,
                 color = GrisNoConsta,
-                modifier = Modifier.padding(top = 6.dp),
             )
+        }
+        if (incompleto) {
+            a.aviso?.let {
+                Text(
+                    it,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = NaranjaAviso,
+                )
+            }
         }
     }
 }
@@ -393,7 +469,9 @@ private fun BloqueOrigen(ficha: Ficha) {
 
         val endemica = ficha.endemica
         Text(
-            when (endemica?.valor) {
+            // La categoría de la lista de aves ("Casi endémica") dice más que un sí o un
+            // no, así que cuando viene se usa tal cual.
+            endemica?.categoria ?: when (endemica?.valor) {
                 true -> "Endémica de Colombia"
                 false -> "No es endémica: también vive fuera de Colombia"
                 null -> "El endemismo no consta"
@@ -402,6 +480,14 @@ private fun BloqueOrigen(ficha: Ficha) {
         )
         endemica?.nota?.let {
             Text(it, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 4.dp))
+        }
+        endemica?.donde?.takeIf { it.isNotBlank() }?.let {
+            Text(
+                it,
+                style = MaterialTheme.typography.bodySmall,
+                color = GrisNoConsta,
+                modifier = Modifier.padding(top = 6.dp),
+            )
         }
     }
 }

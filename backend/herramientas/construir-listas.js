@@ -33,6 +33,7 @@ const FUENTES = {
   amenazadas: 'https://ipt.biodiversidad.co/sib/archive.do?r=especies-amenazadas-mads-2024',
   catalogo: 'https://ipt.biodiversidad.co/sib/archive.do?r=catalogo_plantas_liquenes',
   exoticas: 'https://ipt.biodiversidad.co/iavh/archive.do?r=ls_colombia_plantaeexoticas_2021',
+  avesEndemicas: 'http://ipt.biodiversidad.co/iavh/archive.do?r=biota_v14_n2_09',
 };
 
 /**
@@ -307,6 +308,73 @@ async function construirExoticas() {
   };
 }
 
+/* -------------------------------------------------------------- aves endemicas */
+
+/**
+ * Aves endemicas y casi-endemicas de Colombia.
+ *
+ * Hace falta porque el Catalogo de Plantas, que es de donde sale el endemismo de todo
+ * lo demas, solo cubre flora. Sin esta lista la app decia "el endemismo no consta" del
+ * pauji colombiano (Crax alberti), que es endemico y ademas uno de los casos mas
+ * conocidos del pais. Quedar mudo ante un dato asi hace dudar de todo lo demas.
+ *
+ * Cubre aves y nada mas. Mamiferos, reptiles y anfibios siguen sin fuente de endemismo.
+ */
+async function construirAvesEndemicas() {
+  const archivos = await descargar('Aves endemicas de Colombia', FUENTES.avesEndemicas);
+  const taxones = leerTsv(archivos.get('taxon.txt'));
+  const descripciones = leerTsv(archivos.get('description.txt'));
+  const vernaculos = leerTsv(archivos.get('vernacularname.txt'));
+  const distribucion = leerTsv(archivos.get('distribution.txt'));
+
+  // Solo interesan las dos categorias reales; el resto del campo son citas bibliograficas.
+  const CATEGORIAS = new Map([
+    ['endemica', 'Endémica'],
+    ['casi endemica', 'Casi endémica'],
+  ]);
+
+  const categoriaPorId = new Map();
+  for (const d of descripciones) {
+    const cat = CATEGORIAS.get(sinTildes(d.description).trim());
+    if (cat) categoriaPorId.set(d.id, cat);
+  }
+
+  const comunesPorId = new Map();
+  for (const v of vernaculos) {
+    if (v.language && v.language.toUpperCase() !== 'ES') continue;
+    const lista = comunesPorId.get(v.id) ?? [];
+    if (v.vernacularName) lista.push(v.vernacularName);
+    comunesPorId.set(v.id, lista);
+  }
+
+  const dondePorId = new Map(distribucion.map((d) => [d.id, d.occurrenceRemarks || d.locality]));
+
+  const especies = {};
+  for (const t of taxones) {
+    const categoria = categoriaPorId.get(t.id);
+    if (!categoria) continue;
+
+    const k = claveDeRegistro(t);
+    if (!k) continue;
+
+    especies[k] = limpio({
+      nombre: t.scientificName,
+      categoria,
+      familia: t.family,
+      orden: t.order,
+      comunes: unir(comunesPorId.get(t.id) ?? []),
+      donde: (dondePorId.get(t.id) ?? '').slice(0, 400),
+    });
+  }
+
+  return {
+    fuente: 'Listado actualizado de las aves endemicas y casi-endemicas de Colombia (Instituto Humboldt, Biota Colombiana)',
+    licencia: 'CC BY-NC 4.0',
+    nota: 'Solo aves. Endemica = solo vive en Colombia. Casi endemica = su distribucion desborda poco las fronteras.',
+    especies,
+  };
+}
+
 /* ------------------------------------------------------------- nombres comunes */
 
 /**
@@ -343,12 +411,14 @@ async function principal() {
   const amenazadas = await construirAmenazadas();
   const catalogo = await construirCatalogo();
   const exoticas = await construirExoticas();
-  const comunes = construirNombresComunes(amenazadas);
+  const aves = await construirAvesEndemicas();
+  const comunes = construirNombresComunes(amenazadas, aves);
 
   console.log('');
   escribir('amenazadas-colombia.json', amenazadas, 'Res. 0126 de 2024');
   escribir('flora-colombia.json', catalogo, 'origen, endemismo, distribucion, CITES');
   escribir('exoticas-colombia.json', exoticas, 'plantas no nativas');
+  escribir('aves-endemicas-colombia.json', aves, 'endemismo de aves');
   escribir('nombres-comunes.json', comunes, 'nombre comun -> cientifico');
 
   const endemicas = Object.values(catalogo.especies).filter((e) => e.endemica).length;

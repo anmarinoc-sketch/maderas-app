@@ -27,8 +27,8 @@ const asyncHandler = (fn) => (req, res, next) => Promise.resolve(fn(req, res, ne
  * verdad importan estan en disco, asi que la app tiene que seguir sirviendo el dia que
  * se agoten las consultas.
  */
-async function armarFicha(nombreCientifico, { conRelato }) {
-  const oficial = consultarPorNombreCientifico(nombreCientifico);
+async function armarFicha(nombreCientifico, { conRelato, reinoSugerido }) {
+  const oficial = consultarPorNombreCientifico(nombreCientifico, { reinoSugerido });
   if (!oficial) return null;
 
   const ficha = { ...oficial, relato: null, relato_no_disponible: null };
@@ -65,10 +65,20 @@ async function armarFicha(nombreCientifico, { conRelato }) {
  */
 const NO_ES_UN_NOMBRE = new Set(['desconocido', 'indeterminado', 'no visible', 'n/a', 'ninguno']);
 
-function fichaOficialDe(nombre) {
+/**
+ * El grupo que ve el modelo, traducido a reino.
+ *
+ * Sirve de pista cuando la especie no esta en ninguna lista: sin ella, un perezoso
+ * recibiria el cuadro de vedas de flora, que no le aplica.
+ */
+const REINO_DEL_GRUPO = { flora: 'Plantae', fauna: 'Animalia', hongo: 'Fungi' };
+
+function fichaOficialDe(nombre, grupo) {
   const limpio = String(nombre ?? '').trim().toLowerCase();
   if (!limpio || NO_ES_UN_NOMBRE.has(limpio)) return null;
-  return consultarPorNombreCientifico(nombre);
+  return consultarPorNombreCientifico(nombre, {
+    reinoSugerido: REINO_DEL_GRUPO[String(grupo ?? '').toLowerCase()],
+  });
 }
 
 /** Etiqueta que deja claro de donde sale cada mitad de la respuesta. */
@@ -111,11 +121,11 @@ router.post(
 
     // La ficha oficial se arma para la principal y para cada alternativa: asi el usuario
     // ve de un vistazo que la segunda opcion si esta vedada y la primera no.
-    const principal = fichaOficialDe(resultado.nombre_cientifico);
+    const principal = fichaOficialDe(resultado.nombre_cientifico, resultado.grupo);
 
     const alternativas = (resultado.alternativas ?? []).map((a) => ({
       ...a,
-      oficial: fichaOficialDe(a.nombre_cientifico),
+      oficial: fichaOficialDe(a.nombre_cientifico, resultado.grupo),
     }));
 
     console.log(
@@ -200,7 +210,7 @@ router.get(
     if (enGbif.length === 1) {
       return responder({
         resuelto_por: 'gbif',
-        ficha: await armarFicha(enGbif[0].nombre, { conRelato }),
+        ficha: await armarFicha(enGbif[0].nombre, { conRelato, reinoSugerido: enGbif[0].reino }),
       });
     }
     if (enGbif.length > 1) {
@@ -239,7 +249,11 @@ router.get(
         resuelto_por: 'modelo',
         propuesto_por_el_modelo: propuestas[0],
         modelo,
-        ficha: await armarFicha(nombre, { conRelato }),
+        ficha: await armarFicha(nombre, {
+          conRelato,
+          reinoSugerido:
+            REINO_DEL_GRUPO[String(propuestas[0].grupo ?? '').toLowerCase()] ?? normalizado?.reino,
+        }),
       });
     }
 

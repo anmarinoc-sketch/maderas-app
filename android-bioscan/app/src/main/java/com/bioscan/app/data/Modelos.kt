@@ -46,7 +46,10 @@ data class Origen(
 /** `valor` en null significa "no consta", que NO es lo mismo que "no es endemica". */
 data class Endemica(
     val valor: Boolean? = null,
+    /** "Endémica" o "Casi endémica". Solo lo trae la lista de aves. */
+    val categoria: String? = null,
     val fuente: String? = null,
+    val donde: String? = null,
     val nota: String? = null,
 )
 
@@ -108,6 +111,32 @@ data class Veda(
     @SerializedName("listado_incompleto") val listadoIncompleto: Boolean? = null,
 )
 
+/** Estado frente a UNA autoridad. Es la forma en que se hace la pregunta de verdad. */
+data class VedaPorAutoridad(
+    val autoridad: String? = null,
+    val vedada: Boolean? = null,
+    val normas: List<String>? = null,
+    @SerializedName("listado_completo") val listadoCompleto: Boolean? = null,
+    val aviso: String? = null,
+)
+
+/**
+ * El apartado de veda, ya resuelto por el servidor.
+ *
+ * `aplica` tiene tres valores y los tres importan:
+ *   true  → es flora, la consulta vale y `porAutoridad` dice qué pasa con cada una.
+ *   false → es fauna. Las vedas cargadas son de flora y a un animal NO le aplican;
+ *           `motivo` lo explica. No se enseña ninguna tabla.
+ *   null  → no se pudo saber si es planta o animal, así que la consulta puede no venir
+ *           al caso. Se enseña, pero avisando.
+ */
+data class BloqueVeda(
+    val aplica: Boolean? = null,
+    val motivo: String? = null,
+    @SerializedName("por_autoridad") val porAutoridad: List<VedaPorAutoridad>? = null,
+    val detalle: List<Veda>? = null,
+)
+
 data class CoberturaVedas(
     val completa: Boolean? = null,
     @SerializedName("listados_incompletos") val listadosIncompletos: List<String>? = null,
@@ -138,7 +167,9 @@ data class Ficha(
     val amenaza: Amenaza? = null,
     val cites: Cites? = null,
     val distribucion: Distribucion? = null,
+    /** Forma antigua. Se conserva por si el servidor no manda todavía `veda`. */
     val vedas: List<Veda>? = null,
+    val veda: BloqueVeda? = null,
     @SerializedName("cobertura_vedas") val coberturaVedas: CoberturaVedas? = null,
     val fuentes: List<String>? = null,
     val relato: Relato? = null,

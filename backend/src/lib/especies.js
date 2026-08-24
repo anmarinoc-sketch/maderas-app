@@ -23,6 +23,7 @@ const leer = (archivo) => JSON.parse(readFileSync(join(DATOS, archivo), 'utf8'))
 const amenazadas = leer('amenazadas-colombia.json');
 const flora = leer('flora-colombia.json');
 const exoticas = leer('exoticas-colombia.json');
+const aves = leer('aves-endemicas-colombia.json');
 const comunes = leer('nombres-comunes.json');
 const vedas = leer('vedas-colombia.json');
 
@@ -156,6 +157,56 @@ export function vedasDe(k, ficha = {}) {
   return [...porNorma.values()];
 }
 
+/**
+ * A que autoridad pertenece una norma, para agrupar.
+ *
+ * El usuario pregunta "esto tiene veda nacional o regional, y de quien". Agrupar por
+ * el campo `autoridad` en bruto no sirve: las nacionales estan repartidas entre
+ * INDERENA, el Ministerio y el Congreso, y eso a quien consulta le da igual.
+ */
+function autoridadDe(norma) {
+  if (/CORNARE/i.test(norma.autoridad)) return 'CORNARE';
+  if (/CORANTIOQUIA/i.test(norma.autoridad)) return 'CORANTIOQUIA';
+  return 'NACIONAL';
+}
+
+const ETIQUETAS = {
+  NACIONAL: 'Veda nacional (Minambiente)',
+  CORANTIOQUIA: 'Veda regional — Corantioquia',
+  CORNARE: 'Veda regional — Cornare',
+};
+
+/**
+ * Estado de la especie frente a CADA autoridad, este vedada o no.
+ *
+ * Antes la app soltaba un "no figura en ninguna de las normas cargadas" seguido de un
+ * parrafo de advertencia, y quien preguntaba se quedaba igual: no sabia si le faltaba
+ * el permiso nacional, el regional o ninguno. Esto responde la pregunta tal como se
+ * hace, autoridad por autoridad, y pone el aviso de listado incompleto SOLO donde
+ * corresponde en vez de como un miedo general.
+ */
+function porAutoridad(encontradas) {
+  return Object.entries(ETIQUETAS).map(([id, etiqueta]) => {
+    const suyas = vedas.normas.filter((n) => autoridadDe(n) === id);
+    const acertadas = encontradas.filter((v) =>
+      suyas.some((n) => n.norma === v.norma && n.autoridad === v.autoridad)
+    );
+
+    const incompletas = suyas.filter((n) => n.listado_incompleto);
+
+    return {
+      autoridad: etiqueta,
+      vedada: acertadas.length > 0,
+      normas: acertadas.map((v) => v.norma),
+      listado_completo: incompletas.length === 0,
+      aviso: incompletas.length
+        ? `El listado de ${incompletas.map((n) => n.norma).join(' y ')} está incompleto en ` +
+          'la app: aunque aquí no aparezca, puede estar vedada.'
+        : undefined,
+    };
+  });
+}
+
 /** Que partes del mapa de vedas estan incompletas. Se devuelve siempre, haya o no veda. */
 function coberturaDeVedas() {
   const incompletas = vedas.normas
@@ -186,21 +237,42 @@ function coberturaDeVedas() {
  * Devuelve siempre la misma forma, este o no la especie, con `en_listas` diciendo
  * en cuales aparecio: es lo que permite a la app no confundir silencio con negativa.
  */
-export function consultarPorNombreCientifico(nombre) {
+/**
+ * @param nombre
+ * @param opciones.reinoSugerido  Reino que aporta quien llama cuando las listas no
+ *   conocen la especie: el modelo dice si vio flora o fauna, y GBIF devuelve el reino.
+ *   Sin esta pista, un perezoso —que no esta en ninguna lista— acabaria recibiendo el
+ *   cuadro de vedas de flora, que no le aplica.
+ */
+export function consultarPorNombreCientifico(nombre, { reinoSugerido } = {}) {
   const k = clave(nombre);
   if (!k) return null;
 
   const enFlora = flora.especies[k];
   const enAmenazadas = amenazadas.especies[k];
   const enExoticas = exoticas.especies[k];
+  const enAves = aves.especies[k];
 
   const ficha = {
-    familia: enFlora?.familia ?? enAmenazadas?.familia,
-    reino: enFlora?.reino ?? enAmenazadas?.reino,
+    familia: enFlora?.familia ?? enAmenazadas?.familia ?? enAves?.familia,
+    reino:
+      enFlora?.reino ??
+      enAmenazadas?.reino ??
+      (enAves ? 'Animalia' : undefined) ??
+      reinoSugerido,
     phylum: enFlora?.phylum,
   };
 
-  const lasVedas = vedasDe(k, ficha);
+  /**
+   * Las vedas cargadas son TODAS de flora silvestre.
+   *
+   * A la fauna no le aplica este regimen: lo suyo son las vedas de caza, que es otra
+   * cosa y no esta cargada. Decirle a alguien que consulta un ave "no figura en ninguna
+   * de las normas de veda" da a entender que se comprobo algo que no se comprobo. Ante
+   * un animal, la app se calla sobre vedas y dice por que.
+   */
+  const esFauna = sinTildes(ficha.reino) === 'animalia';
+  const lasVedas = esFauna ? [] : vedasDe(k, ficha);
 
   return {
     clave: k,
@@ -217,26 +289,9 @@ export function consultarPorNombreCientifico(nombre) {
       exoticas: Boolean(enExoticas),
     },
 
-    origen: determinarOrigen(enFlora, enExoticas),
+    origen: determinarOrigen(enFlora, enExoticas, enAves, esFauna),
 
-    // Estar en el Catalogo no basta: hay fichas sin el dato de origen, y en esas el
-    // endemismo no consta. Decir "false" ahi seria afirmar que no es endemica, que es
-    // justo lo que no sabemos.
-    endemica: enFlora?.origen
-      ? {
-          valor: Boolean(enFlora.endemica),
-          fuente: flora.fuente,
-          nota: enFlora.endemica
-            ? 'Endemica de Colombia: no existe de forma natural en ningun otro pais.'
-            : undefined,
-        }
-      : {
-          valor: null,
-          fuente: null,
-          nota: enFlora
-            ? 'Su ficha del Catalogo no trae el dato de origen: no consta.'
-            : 'No esta en el Catalogo de plantas; no se puede afirmar nada.',
-        },
+    endemica: endemismo(enFlora, enAves, esFauna),
 
     amenaza: {
       nacional: enAmenazadas
@@ -291,6 +346,31 @@ export function consultarPorNombreCientifico(nombre) {
     vedas: lasVedas,
     cobertura_vedas: coberturaDeVedas(),
 
+    /**
+     * Lo mismo, pero contestando a la pregunta tal como se hace: ¿tiene veda nacional?
+     * ¿y regional, de quien? La app pinta esto; `vedas` se conserva para las versiones
+     * ya instaladas, que no saben leer lo de abajo.
+     */
+    veda: esFauna
+      ? {
+          aplica: false,
+          motivo:
+            'Las vedas que consulta esta app son de FLORA silvestre. A la fauna le aplica ' +
+            'otro regimen —vedas de caza y permisos de fauna— que no esta cargado, asi que ' +
+            'esta app no puede decirte nada al respecto. Consulta a la autoridad ambiental.',
+        }
+      : {
+          // Sin saber si es planta o animal no se puede afirmar que la consulta signifique
+          // algo: se enseña lo encontrado, pero avisando de que puede no venir al caso.
+          aplica: ficha.reino ? true : null,
+          motivo: ficha.reino
+            ? undefined
+            : 'No se pudo determinar si es flora o fauna. Las vedas cargadas son solo de ' +
+              'flora: si lo que consultas es un animal, esta consulta no viene al caso.',
+          por_autoridad: porAutoridad(lasVedas),
+          detalle: lasVedas,
+        },
+
     fuentes: [
       enAmenazadas && `${amenazadas.norma} (${amenazadas.autoridad})`,
       enFlora && flora.fuente,
@@ -301,13 +381,78 @@ export function consultarPorNombreCientifico(nombre) {
 }
 
 /**
+ * Endemismo, buscandolo donde toque segun el grupo.
+ *
+ * El Catalogo de Plantas resuelve la flora. Para aves esta la lista del Humboldt, que
+ * hizo falta porque la app decia "el endemismo no consta" del pauji colombiano
+ * (Crax alberti), que es endemico y de los casos mas conocidos del pais: quedarse mudo
+ * ante algo asi hace dudar del resto.
+ *
+ * De mamiferos, reptiles, anfibios, peces e insectos NO hay fuente cargada, y eso se
+ * dice tal cual en vez de dejar un "no consta" que parece un no.
+ */
+function endemismo(enFlora, enAves, esFauna) {
+  if (enAves) {
+    const esEndemica = sinTildes(enAves.categoria) === 'endemica';
+    return {
+      valor: esEndemica,
+      categoria: enAves.categoria,
+      fuente: aves.fuente,
+      donde: enAves.donde,
+      nota: esEndemica
+        ? 'Endemica de Colombia: no vive de forma natural en ningun otro pais.'
+        : 'Casi endemica: su distribucion desborda un poco las fronteras de Colombia.',
+    };
+  }
+
+  if (enFlora?.origen) {
+    return {
+      valor: Boolean(enFlora.endemica),
+      fuente: flora.fuente,
+      nota: enFlora.endemica
+        ? 'Endemica de Colombia: no existe de forma natural en ningun otro pais.'
+        : undefined,
+    };
+  }
+
+  if (esFauna) {
+    return {
+      valor: null,
+      fuente: null,
+      nota:
+        'No hay lista de endemismo cargada para este grupo. Solo estan las aves ' +
+        '(Instituto Humboldt) y la flora (Catalogo de Plantas). De mamiferos, reptiles, ' +
+        'anfibios, peces e insectos no se puede afirmar nada desde una fuente oficial.',
+    };
+  }
+
+  return {
+    valor: null,
+    fuente: null,
+    nota: enFlora
+      ? 'Su ficha del Catalogo no trae el dato de origen: no consta.'
+      : 'No esta en el Catalogo de plantas; no se puede afirmar nada.',
+  };
+}
+
+/**
  * Nativa o exotica.
  *
  * El Catalogo es la fuente buena: dice "Nativa", "Endemica", "Cultivada" o
  * "Naturalizada". La lista de exoticas del Humboldt sirve de refuerzo y aporta el
  * continente de origen. Cuando ninguna la tiene, se dice que no se sabe y ya.
  */
-function determinarOrigen(enFlora, enExoticas) {
+function determinarOrigen(enFlora, enExoticas, enAves, esFauna) {
+  // Un ave endemica o casi endemica de Colombia es nativa por definicion. Dejarlo en
+  // "no consta" era absurdo teniendo el dato delante.
+  if (enAves) {
+    return {
+      valor: 'nativa',
+      detalle: `Nativa de Colombia (${enAves.categoria.toLowerCase()})`,
+      fuente: aves.fuente,
+    };
+  }
+
   if (enFlora?.origen) {
     const texto = sinTildes(enFlora.origen);
     const esNativa = texto.includes('nativa') || texto.includes('endemica');
@@ -334,7 +479,10 @@ function determinarOrigen(enFlora, enExoticas) {
     valor: 'desconocido',
     detalle: null,
     fuente: null,
-    nota: 'No esta en el Catalogo de plantas ni en la lista de exoticas. Si es un animal, es lo normal: esas listas solo cubren flora.',
+    nota: esFauna
+      ? 'Las listas de origen que consulta esta app cubren flora y aves. De este grupo ' +
+        'no hay fuente oficial cargada, asi que no se puede afirmar si es nativa o exotica.'
+      : 'No esta en el Catalogo de plantas ni en la lista de exoticas.',
   };
 }
 
