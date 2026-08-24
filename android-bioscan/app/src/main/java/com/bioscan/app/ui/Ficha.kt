@@ -6,7 +6,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -18,11 +22,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.bioscan.app.data.Ficha
 import com.bioscan.app.data.Veda
@@ -55,7 +61,7 @@ fun CuerpoDeFicha(ficha: Ficha, modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         FotoDeLaEspecie(ficha)
-        Encabezado(ficha)
+        Encabezado(ficha, tieneFoto = !ficha.foto?.url.isNullOrBlank())
         Etiquetas(ficha, esFauna)
         ResumenRapido(ficha, esFauna)
 
@@ -90,16 +96,58 @@ private fun FotoDeLaEspecie(ficha: Ficha) {
     val credito = foto.fuente ?: "Wikipedia"
 
     Column {
-        AsyncImage(
-            model = url,
-            contentDescription = "Fotografía de ${ficha.nombreCientifico}",
-            contentScale = ContentScale.Crop,
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(210.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-        )
+                .height(250.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(Color(0xFF0E1A15)),
+        ) {
+            AsyncImage(
+                model = url,
+                contentDescription = "Fotografía de ${ficha.nombreCientifico}",
+                // Fit y no Crop: recortando, a un ave le cortaba la cabeza y a un arbol
+                // la copa. Lo que hay que ver es el bicho entero, aunque queden franjas.
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxSize(),
+            )
+
+            // Velo degradado abajo, para que el nombre se lea sobre cualquier foto.
+            Box(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .fillMaxWidth()
+                    .height(92.dp)
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(Color.Transparent, Color(0xE60B1712)),
+                        )
+                    ),
+            )
+
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(horizontal = 14.dp, vertical = 12.dp),
+            ) {
+                ficha.nombresComunes?.split("|")?.firstOrNull()?.trim()
+                    ?.takeIf { it.isNotBlank() }
+                    ?.let {
+                        Text(
+                            it,
+                            style = MaterialTheme.typography.titleLarge,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                        )
+                    }
+                Text(
+                    ficha.nombreCientifico ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontStyle = FontStyle.Italic,
+                    color = Color(0xFFB7E4C7),
+                )
+            }
+        }
         Text(
             "Foto de referencia · $credito",
             style = MaterialTheme.typography.labelSmall,
@@ -150,12 +198,20 @@ private fun ResumenRapido(ficha: Ficha, esFauna: Boolean) {
                 },
                 if (ficha.endemica?.valor == true) VerdeBien else GrisNoConsta,
             )
+            // "¿Está amenazada?" y no "¿en qué categoría?": la mayoría de las especies no
+            // figuran en ninguna, y eso es una respuesta, no un hueco.
             Pregunta(
                 "¿Está amenazada?",
-                ficha.amenaza?.nacional?.categoria?.let { "Sí · $it" } ?: "No figura",
+                ficha.amenaza?.nacional?.categoria?.let { "Sí · ${nombreDeCategoria(it)}" }
+                    ?: "No figura",
                 ficha.amenaza?.nacional?.categoria?.let {
                     if (it == "VU") NaranjaAviso else RojoGrave
                 } ?: VerdeBien,
+            )
+            Pregunta(
+                "¿Está en CITES?",
+                ficha.cites?.apendice?.let { "Sí · Apéndice $it" } ?: "No figura",
+                if (ficha.cites?.apendice != null) NaranjaAviso else VerdeBien,
             )
             if (!esFauna) {
                 Pregunta(
@@ -196,14 +252,17 @@ private fun Pregunta(pregunta: String, respuesta: String, color: Color) {
 /* ------------------------------------------------------------------- encabezado */
 
 @Composable
-private fun Encabezado(ficha: Ficha) {
+private fun Encabezado(ficha: Ficha, tieneFoto: Boolean) {
     Column {
-        Text(
-            text = ficha.nombreCientifico ?: "Especie sin nombre",
-            style = MaterialTheme.typography.headlineSmall,
-            fontStyle = FontStyle.Italic,
-            fontWeight = FontWeight.Bold,
-        )
+        // Con foto, el nombre ya va encima de ella: repetirlo aqui solo gasta pantalla.
+        if (!tieneFoto) {
+            Text(
+                text = ficha.nombreCientifico ?: "Especie sin nombre",
+                style = MaterialTheme.typography.headlineSmall,
+                fontStyle = FontStyle.Italic,
+                fontWeight = FontWeight.Bold,
+            )
+        }
         ficha.autoria?.let {
             Text(it, style = MaterialTheme.typography.bodySmall, color = GrisNoConsta)
         }
@@ -301,33 +360,13 @@ private fun nombreDeCategoria(codigo: String) = when (codigo) {
 
 @Composable
 private fun BloqueVedas(ficha: Ficha) {
+    // Solo se llama para flora: quien decide es CuerpoDeFicha. Ante un animal el apartado
+    // no se pinta en absoluto, ni siquiera para decir que no aplica.
     val veda = ficha.veda
-
-    // La fauna no lleva apartado de veda: las normas cargadas son de flora y a un animal
-    // no le aplican. Antes se le decia "no figura en ninguna norma de veda", que daba a
-    // entender que se habia comprobado algo. Ahora se dice que no se comprobo, y por que.
-    if (veda?.aplica == false) {
-        Seccion("Veda", oficial = true) {
-            Text(
-                "No aplica: esta especie es fauna.",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-            )
-            veda.motivo?.let {
-                Text(
-                    it,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(top = 6.dp),
-                )
-            }
-        }
-        return
-    }
-
     val porAutoridad = veda?.porAutoridad.orEmpty()
     val detalle = veda?.detalle ?: ficha.vedas.orEmpty()
 
-    Seccion("Veda", oficial = true) {
+    Seccion("Veda", oficial = true, acento = if (detalle.isNotEmpty()) RojoGrave else VerdeBien) {
         if (porAutoridad.isEmpty()) {
             // Servidor antiguo: se pinta como antes.
             Text(
@@ -483,7 +522,12 @@ private fun TarjetaDeVeda(veda: Veda) {
 private fun BloqueAmenaza(ficha: Ficha) {
     val amenaza = ficha.amenaza ?: return
 
-    Seccion("Categoría de amenaza", oficial = true) {
+    val grave = amenaza.nacional?.categoria != null
+    Seccion(
+        "Categoría de amenaza",
+        oficial = true,
+        acento = if (grave) RojoGrave else VerdeBien,
+    ) {
         val nacional = amenaza.nacional
         if (nacional?.categoria != null) {
             Text(
@@ -598,7 +642,7 @@ private fun BloqueAmenaza(ficha: Ficha) {
 private fun BloqueOrigen(ficha: Ficha) {
     val origen = ficha.origen ?: return
 
-    Seccion("Origen y endemismo", oficial = true) {
+    Seccion("Origen y endemismo", oficial = true, acento = Color(0xFF2E7D9A)) {
         Text(
             when (origen.valor) {
                 "nativa" -> "Nativa de Colombia"
@@ -669,7 +713,7 @@ private fun BloqueDistribucion(ficha: Ficha) {
     val hayAlgo = listOfNotNull(d.departamentos, d.altitud, d.regiones, d.global).any { it.isNotBlank() }
     if (!hayAlgo) return
 
-    Seccion("Rango de distribución", oficial = true) {
+    Seccion("Rango de distribución", oficial = true, acento = Color(0xFF7A6BB5)) {
         d.global?.takeIf { it.isNotBlank() }?.let { Dato("Distribución global", it) }
         d.regiones?.takeIf { it.isNotBlank() }?.let { Dato("Región biogeográfica", it) }
         d.altitud?.takeIf { it.isNotBlank() }?.let { Dato("Altitud", it) }
@@ -693,7 +737,7 @@ private fun BloqueRelato(ficha: Ficha) {
 
     if (relato == null) {
         ficha.relatoNoDisponible?.let {
-            Seccion("Explicación", oficial = false) {
+            Seccion("Explicación", oficial = false, acento = GrisNoConsta) {
                 Text(
                     "No se pudo redactar: $it",
                     style = MaterialTheme.typography.bodyMedium,
@@ -709,7 +753,7 @@ private fun BloqueRelato(ficha: Ficha) {
         return
     }
 
-    Seccion("Explicación", oficial = false) {
+    Seccion("Explicación", oficial = false, acento = GrisNoConsta) {
         relato.queEs?.let { Parrafo("Qué es", it) }
         relato.dondeVive?.let { Parrafo("Dónde vive", it) }
         relato.comoReconocerla?.let { Parrafo("Cómo reconocerla", it) }
@@ -757,9 +801,15 @@ private fun BloqueFuentes(ficha: Ficha) {
  * del modelo se confunda con un dato verificado: van en tarjetas distintas y lo dicen.
  */
 @Composable
-private fun Seccion(titulo: String, oficial: Boolean, contenido: @Composable () -> Unit) {
+private fun Seccion(
+    titulo: String,
+    oficial: Boolean,
+    acento: Color = VerdeBien,
+    contenido: @Composable () -> Unit,
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (oficial) {
                 MaterialTheme.colorScheme.surface
@@ -767,28 +817,46 @@ private fun Seccion(titulo: String, oficial: Boolean, contenido: @Composable () 
                 MaterialTheme.colorScheme.surfaceVariant
             },
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = if (oficial) 2.dp else 0.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = if (oficial) 3.dp else 0.dp),
     ) {
-        Column(modifier = Modifier.padding(14.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(titulo, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                Text(
-                    if (oficial) "Lista oficial" else "Redactado por IA",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.White,
-                    modifier = Modifier
-                        .background(
-                            if (oficial) VerdeBien else GrisNoConsta,
-                            RoundedCornerShape(50),
-                        )
-                        .padding(horizontal = 8.dp, vertical = 3.dp),
-                )
+        Row(modifier = Modifier.fillMaxWidth()) {
+            // Banda de color a la izquierda: da relieve sin recargar, y de paso codifica
+            // la gravedad del apartado. Sin ella todas las tarjetas se veian iguales y la
+            // ficha quedaba plana.
+            Box(
+                modifier = Modifier
+                    .width(5.dp)
+                    .heightIn(min = 56.dp)
+                    .fillMaxHeight()
+                    .background(acento),
+            )
+            Column(modifier = Modifier.padding(14.dp)) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        titulo.uppercase(),
+                        style = MaterialTheme.typography.labelLarge,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 1.sp,
+                        color = acento,
+                    )
+                    Text(
+                        if (oficial) "Lista oficial" else "Redactado por IA",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White,
+                        modifier = Modifier
+                            .background(
+                                if (oficial) VerdeBien else GrisNoConsta,
+                                RoundedCornerShape(50),
+                            )
+                            .padding(horizontal = 8.dp, vertical = 3.dp),
+                    )
+                }
+                Column(modifier = Modifier.padding(top = 10.dp)) { contenido() }
             }
-            Column(modifier = Modifier.padding(top = 10.dp)) { contenido() }
         }
     }
 }

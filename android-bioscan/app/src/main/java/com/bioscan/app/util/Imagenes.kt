@@ -72,6 +72,38 @@ object Imagenes {
         ImagenPreparada(jpeg = salida.toByteArray(), vistaPrevia = escalada)
     }
 
+    /**
+     * Carga la foto de una URI y corrige su orientacion, SIN comprimir todavia.
+     * Es lo que se le entrega a la pantalla de ajuste para recortar y girar.
+     */
+    suspend fun cargarParaAjustar(context: Context, uri: Uri): Bitmap = withContext(Dispatchers.IO) {
+        val limites = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        val flujo = context.contentResolver.openInputStream(uri)
+            ?: throw IllegalArgumentException("No se pudo abrir la imagen seleccionada.")
+        flujo.use { BitmapFactory.decodeStream(it, null, limites) }
+
+        if (limites.outWidth <= 0 || limites.outHeight <= 0) {
+            throw IllegalArgumentException("El archivo seleccionado no es una imagen válida.")
+        }
+
+        val opciones = BitmapFactory.Options().apply {
+            inSampleSize = calcularMuestreo(limites.outWidth, limites.outHeight)
+        }
+        val decodificada = context.contentResolver.openInputStream(uri)
+            ?.use { BitmapFactory.decodeStream(it, null, opciones) }
+            ?: throw IllegalArgumentException("No se pudo decodificar la imagen.")
+
+        corregirOrientacion(context, uri, decodificada)
+    }
+
+    /** Reempaqueta un bitmap ya recortado o girado, listo para subir. */
+    suspend fun desdeBitmap(bitmap: Bitmap): ImagenPreparada = withContext(Dispatchers.IO) {
+        val escalada = escalar(bitmap)
+        val salida = ByteArrayOutputStream()
+        escalada.compress(Bitmap.CompressFormat.JPEG, CALIDAD_JPEG, salida)
+        ImagenPreparada(jpeg = salida.toByteArray(), vistaPrevia = escalada)
+    }
+
     /** Archivo temporal en cache/capturas para que la camara del sistema escriba la foto. */
     fun archivoTemporalDeCaptura(context: Context): File {
         val carpeta = File(context.cacheDir, "capturas").apply { mkdirs() }

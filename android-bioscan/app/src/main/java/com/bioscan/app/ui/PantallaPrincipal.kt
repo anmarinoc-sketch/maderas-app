@@ -78,15 +78,26 @@ fun PantallaPrincipal(vm: BioViewModel = viewModel()) {
     var uriDeCaptura by remember { mutableStateOf<Uri?>(null) }
 
     val camara = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
-        if (ok) uriDeCaptura?.let { vm.identificarFoto(it) }
+        if (ok) uriDeCaptura?.let { vm.prepararFoto(it) }
     }
 
     val galeria = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia()
-    ) { uri -> uri?.let { vm.identificarFoto(it) } }
+    ) { uri -> uri?.let { vm.prepararFoto(it) } }
 
     if (enAjustes) {
         PantallaAjustes(vm = vm, onCerrar = { enAjustes = false })
+        return
+    }
+
+    // El ajuste de la foto se lleva la pantalla entera: recortar con la barra de busqueda
+    // encima seria imposible de usar.
+    (estado as? Estado.Ajustando)?.let { ajuste ->
+        PantallaAjusteFoto(
+            original = ajuste.original,
+            onConfirmar = { vm.identificarFoto(it) },
+            onRepetir = { vm.volverAlInicio() },
+        )
         return
     }
 
@@ -169,6 +180,9 @@ fun PantallaPrincipal(vm: BioViewModel = viewModel()) {
 
                 is Estado.Identificada -> ResultadoDeFoto(e, vm)
 
+                // Se pinta arriba, a pantalla completa.
+                is Estado.Ajustando -> Unit
+
                 is Estado.Vacio -> Mensaje(
                     titulo = "Sin resultados",
                     texto = e.aviso ?: "No se encontró esa especie.",
@@ -229,14 +243,31 @@ private fun Instrucciones() {
     ) {
         Column(modifier = Modifier.padding(14.dp)) {
             Text("Qué te dice esta app", fontWeight = FontWeight.Bold)
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(8.dp))
             Text(
-                "Escribe un nombre o toma una foto de una planta o un animal, y te dice " +
-                    "si es nativa o exótica, si es endémica, en qué categoría de amenaza " +
-                    "está, si está vedada y cuál es su rango de distribución.",
+                "Escribe un nombre o toma una foto de una planta o un animal, y te responde:",
                 style = MaterialTheme.typography.bodyMedium,
             )
-            Spacer(Modifier.height(10.dp))
+            Spacer(Modifier.height(8.dp))
+
+            // En lista y en forma de pregunta. El texto seguido decia "en qué categoría de
+            // amenaza está", que da por hecho que lo está: la mayoría de las especies no
+            // figuran en ninguna categoría, y eso es una respuesta, no una ausencia.
+            listOf(
+                "Si es nativa de Colombia o exótica",
+                "Si es endémica, es decir, si solo vive aquí",
+                "Si se encuentra amenazada y, en ese caso, en qué categoría",
+                "Si está en algún apéndice CITES, que regula su comercio internacional",
+                "Si está vedada, por norma nacional o regional",
+                "Cuál es su rango de distribución",
+            ).forEach {
+                Row(modifier = Modifier.padding(vertical = 3.dp)) {
+                    Text("·  ", style = MaterialTheme.typography.bodyMedium)
+                    Text(it, style = MaterialTheme.typography.bodyMedium)
+                }
+            }
+
+            Spacer(Modifier.height(12.dp))
             Text(
                 "Los datos legales y de conservación salen de las listas oficiales " +
                     "colombianas cargadas en el servidor, con su norma citada. El nombre " +

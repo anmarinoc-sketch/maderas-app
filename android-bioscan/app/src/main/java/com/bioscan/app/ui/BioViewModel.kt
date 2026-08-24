@@ -25,6 +25,9 @@ sealed interface Estado {
 
     data class Trabajando(val mensaje: String) : Estado
 
+    /** Foto cargada, esperando que se recorte y se gire antes de subirla. */
+    data class Ajustando(val original: Bitmap) : Estado
+
     data class FichaLista(
         val ficha: Ficha,
         val resueltoPor: String?,
@@ -138,16 +141,40 @@ class BioViewModel(app: Application) : AndroidViewModel(app) {
 
     /* ----------------------------------------------------------------- por foto */
 
-    fun identificarFoto(uri: Uri) {
-        _estado.value = Estado.Trabajando("Preparando la fotografía...")
+    /**
+     * Carga la foto y la deja lista para ajustar.
+     *
+     * No se sube todavia: primero se recorta y se gira. Un ave que ocupa un cuarto del
+     * encuadre pierde tres cuartas partes de la resolucion al reducir la imagen, y ahi
+     * es donde se decide si el modelo acierta.
+     */
+    fun prepararFoto(uri: Uri) {
+        _estado.value = Estado.Trabajando("Abriendo la fotografía...")
         ultimaEleccion = null
 
         viewModelScope.launch {
-            val preparada = runCatching { Imagenes.preparar(getApplication(), uri) }.getOrElse { e ->
+            runCatching { Imagenes.cargarParaAjustar(getApplication(), uri) }
+                .onSuccess { _estado.value = Estado.Ajustando(it) }
+                .onFailure { e ->
+                    _estado.value = Estado.Fallo(
+                        codigo = "IMAGEN_INVALIDA",
+                        mensaje = e.message ?: "No se pudo leer la fotografía.",
+                        detalle = "Prueba con otra imagen o vuelve a tomarla.",
+                    )
+                }
+        }
+    }
+
+    /** Sube la foto ya recortada y girada. */
+    fun identificarFoto(bitmap: Bitmap) {
+        _estado.value = Estado.Trabajando("Preparando la fotografía...")
+
+        viewModelScope.launch {
+            val preparada = runCatching { Imagenes.desdeBitmap(bitmap) }.getOrElse { e ->
                 _estado.value = Estado.Fallo(
                     codigo = "IMAGEN_INVALIDA",
-                    mensaje = e.message ?: "No se pudo leer la fotografía.",
-                    detalle = "Prueba con otra imagen o vuelve a tomarla.",
+                    mensaje = e.message ?: "No se pudo preparar la fotografía.",
+                    detalle = null,
                 )
                 return@launch
             }
