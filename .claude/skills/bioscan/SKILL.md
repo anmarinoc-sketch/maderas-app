@@ -68,10 +68,16 @@ cd C:\Users\amo\Desktop\Claude\maderas-app\backend; node herramientas/construir-
 | `amenazadas-colombia.json` | **Resolución 0126 de 2024** (MADS), que derogó la 1912 de 2017 | 2.087 |
 | `flora-colombia.json` | Catálogo de Plantas y Líquenes de Colombia (UNAL) | 44.477, de ellas 6.408 endémicas |
 | `exoticas-colombia.json` | Lista de plantas exóticas del Humboldt | 1.292 |
-| `nombres-comunes.json` | Derivado de amenazadas + aves endemicas | 1.069 |
+| `nombres-comunes.json` | Derivado de amenazadas, aves endemicas y fauna | 3.216 |
 | `vedas-colombia.json` | **Transcrito a mano.** No hay fuente legible por máquina | 14 normas, 77 especies |
 
-Todo cabe: 107 MB de RSS, 221 ms de arranque, 9 µs por consulta. Render da 512 MB.
+Todo cabe: unos 120 MB de RSS y menos de medio segundo de arranque. Render da 512 MB.
+
+**Lo que NO esta en disco se resuelve en caliente, y en este orden:** listas locales ->
+GBIF (gratis, sin clave) -> modelo. GBIF cubre reptiles, anfibios, invertebrados y lo de
+fuera con `fichaDeRespaldo`, que trae taxonomia, nombres comunes y cuantos registros hay
+en Colombia. Va ANTES que el modelo a proposito: es gratis y el modelo cuesta cuota.
+Tambien de GBIF sale la categoria mundial de la UICN, y de Wikipedia la foto.
 
 **Ojo con la 1912 de 2017**: está derogada. Si alguien la menciona, es la 0126 de 2024.
 
@@ -131,12 +137,21 @@ XiloScan no cambió de comportamiento.
 
 ## Qué queda pendiente
 
-1. **Medir la identificación por foto.** Es lo importante y lo único sin tocar. Andrés
-   tiene la app instalada desde el release `bio-v1`.
+1. **Medir la identificación por foto con fotos de campo.** Con seis fotos de Wikipedia
+   salieron 5 especies exactas y 1 género, sin fallos, pero esas fotos son faciles.
+   Andrés tiene la app instalada desde `bio-v2`.
 2. **Las 2 especies que faltan del Acuerdo 404** y los Acuerdos 262 de 2011 y 207 de 2008,
    que no estan publicados en la web de Cornare (probado: dan 404). Habria que pedirlos.
 3. Nombres comunes: solo hay 878, de las especies amenazadas. GBIF cubre el resto en
    caliente, pero un índice local más grande ahorraría llamadas.
+
+## Del diseño que trajo el usuario, lo que falta
+
+Trajo una maqueta completa el 23-08-2026. Hecho: logo, bienvenida con boton Comenzar,
+foto de la especie y el resumen de cuatro preguntas (nativa, endemica, amenazada, vedada).
+Sin hacer, porque son funciones nuevas y no decisiones de estilo: navegacion inferior,
+"Mis listas" y favoritos, "Mis observaciones", mapas de biodiversidad, perfil e inicio de
+sesion. Guardar observaciones choca ademas con el disco efimero de Render.
 
 ## Trato con el usuario
 
