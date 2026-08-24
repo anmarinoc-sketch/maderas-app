@@ -21,7 +21,7 @@ servidor, clave de firma y CI con XiloScan**: invoca también la skill `xiloscan
 | Carpeta local | `C:\Users\amo\Desktop\Claude\maderas-app` |
 | App | `android-bioscan/`, paquete `com.bioscan.app` |
 | Backend | `backend/` — el MISMO servicio de Render que XiloScan |
-| Release | Etiqueta `bio-v*`. Última: **bio-v7** |
+| Release | Etiqueta `bio-v*`. Última: **bio-v8** |
 | Clave de Gemini | `GEMINI_API_KEY_ESPECIES` en Render, proyecto Google `BioScan` |
 
 Creado el 23-08-2026 y desarrollado en una sola sesión larga. **Probado contra Gemini y
@@ -57,7 +57,7 @@ curl.exe -s https://madera-backend.onrender.com/api/listas
 `android-bioscan/app/build.gradle.kts` (la app enseña el número en Más), y etiquetar:
 
 ```bash
-cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v8; git push origin bio-v8
+cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v9; git push origin bio-v9
 ```
 
 ### Los cuatro workflows
@@ -84,15 +84,20 @@ cd C:\Users\amo\Desktop\Claude\maderas-app; git tag bio-v8; git push origin bio-
    Solo el relato gasta, y si falla, la ficha oficial se devuelve igual.
 5. **Lo que no viene al caso no se pinta.** Una respuesta que describe la lista consultada
    en vez de la especie es un hueco con aspecto de dato, y en esta app eso vale menos que
-   el silencio. Tres consecuencias, todas de bio-v7:
-   - **Fauna exótica** (`fauna_exotica`): solo se dice que es exótica. Sin endemismo, sin
-     categoría de amenaza, sin UICN mundial. **Sí se quedan CITES** —aplica aunque la
-     especie sea introducida; el hipopótamo del Magdalena está en el Apéndice II— y el
-     potencial invasor. La bandera se decide en DOS sitios porque los casos llegan por dos
-     caminos: `especies.js` para las seis exóticas de la lista de fauna (todas aves), y
-     `routes/especies.js` para las que no están en ninguna lista y solo se sabe que son
-     introducidas cuando vuelve el relato. Las dos rutas exigen que no haya categoría
-     nacional: si la Resolución 0126 habla, manda ella.
+   el silencio. Tres consecuencias, de bio-v7 y bio-v8:
+   - **Especie exótica** (`es_exotica`, flora y fauna por igual): solo se dice que es
+     exótica. Sin endemismo, sin categoría de amenaza, sin UICN mundial. **Sí se quedan
+     CITES** —aplica aunque la especie sea introducida; el hipopótamo del Magdalena está
+     en el Apéndice II— y el potencial invasor. **Y en flora, LA VEDA**, que es la trampa
+     de este ajuste: las vedas alcanzan POR FAMILIA, así que la piña sale exótica y vedada
+     a la vez por Bromeliaceae. Esconderla por ser exótica sería el error que la app existe
+     para evitar; en flora exótica el apartado se llama solo «Veda», sin la fila de
+     amenaza. La bandera se decide en DOS sitios porque los casos llegan por dos caminos:
+     `especies.js` para lo que está en las listas, y `routes/especies.js` para lo que no
+     está en ninguna y solo se sabe que es introducido cuando vuelve el relato (el
+     hipopótamo, la tilapia, el caballo). Las dos rutas exigen que no haya categoría
+     nacional ni del Catálogo: si alguna de las dos habla, manda ella. `fauna_exotica`
+     sigue viajando en la respuesta porque bio-v7 solo sabe leer esa.
    - **La fila de veda nacional solo sale si hay veda nacional.** Las nacionales de flora
      alcanzan a pocas especies y casi siempre a las mismas, así que repetía «sin veda». En
      su sitio va la condición de amenaza de la Resolución 0126, que sí cambia de una
