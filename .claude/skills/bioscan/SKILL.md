@@ -20,7 +20,7 @@ tocar `backend/` o los workflows.
 | Carpeta local | `C:\Users\amo\Desktop\Claude\maderas-app` |
 | App | `android-bioscan/`, paquete `com.bioscan.app` |
 | Backend | `backend/` — el MISMO servicio de Render que XiloScan |
-| Release | Etiqueta `bio-v*`. Última: **bio-v5** (24-08-2026) |
+| Release | Etiqueta `bio-v*`. Última: **bio-v6** (24-08-2026) |
 | Clave de Gemini | `GEMINI_API_KEY_ESPECIES` en Render, proyecto Google `BioScan` |
 
 Creado el 23-08-2026 y probado contra Gemini y contra producción ese mismo día. Lo único
@@ -84,6 +84,10 @@ Lo de XiloScan (`lib/gemini.js`, `prompt.js`, `referencia.js`, `aprendizaje.js`,
 | `MainActivity.kt` | Bienvenida y luego pantalla principal |
 | `BioScanApp.kt` | **Solo existe para el User-Agent de Coil.** Sin él, Wikimedia devuelve 403 y las fotos salen en gris |
 | `ui/PantallaBienvenida.kt` | Logo, nombre y botón Comenzar |
+| `ui/Piezas.kt` | Piezas visuales que se repiten: icono redondo, tarjeta de acción, fila con flecha |
+| `ui/PantallaGuardados.kt` | Historial, Favoritos y la sección Más |
+| `ui/PantallaAjusteFoto.kt` | Recortar y girar antes de subir. Portada de XiloScan |
+| `util/Guardados.kt` | Historial y favoritos, en SharedPreferences del teléfono |
 | `ui/PantallaPrincipal.kt` | Buscador, botones de foto, y el estado (candidatas, ficha, resultado de foto) |
 | `ui/Ficha.kt` | **La ficha entera.** Foto, resumen de preguntas, veda, amenaza, origen, distribución, relato |
 | `ui/PantallaAjustes.kt` | URL, clave, y el interruptor del relato |
@@ -207,10 +211,10 @@ ya teníamos por otra fuente, y coincidieron las 7 especies. Sobre eso se acept�
    reinstalar las dos apps.
 3. **La app no muestra su número de versión**, así que no hay forma de saber cuál está
    instalada sin mirar el APK.
-4. Del diseño que trajo el usuario quedan sin hacer, y son funciones nuevas, no estilo:
-   navegación inferior, «Mis listas» y favoritos, «Mis observaciones», mapas de
-   biodiversidad, perfil e inicio de sesión. Guardar observaciones choca con el disco
-   efímero de Render.
+4. Del diseño quedan sin hacer «Mis observaciones» (guardar tus propias fotos con su
+   ubicación) y los mapas de biodiversidad. Historial y Favoritos ya están, guardados en
+   el teléfono. No hay ni hará falta inicio de sesión mientras nada se guarde en el
+   servidor: su disco es efímero.
 
 ## Trato con el usuario
 
