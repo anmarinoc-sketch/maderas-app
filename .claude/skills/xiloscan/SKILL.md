@@ -15,7 +15,7 @@ Para Andrés, del comercio maderero del Valle de Aburrá (Medellín, Colombia).
 | Repositorio | https://github.com/anmarinoc-sketch/maderas-app (público) |
 | Carpeta local | `C:\Users\amo\Desktop\Claude\maderas-app` |
 | Backend | https://madera-backend.onrender.com (Render, plan gratuito) |
-| APK | Artefacto `xiloscan-apk` de cada ejecución de Actions |
+| APK | Release con etiqueta `v*` (el primero, `v1`, es del 23-08-2026), o el artefacto `xiloscan-apk` de cada ejecución de Actions |
 | Clave de firma | `android/keystore/xiloscan.p12`, versionada, contraseña `xiloscan` |
 
 Estructura: `android/` (Kotlin + Compose) y `backend/` (Node 22 + Express).
