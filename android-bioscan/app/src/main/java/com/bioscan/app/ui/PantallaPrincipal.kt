@@ -566,6 +566,17 @@ private fun ListaDeCandidatas(
                     Text("Se le llama así en: $it", color = TextoTenue, style = MaterialTheme.typography.bodySmall)
                 }
 
+                // Cuando la lista sale de un parecido y no de una coincidencia, hay que
+                // decir con qué se pareció: sin eso, ver seis nombres que no se pidieron
+                // parece un error de la app en vez de una sugerencia.
+                c.parecidoA?.takeIf { it.isNotBlank() }?.let {
+                    Text(
+                        "Se parece a «$it»" + (c.parecidoPor?.let { p -> ", $p" } ?: ""),
+                        color = TextoTenue,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                }
+
                 // Las banderas van aquí porque son justo lo que hace elegir una u otra.
                 val banderas = buildList {
                     if (c.endemica == true) add("Endémica")

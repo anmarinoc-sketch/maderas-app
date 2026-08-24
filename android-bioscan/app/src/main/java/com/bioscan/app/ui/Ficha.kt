@@ -1115,6 +1115,39 @@ private fun BloqueRelato(ficha: Ficha, esExotica: Boolean) {
             Parrafo(if (esExotica) "Qué papel cumple aquí" else "Por qué importa conservarla", it)
         }
         relato.enLaPractica?.let { Parrafo("En la práctica", it) }
+
+        /*
+         * De dónde salió lo de arriba, y qué parte no salió de ningún sitio.
+         *
+         * Las referencias las escribe el SERVIDOR a partir de la ficha que él mismo le
+         * mandó al modelo; el modelo solo elige de una lista cerrada en qué se apoyó. Si
+         * se le pidiera que citara él, produciría números de resolución plausibles y
+         * falsos, que es el daño que esta app existe para no hacer.
+         */
+        val referencias = relato.referencias.orEmpty().filter { it.isNotBlank() }
+        val sinRespaldo = relato.sinRespaldo?.takeIf { it.isNotBlank() }
+
+        if (referencias.isNotEmpty() || sinRespaldo != null) {
+            HorizontalDivider(modifier = Modifier.padding(vertical = 10.dp))
+        }
+
+        if (referencias.isNotEmpty()) {
+            Text(
+                "Se apoya en",
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.Bold,
+                color = GrisNoConsta,
+            )
+            referencias.forEach {
+                Text("· $it", style = MaterialTheme.typography.bodySmall, color = GrisNoConsta)
+            }
+        }
+
+        // Lo que el modelo reconoce haber puesto de su cosecha. Enseñarlo es lo que
+        // convierte "redactado por IA" de etiqueta genérica en algo que se puede usar.
+        sinRespaldo?.let {
+            Aviso("Sin lista detrás: $it", NaranjaAviso, Modifier.padding(top = 8.dp))
+        }
     }
 }
 

@@ -235,6 +235,17 @@ data class Relato(
     @SerializedName("importancia_conservacion") val importanciaConservacion: String? = null,
     @SerializedName("en_la_practica") val enLaPractica: String? = null,
     @SerializedName("generado_por") val generadoPor: String? = null,
+    /**
+     * Las normas y fuentes en las que se apoya el texto.
+     *
+     * Las escribe el SERVIDOR, no el modelo: el modelo solo elige de una lista cerrada de
+     * siete palabras en qué bloque se apoyó, y el servidor traduce cada una al nombre real
+     * de lo que le mandó. A un modelo al que se le pide que cite le salen números de
+     * resolución plausibles y falsos.
+     */
+    val referencias: List<String>? = null,
+    /** Lo que el modelo dice haber escrito de su propio conocimiento, sin lista detrás. */
+    @SerializedName("sin_respaldo") val sinRespaldo: String? = null,
 )
 
 /** Todo lo que las listas oficiales saben de una especie, mas el relato del modelo. */
@@ -283,6 +294,9 @@ data class Candidata(
     val endemica: Boolean? = null,
     val amenaza: String? = null,
     val vedada: Boolean? = null,
+    /** Solo cuando la lista sale de un parecido: con qué nombre se pareció lo tecleado. */
+    @SerializedName("se_parece_a") val parecidoA: String? = null,
+    @SerializedName("parecido_por") val parecidoPor: String? = null,
 )
 
 data class RespuestaEspecie(

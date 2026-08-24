@@ -53,7 +53,10 @@ METODO DE TRABAJO (aplicalo en este orden):
    disposicion, nervadura, corteza, flor, fruto; o en fauna, silueta, pico, patas,
    coloracion, marcas, tamano aparente. Esta descripcion es la que sostiene el nombre.
 4. Solo entonces propon la identificacion mas probable y hasta tres alternativas,
-   justificando cada una con los rasgos observados.
+   justificando cada una con los rasgos observados. SI NO LLEGAS A LA ESPECIE, LAS
+   ALTERNATIVAS SON OBLIGATORIAS: quedarte en el genero y no ofrecer nada mas deja a
+   quien pregunta igual que estaba. Da las candidatas razonables aunque dudes, con la
+   confianza baja que corresponda y diciendo que rasgo separaria a una de otra.
 5. Ten presente el contexto: lo mas probable es que la foto sea de Colombia, y muy
    posiblemente de Antioquia. Pero si lo que ves es claramente una especie cultivada u
    ornamental de otro continente, dilo: en ciudad abundan.
@@ -348,8 +351,36 @@ Escribe, para alguien del sector forestal que no es biologo:
 2. Donde vive y como se reconoce en campo.
 ${conservacion}
 4. Que deberia tener en cuenta quien se la encuentre trabajando.${alimentacion}
+
+Y ADEMAS, dos campos que no son texto para leer sino la trazabilidad de lo que
+escribiste, y que se le enseñan al usuario:
+- apoyado_en: cuales de los bloques de datos oficiales de arriba usaste de verdad.
+  Elige solo de la lista cerrada del esquema. NO escribas normas ni numeros de
+  resolucion: el sistema pone las referencias, porque el sabe cuales te mando.
+- sin_respaldo: que parte de lo que escribiste sale de tu conocimiento y no de esos
+  datos. Se lo enseñamos al usuario tal cual. Preferimos que digas "esto no me consta"
+  a que quede una frase bonita que nadie pueda comprobar.
 `.trim();
 }
+
+/**
+ * Los bloques de datos oficiales que el sistema le pasa al modelo.
+ *
+ * El modelo NO escribe referencias: elige de esta lista cerrada de que se apoyo, y el
+ * servidor traduce cada eleccion al nombre real de la norma o de la fuente que le mando.
+ * Es la unica forma de que la ficha lleve referencias sin arriesgarse a que se las
+ * invente, que es exactamente lo que hace un modelo al que se le pide que cite: produce
+ * numeros de resolucion plausibles y falsos.
+ */
+export const BLOQUES_OFICIALES = [
+  'origen',
+  'invasora',
+  'endemismo',
+  'amenaza',
+  'cites',
+  'distribucion',
+  'vedas',
+];
 
 export const ESQUEMA_RELATO = {
   type: Type.OBJECT,
@@ -361,6 +392,8 @@ export const ESQUEMA_RELATO = {
     'habitos_alimenticios',
     'importancia_conservacion',
     'en_la_practica',
+    'apoyado_en',
+    'sin_respaldo',
   ],
   propertyOrdering: [
     'origen_si_no_consta',
@@ -370,6 +403,8 @@ export const ESQUEMA_RELATO = {
     'habitos_alimenticios',
     'importancia_conservacion',
     'en_la_practica',
+    'apoyado_en',
+    'sin_respaldo',
   ],
   properties: {
     origen_si_no_consta: {
@@ -406,6 +441,24 @@ export const ESQUEMA_RELATO = {
       description:
         'Que tener en cuenta al encontrarsela trabajando. Sin afirmar nada legal que no ' +
         'venga en los datos oficiales.',
+    },
+    apoyado_en: {
+      type: Type.ARRAY,
+      items: { type: Type.STRING, enum: BLOQUES_OFICIALES },
+      description:
+        'En cuales de los datos oficiales que te pasaron te apoyaste de verdad. SOLO ' +
+        'estos valores y solo los que hayas usado. NO escribas nombres de normas ni ' +
+        'numeros de resolucion: de eso se encarga el sistema, que sabe cual te mando. ' +
+        'Lista vacia si no usaste ninguno.',
+    },
+    sin_respaldo: {
+      type: Type.STRING,
+      description:
+        'Que has escrito de tu propio conocimiento biologico y NO sale de los datos ' +
+        'oficiales que te pasaron. Una frase corta, en plata: "la altura, la floracion y ' +
+        'los usos de la madera no vienen en los datos oficiales". Se le enseña al usuario ' +
+        'tal cual para que sepa que parte no esta verificada. Cadena vacia solo si todo ' +
+        'lo que escribiste sale de los datos oficiales, que es raro.',
     },
   },
 };

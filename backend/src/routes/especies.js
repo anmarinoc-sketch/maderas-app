@@ -3,11 +3,13 @@ import { Router } from 'express';
 import { AppError, errores } from '../lib/errors.js';
 import {
   candidatasPorNombreComun,
+  clavesParecidas,
   consultarPorNombreCientifico,
   estadoDeListas,
   estaEnColombia,
   pareceBinomio,
   pareceNombreCientifico,
+  sinTildes,
 } from '../lib/especies.js';
 import {
   buscarPorNombreComun,
@@ -104,7 +106,11 @@ async function armarFicha(nombreCientifico, { conRelato, reinoSugerido, respaldo
         vedas: oficial.vedas,
       },
     });
-    ficha.relato = { ...resultado, generado_por: modelo };
+    ficha.relato = {
+      ...resultado,
+      generado_por: modelo,
+      referencias: referenciasDe(resultado.apoyado_en, oficial),
+    };
 
     /*
      * Si las listas no saben si es nativa o exotica, se usa lo que diga el modelo.
@@ -152,6 +158,52 @@ async function armarFicha(nombreCientifico, { conRelato, reinoSugerido, respaldo
   }
 
   return ficha;
+}
+
+/**
+ * De donde sale cada bloque oficial, para poner la referencia debajo de la explicacion.
+ *
+ * El modelo solo dice EN CUAL se apoyo, eligiendo de una lista cerrada de siete palabras.
+ * El texto de la referencia se saca de aqui, o sea de la ficha que el propio servidor le
+ * mando. Es la unica manera de que la explicacion lleve referencias sin arriesgarse a que
+ * se las invente: a un modelo al que se le pide que cite le salen numeros de resolucion
+ * plausibles y falsos, y en esta app eso es dano real.
+ *
+ * Si el modelo dice apoyarse en un bloque que iba vacio, aqui sale null y no se enseña
+ * ninguna referencia por el. Tampoco eso se le puede dejar decidir.
+ */
+const REFERENCIA_DE = {
+  origen: (o) => o.origen?.fuente,
+  invasora: (o) =>
+    o.invasora?.declarada ? `${o.invasora.norma} (${o.invasora.autoridad})` : undefined,
+  endemismo: (o) => o.endemica?.fuente,
+  amenaza: (o) =>
+    o.amenaza?.nacional?.norma
+      ? `${o.amenaza.nacional.norma} (${o.amenaza.nacional.autoridad})`
+      : o.amenaza?.catalogo?.fuente,
+  cites: (o) => (o.cites?.apendice ? `CITES, Apendice ${o.cites.apendice}` : undefined),
+  distribucion: (o) => o.distribucion?.fuente,
+  vedas: (o) => (o.vedas?.length ? o.vedas.map((v) => v.norma).join('; ') : undefined),
+};
+
+function referenciasDe(apoyadoEn, oficial) {
+  const textos = [
+    ...new Set(
+      (apoyadoEn ?? []).map((bloque) => REFERENCIA_DE[bloque]?.(oficial)).filter(Boolean)
+    ),
+  ];
+
+  /*
+   * Fuera las que ya estan dichas dentro de otra.
+   *
+   * El origen cita "Catalogo de Plantas y Liquenes de Colombia" y el endemismo la cita
+   * academica entera, que contiene a la primera palabra por palabra. Son la misma fuente
+   * escrita de dos maneras, y enseñarlas seguidas parece que se comprobo dos veces. Se
+   * queda la mas completa.
+   */
+  return textos.filter(
+    (t) => !textos.some((otra) => otra !== t && sinTildes(otra).includes(sinTildes(t)))
+  );
 }
 
 /**
@@ -348,17 +400,56 @@ router.get(
     }
 
     /* 4. Ultimo recurso: que lo proponga el modelo, y lo verifican las listas. */
-    const { resultado, modelo } = await resolverNombre(consulta);
-    const propuestas = (resultado.candidatas ?? []).filter((c) => c.nombre_cientifico);
+    let resultado = null;
+    let modelo = null;
+    try {
+      ({ resultado, modelo } = await resolverNombre(consulta));
+    } catch (error) {
+      /*
+       * Sin cuota o con el modelo caido todavia quedan los nombres parecidos, que estan
+       * en disco y no gastan nada. Antes se propagaba el error y una errata de teclado se
+       * quedaba sin respuesta por un problema que no tiene nada que ver con ella; la app
+       * tiene que seguir sirviendo el dia que se agoten las consultas.
+       */
+      console.warn(`[nombre] ${consulta}: fallo el modelo, quedan los parecidos. ${error.message}`);
+    }
 
-    if (!resultado.reconocido || propuestas.length === 0) {
+    const propuestas = (resultado?.candidatas ?? []).filter((c) => c.nombre_cientifico);
+
+    if (!resultado?.reconocido || propuestas.length === 0) {
+      /*
+       * Ni las listas, ni GBIF, ni el modelo. Antes la respuesta acababa aqui, con un
+       * "no se pudo identificar" y nada mas, que delante de un arbol no sirve de nada:
+       * quien escribe "comino cresto" no necesita que le digan que no existe, necesita
+       * ver "comino crespo" y elegir. Se buscan nombres parecidos en las propias listas.
+       */
+      const parecidas = clavesParecidas(consulta)
+        .map((s) => {
+          const ficha = consultarPorNombreCientifico(s.clave);
+          if (!ficha) return null;
+          return { ...resumirCandidata(ficha), se_parece_a: s.se_parece_a, parecido_por: s.como };
+        })
+        .filter(Boolean);
+
+      if (parecidas.length > 0) {
+        return responder({
+          resuelto_por: 'parecido',
+          hay_que_elegir: true,
+          aviso:
+            `No hay ninguna especie que se llame exactamente "${consulta}". ` +
+            'Estas se le parecen: mira si alguna es la tuya.',
+          nota_del_modelo: resultado?.nota,
+          candidatas: ordenarCandidatas(parecidas),
+        });
+      }
+
       return responder({
         resuelto_por: 'ninguna_fuente',
         encontrada: false,
         aviso:
           `No se pudo identificar a que especie corresponde "${consulta}". ` +
           'Prueba con el nombre cientifico, o con otro de los nombres comunes que uses.',
-        nota_del_modelo: resultado.nota,
+        nota_del_modelo: resultado?.nota,
       });
     }
 

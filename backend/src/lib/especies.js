@@ -441,7 +441,17 @@ export function consultarPorNombreCientifico(nombre, { reinoSugerido, respaldo }
 
   return {
     clave: k,
-    nombre_cientifico: enFlora?.nombre ?? enAmenazadas?.nombre ?? enExoticas?.nombre ?? nombre,
+    // La fauna tambien tiene su `nombre` bien escrito, y faltaba en esta cadena: un ave
+    // consultada por su clave volvia en minusculas ("diplomys caniceps"). No se veia
+    // porque hasta ahora nadie consultaba por la clave; las sugerencias por parecido si.
+    nombre_cientifico:
+      enFlora?.nombre ??
+      enAmenazadas?.nombre ??
+      enExoticas?.nombre ??
+      enFauna?.nombre ??
+      enAves?.nombre ??
+      enHerpeto?.nombre ??
+      nombre,
     autoria: enFlora?.autoria,
     familia: ficha.familia,
     reino: ficha.reino,
@@ -826,6 +836,116 @@ export function candidatasPorNombreComun(texto) {
     if (encaja) claves.forEach((c) => parciales.add(c));
   }
   return [...parciales].slice(0, 12);
+}
+
+/* --------------------------------------------------------------- se parece a... */
+
+/**
+ * Nombres parecidos a lo que se escribio, para no dejar a nadie en un callejon.
+ *
+ * Antes, cuando ni las listas ni GBIF ni el modelo reconocian lo tecleado, la app
+ * contestaba "no se pudo identificar" y ahi se acababa. Delante de un arbol eso no vale
+ * de nada: quien escribe "algarobo" o "comino cresto" no necesita que le digan que no
+ * existe, necesita ver "algarrobo" y "comino crespo" y elegir.
+ *
+ * Compara por bigramas de letras (coeficiente de Dice), que perdona la letra cambiada,
+ * la que falta y la que sobra, que son los tres errores de teclear un nombre que no se
+ * escribe todos los dias.
+ */
+function bigramas(texto) {
+  const limpio = ` ${sinTildes(texto).replace(/[^a-z]+/g, ' ').trim()} `;
+  const pares = new Map();
+  for (let i = 0; i < limpio.length - 1; i += 1) {
+    const par = limpio.slice(i, i + 2);
+    pares.set(par, (pares.get(par) ?? 0) + 1);
+  }
+  return pares;
+}
+
+function cuantoSeParecen(a, b) {
+  let compartidos = 0;
+  let total = 0;
+  for (const [par, n] of a) {
+    total += n;
+    compartidos += Math.min(n, b.get(par) ?? 0);
+  }
+  for (const n of b.values()) total += n;
+  return total ? (2 * compartidos) / total : 0;
+}
+
+/**
+ * Indice por las dos primeras letras, para no comparar contra las 50.000 entradas.
+ *
+ * Se construye la primera vez que hace falta y no al arrancar: esto solo se usa en el
+ * ultimo recurso, cuando ya han fallado las listas, GBIF y el modelo, y no merece pagar
+ * su coste en cada arranque de Render. Guarda referencias a cadenas que ya existen, asi
+ * que lo que engorda es la lista de punteros, no el texto.
+ */
+let CAJONES = null;
+
+function cajones() {
+  if (CAJONES) return CAJONES;
+
+  CAJONES = new Map();
+  const meter = (nombre, entrada) => {
+    const k = sinTildes(nombre).replace(/[^a-z]/g, '');
+    if (k.length < 3) return;
+    const cajon = k.slice(0, 2);
+    const lista = CAJONES.get(cajon) ?? [];
+    lista.push(entrada);
+    CAJONES.set(cajon, lista);
+  };
+
+  for (const [comun, claves] of Object.entries(comunes)) {
+    meter(comun, { texto: comun, claves, como: 'nombre comun' });
+    // Y por la segunda palabra: "roble negro" tiene que salir buscando "negro".
+    const segunda = comun.split(' ')[1];
+    if (segunda) meter(segunda, { texto: comun, claves, como: 'nombre comun' });
+  }
+
+  for (const lista of [amenazadas, fauna, aves, herpeto, flora]) {
+    for (const k of Object.keys(lista.especies)) {
+      meter(k, { texto: k, claves: [k], como: 'nombre cientifico' });
+    }
+  }
+
+  return CAJONES;
+}
+
+/**
+ * Hasta `limite` nombres que se parezcan a `texto`, ordenados por parecido.
+ * Devuelve claves de especie, listas para armar su ficha resumida.
+ */
+export function clavesParecidas(texto, limite = 8) {
+  const q = bigramas(texto);
+  if (q.size === 0) return [];
+
+  const k = sinTildes(texto).replace(/[^a-z]/g, '');
+  if (k.length < 3) return [];
+
+  // El cajon de las dos primeras letras del texto entero y el de cada palabra suelta.
+  const aMirar = new Set([k.slice(0, 2)]);
+  for (const palabra of sinTildes(texto).split(/[^a-z]+/)) {
+    if (palabra.length >= 3) aMirar.add(palabra.slice(0, 2));
+  }
+
+  const mejores = new Map();
+  for (const cajon of aMirar) {
+    for (const entrada of cajones().get(cajon) ?? []) {
+      const p = cuantoSeParecen(q, bigramas(entrada.texto));
+      // 0,45 deja pasar la errata y corta el ruido. Por debajo salian coincidencias que
+      // no se parecen en nada y que solo hacen dudar de las buenas.
+      if (p < 0.45) continue;
+      for (const clave of entrada.claves) {
+        const previa = mejores.get(clave);
+        if (!previa || p > previa.parecido) {
+          mejores.set(clave, { clave, parecido: p, como: entrada.como, se_parece_a: entrada.texto });
+        }
+      }
+    }
+  }
+
+  return [...mejores.values()].sort((a, b) => b.parecido - a.parecido).slice(0, limite);
 }
 
 /**
