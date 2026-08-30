@@ -32,6 +32,8 @@ export const errores = {
       `La imagen supera el limite de ${(maxBytes / 1024 / 1024).toFixed(1)} MB.`,
       'Reduce la resolucion o la calidad de compresion antes de enviarla.'
     ),
+  datosIncompletos: (detalle) =>
+    new AppError(400, 'DATOS_INCOMPLETOS', 'Faltan datos en la peticion.', detalle),
   noAutorizado: () =>
     new AppError(401, 'NO_AUTORIZADO', 'Cabecera X-App-Key ausente o incorrecta.'),
   demasiadasSolicitudes: (segundos) =>

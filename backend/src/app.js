@@ -7,6 +7,7 @@ import { manejadorErrores, noEncontrado } from './middleware/errorHandler.js';
 import { estadoModelos } from './lib/gemini.js';
 import { estadoModelos as estadoModelosEspecies } from './lib/gemini-especies.js';
 import { estadoModelos as estadoModelosComida } from './lib/gemini-comida.js';
+import { estadoModelos as estadoModelosSugerencias } from './lib/gemini-sugerencias.js';
 import { estadoDeListas } from './lib/especies.js';
 import { construirSystemPrompt } from './lib/prompt.js';
 import { router as identificarRouter } from './routes/identificar.js';
@@ -54,6 +55,7 @@ export function crearApp() {
     const libresEspecies = modelosEspecies.filter((m) => m.disponible);
     const modelosComida = estadoModelosComida();
     const libresComida = modelosComida.filter((m) => m.disponible);
+    const libresSugerencias = estadoModelosSugerencias().filter((m) => m.disponible);
 
     res.json({
       ok: true,
@@ -94,6 +96,9 @@ export function crearApp() {
             : 'NutriFoto comparte la cuota de XiloScan (falta GEMINI_API_KEY_COMIDA)',
           // NutriFoto sigue sirviendo sin cuota: el registro manual y el diario son
           // locales, solo el analisis por foto necesita a Gemini.
+          // Van por separado porque cada motor lleva su propia cuenta de modelos
+          // agotados: la foto puede quedarse sin cuota y la sugerencia seguir viva.
+          sugerencias_disponibles: libresSugerencias.length,
           sin_cuota: 'El registro manual y el historial funcionan igual sin cuota.',
         },
       },
