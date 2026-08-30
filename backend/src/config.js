@@ -62,6 +62,31 @@ export const config = {
     process.env.GEMINI_API_KEY_ESPECIES?.trim() || requerido('GEMINI_API_KEY'),
 
   /**
+   * Clave para NutriFoto (calorias por foto). Mismo criterio que la de BioScan: mejor
+   * de otro proyecto de Google Cloud, para no repartirse las ~160 consultas diarias.
+   * Vacia = comparte la de XiloScan y la app funciona igual, solo que gastando cuota
+   * de las otras.
+   */
+  geminiApiKeyComida: process.env.GEMINI_API_KEY_COMIDA?.trim() || requerido('GEMINI_API_KEY'),
+
+  /** Si NutriFoto tiene clave propia. Se publica en /health como si/no, nunca la clave. */
+  geminiClaveComidaPropia: Boolean(process.env.GEMINI_API_KEY_COMIDA?.trim()),
+
+  /**
+   * Origenes web autorizados a llamar al backend desde un navegador.
+   *
+   * XiloScan y BioScan son apps nativas y no pasan por CORS; NutriFoto es una pagina
+   * web (Vercel) y un WebView de Capacitor, y sin esto el navegador bloquea la
+   * respuesta antes de que la app la vea. Vacio = se permite cualquier origen, que es
+   * lo mismo que ya ocurre hoy: el backend no exige credencial, y quien lo protege de
+   * verdad es APP_API_KEY y el rate limit, no la lista de origenes.
+   */
+  origenesPermitidos:
+    process.env.ORIGENES_PERMITIDOS?.trim()
+      ? process.env.ORIGENES_PERMITIDOS.split(',').map((o) => o.trim()).filter(Boolean)
+      : null,
+
+  /**
    * Si BioScan tiene clave propia o esta compartiendo la de XiloScan.
    *
    * Se publica en /health como un simple si/no para poder comprobar desde fuera que la

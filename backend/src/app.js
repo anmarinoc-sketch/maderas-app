@@ -6,10 +6,12 @@ import { config } from './config.js';
 import { manejadorErrores, noEncontrado } from './middleware/errorHandler.js';
 import { estadoModelos } from './lib/gemini.js';
 import { estadoModelos as estadoModelosEspecies } from './lib/gemini-especies.js';
+import { estadoModelos as estadoModelosComida } from './lib/gemini-comida.js';
 import { estadoDeListas } from './lib/especies.js';
 import { construirSystemPrompt } from './lib/prompt.js';
 import { router as identificarRouter } from './routes/identificar.js';
 import { router as especiesRouter } from './routes/especies.js';
+import { router as comidaRouter } from './routes/comida.js';
 
 export function crearApp() {
   const app = express();
@@ -26,11 +28,32 @@ export function crearApp() {
   // El JSON puede llevar base64, que infla ~33% respecto al binario.
   app.use(express.json({ limit: Math.ceil((config.maxImageBytes * 1.4) / 1024) + 'kb' }));
 
+  /**
+   * CORS. Hace falta desde que NutriFoto llama a este backend desde un navegador
+   * (la web en Vercel y el WebView de Capacitor, cuyo origen es https://localhost).
+   * Sin credenciales de por medio: no hay cookies ni sesion que proteger, solo la
+   * cuota, de la que se encargan el rate limit y APP_API_KEY.
+   */
+  app.use((req, res, next) => {
+    const origen = req.get('Origin');
+    if (origen && (!config.origenesPermitidos || config.origenesPermitidos.includes(origen))) {
+      res.set('Access-Control-Allow-Origin', origen);
+      res.set('Vary', 'Origin');
+      res.set('Access-Control-Allow-Headers', 'Content-Type, X-App-Key');
+      res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+      res.set('Access-Control-Max-Age', '86400');
+    }
+    if (req.method === 'OPTIONS') return res.sendStatus(204);
+    return next();
+  });
+
   app.get('/health', (_req, res) => {
     const modelos = estadoModelos();
     const libres = modelos.filter((m) => m.disponible);
     const modelosEspecies = estadoModelosEspecies();
     const libresEspecies = modelosEspecies.filter((m) => m.disponible);
+    const modelosComida = estadoModelosComida();
+    const libresComida = modelosComida.filter((m) => m.disponible);
 
     res.json({
       ok: true,
@@ -62,12 +85,24 @@ export function crearApp() {
           // BioScan sigue sirviendo sin cuota: lo que esta en las listas no la gasta.
           listas: estadoDeListas(),
         },
+        nutrifoto: {
+          modelos_disponibles: libresComida.length,
+          modelos_totales: modelosComida.length,
+          cuota_propia: config.geminiClaveComidaPropia,
+          cuota: config.geminiClaveComidaPropia
+            ? 'NutriFoto tiene su propia cuota diaria'
+            : 'NutriFoto comparte la cuota de XiloScan (falta GEMINI_API_KEY_COMIDA)',
+          // NutriFoto sigue sirviendo sin cuota: el registro manual y el diario son
+          // locales, solo el analisis por foto necesita a Gemini.
+          sin_cuota: 'El registro manual y el historial funcionan igual sin cuota.',
+        },
       },
     });
   });
 
   app.use('/api', identificarRouter);
   app.use('/api', especiesRouter);
+  app.use('/api', comidaRouter);
 
   app.use(noEncontrado);
   app.use(manejadorErrores);
