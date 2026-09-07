@@ -73,6 +73,18 @@ export const config = {
   geminiClaveComidaPropia: Boolean(process.env.GEMINI_API_KEY_COMIDA?.trim()),
 
   /**
+   * Clave para el lector de cuadros de coordenadas del conversor. Mismo criterio que
+   * las dos anteriores: mejor de otro proyecto de Google Cloud, para no repartirse las
+   * ~160 consultas diarias. Vacia = comparte la de XiloScan y funciona igual, solo que
+   * gastando cuota de las otras apps.
+   */
+  geminiApiKeyCoordenadas:
+    process.env.GEMINI_API_KEY_COORDENADAS?.trim() || requerido('GEMINI_API_KEY'),
+
+  /** Si el lector de coordenadas tiene clave propia. Se publica en /health como si/no. */
+  geminiClaveCoordenadasPropia: Boolean(process.env.GEMINI_API_KEY_COORDENADAS?.trim()),
+
+  /**
    * Origenes web autorizados a llamar al backend desde un navegador.
    *
    * XiloScan y BioScan son apps nativas y no pasan por CORS; NutriFoto es una pagina

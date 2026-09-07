@@ -243,6 +243,54 @@ antes de pegarlo.
 
 Cargarlo todo cuesta **107 MB de RSS y 221 ms de arranque**; Render da 512 MB.
 
+## Conversor de coordenadas: lectura de un cuadro por imagen
+
+### `POST /api/leer-coordenadas`
+
+Transcribe el cuadro de coordenadas de la foto o el escaneo de un plano, una escritura
+o una resolución. Acepta la imagen igual que los demás endpoints: `multipart/form-data`
+con el campo `imagen`, o JSON con `imagen_base64`. Admite además una `pista` opcional
+con el contexto del documento.
+
+```bash
+curl -X POST http://localhost:3000/api/leer-coordenadas -F "imagen=@plano.jpg"
+```
+
+**No convierte nada, y es lo importante de este endpoint.** Devuelve los números tal
+como están impresos, con sus separadores de miles y su coma decimal, sin normalizar. La
+conversión entre sistemas la hace proj4 en el navegador, que es exacta; lo único que
+puede salir mal aquí es la lectura de un dígito, y por eso el cliente muestra la
+transcripción al lado de la imagen para que una persona la coteje antes de convertir.
+`requiere_confirmacion` vale siempre `true`, sin excepción: una coordenada mal
+transcrita no falla ni avisa, solo deja el punto en otro sitio.
+
+```json
+{
+  "ok": true,
+  "modelo": "gemini-3.6-flash",
+  "resultado": {
+    "sistema": {
+      "descripcion": "MAGNA-SIRGAS origen Bogota",
+      "epsg_sugerido": "EPSG:3116",
+      "confianza": "alta"
+    },
+    "tipo_coordenada": "planas",
+    "puntos": [
+      { "nombre": "1",   "y_texto": "1.005.678,123", "x_texto": "1.001.234,567",
+        "confianza": "alta", "duda": "" },
+      { "nombre": "V-2", "y_texto": "1.005.700,45",  "x_texto": "1.001.260,89",
+        "confianza": "baja", "duda": "el 4o digito del Norte esta tapado por el sello" }
+    ],
+    "notas": "La tabla no trae encabezados; se uso el orden de las columnas.",
+    "requiere_confirmacion": true
+  }
+}
+```
+
+`epsg_sugerido` se valida contra la lista de los catorce sistemas que el conversor sabe
+manejar; cualquier otra cosa que devuelva el modelo se descarta y el campo sale vacío,
+porque una sugerencia equivocada es peor que ninguna: invita a aceptarla sin mirar.
+
 ## Estructura
 
 ```
@@ -253,12 +301,18 @@ src/
 
   routes/identificar.js   XiloScan: POST /api/identificar-madera
   routes/especies.js      BioScan: GET /api/especie y POST /api/identificar-especie
+  routes/comida.js        NutriFoto: POST /api/analizar-comida y /api/sugerir-comida
+  routes/coordenadas.js   Conversor: POST /api/leer-coordenadas
 
   lib/motor-gemini.js     rotación de modelos, cuotas y errores; una instancia por clave
   lib/gemini.js           XiloScan sobre el motor
   lib/gemini-especies.js  BioScan sobre el motor, con OTRA clave
+  lib/gemini-comida.js    NutriFoto sobre el motor, con OTRA clave
+  lib/gemini-coordenadas.js  lector de coordenadas sobre el motor, con OTRA clave
   lib/prompt.js           rol de dendrólogo + esquema JSON de salida
   lib/prompt-especies.js  prompts de BioScan; le prohíben pronunciarse sobre normas
+  lib/prompt-comida.js    prompts de NutriFoto; prefieren admitir la duda a inventar precisión
+  lib/prompt-coordenadas.js  transcripción literal: le prohíben convertir y adivinar dígitos
   lib/especies.js         cruce de un nombre contra las listas oficiales
   lib/gbif.js             nombres vulgares y normalización, API pública sin clave
   lib/image.js            validación real de la imagen y decodificación base64

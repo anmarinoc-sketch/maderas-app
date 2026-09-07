@@ -8,11 +8,13 @@ import { estadoModelos } from './lib/gemini.js';
 import { estadoModelos as estadoModelosEspecies } from './lib/gemini-especies.js';
 import { estadoModelos as estadoModelosComida } from './lib/gemini-comida.js';
 import { estadoModelos as estadoModelosSugerencias } from './lib/gemini-sugerencias.js';
+import { estadoModelos as estadoModelosCoordenadas } from './lib/gemini-coordenadas.js';
 import { estadoDeListas } from './lib/especies.js';
 import { construirSystemPrompt } from './lib/prompt.js';
 import { router as identificarRouter } from './routes/identificar.js';
 import { router as especiesRouter } from './routes/especies.js';
 import { router as comidaRouter } from './routes/comida.js';
+import { router as coordenadasRouter } from './routes/coordenadas.js';
 
 export function crearApp() {
   const app = express();
@@ -56,6 +58,8 @@ export function crearApp() {
     const modelosComida = estadoModelosComida();
     const libresComida = modelosComida.filter((m) => m.disponible);
     const libresSugerencias = estadoModelosSugerencias().filter((m) => m.disponible);
+    const modelosCoordenadas = estadoModelosCoordenadas();
+    const libresCoordenadas = modelosCoordenadas.filter((m) => m.disponible);
 
     res.json({
       ok: true,
@@ -101,6 +105,18 @@ export function crearApp() {
           sugerencias_disponibles: libresSugerencias.length,
           sin_cuota: 'El registro manual y el historial funcionan igual sin cuota.',
         },
+        coordenadas: {
+          modelos_disponibles: libresCoordenadas.length,
+          modelos_totales: modelosCoordenadas.length,
+          cuota_propia: config.geminiClaveCoordenadasPropia,
+          cuota: config.geminiClaveCoordenadasPropia
+            ? 'El lector de coordenadas tiene su propia cuota diaria'
+            : 'El lector de coordenadas comparte la cuota de XiloScan (falta GEMINI_API_KEY_COORDENADAS)',
+          // El conversor no depende del backend: la conversion con proj4 y la carga
+          // masiva por CSV o Excel son locales. Sin cuota solo se pierde la lectura
+          // del cuadro de coordenadas por imagen, que es un atajo, no el producto.
+          sin_cuota: 'La conversion y la carga masiva funcionan igual sin cuota.',
+        },
       },
     });
   });
@@ -108,6 +124,7 @@ export function crearApp() {
   app.use('/api', identificarRouter);
   app.use('/api', especiesRouter);
   app.use('/api', comidaRouter);
+  app.use('/api', coordenadasRouter);
 
   app.use(noEncontrado);
   app.use(manejadorErrores);
